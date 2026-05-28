@@ -212,6 +212,41 @@ module.exports = function (app) {
     res.json(results);
   });
 
+  // ── /send-payment ────────────────────────────────────────────────────────────
+  // Full server-side payment — avoids proxy timeout on transactions
+  app.post("/send-payment", async (req, res) => {
+    const { fromWalletId, toAddress, amount, blockchain } = req.body;
+    console.log("[Payment] Sending", amount, "USDC from", fromWalletId, "to", toAddress);
+    try {
+      // 1. Get fresh ciphertext
+      const ciphertext = await makeCiphertext();
+
+      // 2. Send transaction
+      const response = await fetch(CIRCLE + "/v1/w3s/developer/transactions/transfer", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idempotencyKey: crypto.randomUUID(),
+          walletId: fromWalletId,
+          blockchain: blockchain || "ARC-TESTNET",
+          tokenAddress: "0x3600000000000000000000000000000000000000",
+          destinationAddress: toAddress,
+          amounts: [String(amount)],
+          feeLevel: "MEDIUM",
+          entitySecretCiphertext: ciphertext,
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+      const data = await response.json();
+      console.log("[Payment] Response:", response.status, JSON.stringify(data));
+      if (!response.ok) return res.status(response.status).json(data);
+      res.json(data);
+    } catch (e) {
+      console.error("[Payment Error]", e.message);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ── /circle-api proxy ────────────────────────────────────────────────────────
   app.use("/circle-api", createProxyMiddleware({
     target: CIRCLE,
