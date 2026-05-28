@@ -1253,84 +1253,15 @@ const s = {
   landStats: { display: "flex", gap: 24, padding: "18px 26px", background: "rgba(255,255,255,0.5)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 28, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 18px 40px rgba(80,110,140,0.08)" },
   
 
-  iphoneFrame: {
+  phoneMockupWrap: {
     position: "relative", zIndex: 2,
-    width: 290, height: 580,
+    width: 290,
     display: "flex", alignItems: "center", justifyContent: "center",
-    filter: "drop-shadow(0 32px 72px rgba(80,110,140,0.22))",
+    filter: "drop-shadow(0 32px 72px rgba(80,110,140,0.20))",
   },
-  iphoneBezel: {
-    width: "100%", height: "100%",
-    borderRadius: 52,
-    background: "linear-gradient(180deg,#2c2c2e,#1c1c1e)",
-    padding: 6,
-    boxShadow: "inset 0 2px 4px rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.15)",
-    position: "relative",
-  },
-  iphoneDynamicIsland: {
-    position: "absolute", top: 10, left: "50%", transform: "translateX(-50%)",
-    width: 110, height: 24,
-    borderRadius: 999,
-    background: "#1a1a1c",
-    zIndex: 10,
-    boxShadow: "inset 0 1px 2px rgba(255,255,255,0.08)",
-  },
-  iphoneScreen: {
-    width: "100%", height: "100%",
-    borderRadius: 46,
-    background: "#f7fbff",
-    overflow: "hidden",
-    position: "relative",
-    display: "flex", flexDirection: "column",
-  },
-  iphoneStatusBar: {
-    display: "flex", justifyContent: "space-between", alignItems: "center",
-    padding: "14px 18px 6px",
-  },
-  iphoneContent: {
-    flex: 1, padding: "0 16px 16px",
-    display: "flex", flexDirection: "column", gap: 8,
-  },
-
-    iphoneBalanceCard: {
-    background: "linear-gradient(135deg,#55c9b6,#2eaa99,#198f82)",
-    borderRadius: 16, padding: "14px 14px 10px",
-    boxShadow: "0 8px 24px rgba(63,183,163,0.30)",
-    marginBottom: 6,
-  },
-  iphoneTxList: {
-    display: "flex", flexDirection: "column", gap: 4,
-    flex: 1, marginBottom: 4,
-  },  iphoneNav: {
-    display: "flex", justifyContent: "center", gap: 6,
-    padding: "8px 0",
-  },
-  iphoneNavDot: {
-    width: 18, height: 5, borderRadius: 3,
-    background: palette.brand,
-  },
-  iphoneNavDotO: {
-    width: 5, height: 5, borderRadius: "50%",
-    background: "#dce8ef",
-  },
-  iphoneHomeIndicator: {
-    position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)",
-    width: 104, height: 4, borderRadius: 2,
-    background: "rgba(255,255,255,0.4)", zIndex: 10,
-  },
-  iphoneSideBtn: {
-    position: "absolute", top: 120, right: -2, width: 3, height: 40,
-    background: "#333", borderRadius: "0 2px 2px 0",
-    zIndex: 0,
-  },
-  iphoneSideBtn2: {
-    position: "absolute", top: 168, right: -2, width: 3, height: 50,
-    background: "#333", borderRadius: "0 2px 2px 0",
-    zIndex: 0,
-  },
-  iphoneSideBtn3: {
-    position: "absolute", top: 140, left: -2, width: 3, height: 44,
-    background: "#333", borderRadius: "2px 0 0 2px",
+  phoneMockupImg: {
+    width: 290, height: "auto",
+  },    background: "#333", borderRadius: "2px 0 0 2px",
     zIndex: 0,
   },
 
