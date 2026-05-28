@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 // ─── Circle API ───────────────────────────────────────────────────────────────
 const DEMO_MODE = process.env.REACT_APP_DEMO_MODE !== "false";
@@ -254,7 +254,8 @@ export default function MediPay() {
   const [existFN, setExistFN] = useState(""); const [menuOpen, setMenuOpen] = useState(false); const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
   const [showPayLink, setShowPayLink] = useState(false); const [payLink, setPayLink] = useState(""); const [payLinkCopied, setPayLinkCopied] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false); const [shareReceipt, setShareReceipt] = useState(null); const [rcpCopied, setRcpCopied] = useState(false);
-  const [pendingLinks, setPendingLinks] = useState([]);
+  // eslint-disable-next-line
+  const [, setPendingLinks] = useState([]);
 
   useEffect(() => {
     const h = () => setIsMobile(window.innerWidth < 900);
@@ -275,18 +276,18 @@ export default function MediPay() {
 
   const setupWallet = async (refId) => {
     setStep("Creating your Circle Programmable Wallet on ARC Testnet...");
-    const w = await createCircleWallet(API_KEY, "demo-set", refId);
-    setWalletId(w.id); setWalletAddr(w.address);
+    const cw = await createCircleWallet(API_KEY, "demo-set", refId);
+    setWalletId(cw.id); setWalletAddr(cw.address);
     try {
       setStep("Requesting 10 USDC from Circle faucet...");
-      await faucetDrip(API_KEY, w.address);
+      await faucetDrip(API_KEY, cw.address);
       setFaucetSent(true);
     } catch(e) { console.warn("Faucet skipped:", e.message); setFaucetSent(false); }
     try {
       setStep("Loading balance...");
-      setUsdcBal(await getWalletBalance(API_KEY, w.id));
+      setUsdcBal(await getWalletBalance(API_KEY, cw.id));
     } catch(e) { console.warn("Balance check skipped:", e.message); setUsdcBal("0.00"); }
-    setStep(""); return w;
+    setStep(""); return cw;
   };
 
   const handleHospSelect = h => { setHospital(h); setScreen("auth"); };
@@ -296,7 +297,7 @@ export default function MediPay() {
     if (authMode === "existing") {
       const fn = existFN.trim().toUpperCase();
       if (!fn) { toast_("Enter your file number", "err"); setLoading(false); return; }
-      const w = await setupWallet(fn);
+      await setupWallet(fn);
       const prefix = fn.split("-")[0];
       const homeH = HOSPITALS.find(h => h.id === prefix) || hospital;
       setLinked([homeH, hospital].filter(Boolean).filter((v, i, a) => a.findIndex(x => x.id === v.id) === i));
@@ -1158,6 +1159,7 @@ const ShareModal = ({ rec, copied, onCopy, onNative, onDownload, onClose }) => (
   <Mdl onClose={onClose}>
     <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 10 }}>Share Receipt</div>
     <div style={{ background: "#f5fbfd", border: "1px solid " + palette.lineStrong, borderRadius: 10, padding: 14, fontFamily: "monospace", fontSize: 11, lineHeight: 1.9, color: palette.textSoft, marginBottom: 16, maxHeight: 200, overflowY: "auto", whiteSpace: "pre-wrap" }}>
+      {/* eslint-disable-next-line no-useless-concat */}
       {["== MEDIPAY RECEIPT ==","Patient:  "+rec.patient,"File No:  "+rec.fileNo,"Hospital: "+(rec.hospital||""),"Category: "+rec.category,"Service:  "+rec.item,rec.note?"Note:     "+rec.note:null,"Amount:   "+("N"+Number(rec.amount).toLocaleString()),"USDC:     "+rec.usdc+" USDC","Network:  ARC-TESTNET","Date:     "+rec.date,"Tx ID:    "+rec.id,"========================","Powered by Circle on ARC Testnet"].filter(Boolean).join("\n")}
     </div>
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
