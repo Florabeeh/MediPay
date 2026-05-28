@@ -1255,12 +1255,12 @@ const s = {
 
   phoneMockupWrap: {
     position: "relative", zIndex: 2,
-    width: 290,
+    width: "100%", maxWidth: 340,
     display: "flex", alignItems: "center", justifyContent: "center",
     filter: "drop-shadow(0 32px 72px rgba(80,110,140,0.20))",
   },
   phoneMockupImg: {
-    width: 290, height: "auto",
+    width: "100%", height: "auto",
   },
 
   landingFooterDeco: { position: "absolute", top: -1, left: "10%", right: "10%", height: 1, background: "linear-gradient(90deg,transparent,rgba(63,183,163,0.30),transparent)", pointerEvents: "none" },
