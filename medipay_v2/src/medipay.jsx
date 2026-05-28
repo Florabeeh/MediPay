@@ -880,6 +880,7 @@ export default function MediPay() {
 function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast }) {
   return (
     <div style={s.shell}>
+      <HealthObjects dense={showNav} />
       <div style={s.topbar}>
         <div style={s.tbL}>
           {showNav && isMobile && <button style={s.burger} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "✕" : "☰"}</button>}
@@ -912,7 +913,7 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
           </div>
         </div>
       )}
-      <div style={{ display: "flex", minHeight: "calc(100vh - 64px)" }}>
+      <div style={{ display: "flex", minHeight: "calc(100vh - 66px)", position: "relative", zIndex: 1 }}>
         {showNav && !isMobile && (
           <div style={s.sidebar}>
             <div style={{ padding: "20px 12px 12px" }}>
@@ -938,6 +939,17 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
   );
 }
 
+const HealthObjects = ({ dense }) => (
+  <div style={s.bioLayer} aria-hidden="true">
+    <div style={{ ...s.bioBlob, ...s.bioBlobMint, top: dense ? 96 : 122, left: dense ? 250 : "8%", transform: "rotate(-18deg)", filter: dense ? "blur(1.5px)" : "blur(.4px)", opacity: dense ? 0.28 : 0.58 }}>✚</div>
+    <div style={{ ...s.bioBlob, ...s.bioBlobBlue, top: dense ? 168 : "18%", right: dense ? "7%" : "10%", transform: "rotate(22deg)", filter: dense ? "blur(6px)" : "blur(1px)", opacity: dense ? 0.22 : 0.46 }}>🫧</div>
+    <div style={{ ...s.bioBlob, ...s.bioBlobPeach, bottom: dense ? "18%" : "13%", left: dense ? "7%" : "16%", transform: "rotate(14deg)", filter: dense ? "blur(7px)" : "blur(2px)", opacity: dense ? 0.20 : 0.42 }}>💊</div>
+    <div style={{ ...s.bioBlob, ...s.bioBlobLav, bottom: dense ? "10%" : "18%", right: dense ? "14%" : "18%", transform: "rotate(-28deg)", filter: dense ? "blur(9px)" : "blur(3px)", opacity: dense ? 0.18 : 0.34 }}>🧬</div>
+    <div style={{ ...s.bioOrb, top: dense ? "44%" : "36%", left: dense ? "78%" : "72%", background: "linear-gradient(145deg,#ffffff,#dff7ef 52%,#93e0d0)" }} />
+    <div style={{ ...s.bioOrb, width: 42, height: 42, bottom: dense ? "30%" : "26%", left: dense ? "28%" : "10%", background: "linear-gradient(145deg,#ffffff,#e8f5ff 55%,#9acdf3)", filter: "blur(1.5px)", opacity: dense ? .22 : .36 }} />
+  </div>
+);
+
 const CopyBtn = ({ text }) => {
   const [copied, setCopied] = React.useState(false);
   const copy = () => { if (!text) return; navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); };
@@ -949,7 +961,7 @@ const CopyBtn = ({ text }) => {
 };
 const PBar = ({ title, onBack }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: "1px solid " + palette.line, position: "sticky", top: 0, background: "#f5fbfd", zIndex: 20 }}>
-    <button style={{ background: "none", border: "none", color: palette.textSoft, fontSize: 13, cursor: "pointer", padding: "6px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6, border: "1px solid " + palette.lineStrong }} onClick={onBack}>← Back</button>
+    <button style={{ background: "none", color: palette.textSoft, fontSize: 13, cursor: "pointer", padding: "6px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6, border: "1px solid " + palette.lineStrong }} onClick={onBack}>← Back</button>
     <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: palette.text }}>{title}</span>
   </div>
 );
@@ -1008,7 +1020,7 @@ const palette = {
 const btnShadow = "0 14px 28px rgba(63,183,163,0.24)";
 const cardShadow = "0 18px 45px rgba(89,118,148,0.12)";
 const softShadow = "0 10px 24px rgba(89,118,148,0.10)";
-const fontStack = "Inter, ui-rounded, Nunito, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const fontStack = "Nunito, ui-rounded, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
 const s = {
   shell: {
@@ -1017,7 +1029,16 @@ const s = {
       "radial-gradient(circle at 12% 6%, rgba(117,213,194,0.30), transparent 28%), radial-gradient(circle at 92% 12%, rgba(152,183,255,0.28), transparent 30%), linear-gradient(180deg,#f8fcff 0%,#eef8f5 48%,#f8fbff 100%)",
     color: palette.text,
     fontFamily: fontStack,
+    position: "relative",
+    overflowX: "hidden",
   },
+  bioLayer: { position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 },
+  bioBlob: { position: "absolute", width: 92, height: 92, borderRadius: 30, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, boxShadow: "inset 10px 12px 22px rgba(255,255,255,.72), inset -12px -16px 26px rgba(89,118,148,.12), 0 24px 55px rgba(89,118,148,.12)", border: "1px solid rgba(255,255,255,.72)" },
+  bioBlobMint: { background: "linear-gradient(145deg,#ffffff,#dff7ef 58%,#9ae4d5)", color: "#3fb7a3" },
+  bioBlobBlue: { background: "linear-gradient(145deg,#ffffff,#e8f5ff 58%,#9ccff4)", color: "#5aa9e6" },
+  bioBlobPeach: { background: "linear-gradient(145deg,#ffffff,#fff0e9 58%,#ffc3ad)", color: "#e98f70" },
+  bioBlobLav: { background: "linear-gradient(145deg,#ffffff,#f0f1ff 58%,#b6b9ff)", color: "#8f93ea" },
+  bioOrb: { position: "absolute", width: 58, height: 58, borderRadius: "50%", boxShadow: "inset 8px 10px 18px rgba(255,255,255,.85), inset -10px -12px 18px rgba(89,118,148,.13), 0 20px 42px rgba(89,118,148,.10)", opacity: .32 },
   topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 18px", height: 66, borderBottom: "1px solid rgba(216,229,238,0.78)", position: "sticky", top: 0, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(18px)", zIndex: 30, gap: 12, boxShadow: "0 8px 24px rgba(80,110,140,0.07)" },
   tbL: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 }, tbR: { display: "flex", alignItems: "center", gap: 8 },
   burger: { background: palette.surfaceSoft, border: "1px solid " + palette.line, color: palette.textSoft, fontSize: 19, cursor: "pointer", padding: "6px 10px", lineHeight: 1, borderRadius: 12, boxShadow: "0 6px 16px rgba(89,118,148,0.10)" },
@@ -1037,7 +1058,7 @@ const s = {
   landGlow1: { position: "absolute", top: "7%", left: "4%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(122,219,199,0.28),transparent 68%)", pointerEvents: "none" },
   landGlow2: { position: "absolute", bottom: "4%", right: "4%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(150,180,255,0.24),transparent 70%)", pointerEvents: "none" },
   landLogo: { width: 78, height: 78, borderRadius: 24, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, boxShadow: "0 18px 38px rgba(63,183,163,0.28)" },
-  landH1: { fontSize: "clamp(34px,6vw,64px)", fontWeight: 900, lineHeight: 1.04, marginBottom: 18, letterSpacing: "0", color: palette.text },
+  landH1: { fontFamily: "Quicksand, Nunito, system-ui, sans-serif", fontSize: "clamp(34px,6vw,64px)", fontWeight: 700, lineHeight: 1.04, marginBottom: 18, letterSpacing: "-0.8px", color: palette.text },
   landSub: { fontSize: 16, color: palette.textSoft, lineHeight: 1.8, marginBottom: 34, maxWidth: 520 },
   landCTA: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: palette.text, border: "none", borderRadius: 18, padding: "16px 34px", fontSize: 16, fontWeight: 900, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 34, boxShadow: btnShadow },
   landFeatures: { display: "flex", gap: 14, marginBottom: 30, flexWrap: "wrap", justifyContent: "center" },
