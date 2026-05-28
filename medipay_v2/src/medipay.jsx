@@ -1261,11 +1261,8 @@ const s = {
   },
   phoneMockupImg: {
     width: 290, height: "auto",
-  },    background: "#333", borderRadius: "2px 0 0 2px",
-    zIndex: 0,
   },
 
-  
   landingFooterDeco: { position: "absolute", top: -1, left: "10%", right: "10%", height: 1, background: "linear-gradient(90deg,transparent,rgba(63,183,163,0.30),transparent)", pointerEvents: "none" },
   landingFooter: {
     width: "100%", maxWidth: 1120, margin: "0 auto", padding: "64px 0 24px",
