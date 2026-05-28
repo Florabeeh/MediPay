@@ -340,13 +340,13 @@ export default function MediPay() {
         <div style={s.landingGrid}>
           <div style={{ ...s.heroCopy, position: "relative", zIndex: 1 }}>
             <div style={s.heroPills}>
-              <span style={s.heroPill}>Soft healthcare UI</span>
-              <span style={s.heroPill}>Circle Programmable Wallet</span>
-              <span style={s.heroPill}>12 hospitals live</span>
+              <span style={s.heroPill}>⚡ Instant settlements</span>
+              <span style={s.heroPill}>🏥 12 hospitals</span>
+              <span style={s.heroPill}>🔗 Share a payment link</span>
             </div>
-            <div style={s.landLogo}><span style={{ fontSize: 32, fontWeight: 800, color: "#fff" }}>M</span></div>
+            <div style={s.landLogo}><span style={{ fontSize: 32, fontWeight: 700, color: "#fff" }}>M</span></div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 40, fontWeight: 900, letterSpacing: "-2px", color: palette.text }}>MediPay</span>
+              <span style={{ fontSize: 40, fontWeight: 700, letterSpacing: "-1.5px", color: palette.text }}>MediPay</span>
               {DEMO_MODE && <span style={s.demoBadge}>Demo</span>}
             </div>
             <p style={{ fontSize: 13, color: palette.muted, marginBottom: 18 }}>Powered by Circle USDC on ARC Testnet</p>
@@ -371,25 +371,25 @@ export default function MediPay() {
           <div style={s.heroVisual}>
             <div style={s.previewShell}>
               <div style={s.previewTop}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: palette.textSoft }}>Live app preview</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: palette.textSoft }}>Live app preview</div>
                 <div style={s.previewChip}>Secure</div>
               </div>
               <div style={s.previewCard}>
                 <div style={s.previewRow}>
                   <div>
                     <div style={{ fontSize: 11, color: palette.muted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>Circle wallet</div>
-                    <div style={{ fontSize: 20, fontWeight: 900, color: palette.text }}>N 0.00</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: palette.text }}>N 0.00</div>
                     <div style={{ fontSize: 12, color: palette.textSoft, marginTop: 4 }}>Ready for hospital payment</div>
                   </div>
                   <div style={s.previewAvatar}>🫧</div>
                 </div>
                 <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.7 }}>
-                  Soft surfaces, gentle type, and blurred medical shapes — built to feel like a modern healthcare app, not a fintech dashboard.
+                  Send a payment link via WhatsApp or SMS — the patient pays instantly with Circle USDC. No app download needed, no bank delays.
                 </div>
                 <div style={s.miniStatGrid}>
                   {[["12", "Hospitals"], ["<1s", "Settlement"], ["0", "Fees"], ["MPC", "Secured"]].map(([v, l]) => (
                     <div key={l} style={s.miniStat}>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: palette.brandDeep }}>{v}</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: palette.brandDeep }}>{v}</div>
                       <div style={{ fontSize: 11, color: palette.muted }}>{l}</div>
                     </div>
                   ))}
@@ -400,18 +400,18 @@ export default function MediPay() {
         </div>
 
         <div style={s.landSection}>
-          <div style={s.sectionTitle}>How it works</div>
-          <div style={s.sectionH2}>A calm hospital payment flow, end to end.</div>
-          <div style={s.sectionLead}>The app starts with a friendly landing experience, then guides the patient into hospital selection, file registration, and payment with soft visual cues throughout.</div>
+          <div style={s.sectionTitle}>What MediPay does</div>
+          <div style={s.sectionH2}>Medical payments across Nigeria, powered by Circle USDC.</div>
+          <div style={s.sectionLead}>MediPay replaces cash and bank transfers at hospitals with instant USDC settlement through a Circle Programmable Wallet — created automatically for every patient, no crypto knowledge needed.</div>
           <div style={s.sectionGrid}>
             {[
-              ["1", "Choose your hospital", "Search and select the hospital you are visiting, from UDUTH to LUTH and beyond."],
-              ["2", "Register or retrieve", "Create a profile or pull your existing file number in one smooth flow."],
-              ["3", "Pay and share", "Settle instantly with Circle USDC, then share a receipt or payment link."]
-            ].map(([n, t, d]) => (
-              <div key={n} style={s.stepCard}>
-                <div style={s.stepNo}>{n}</div>
-                <div style={{ fontSize: 18, fontWeight: 900, color: palette.text, marginBottom: 8 }}>{t}</div>
+              ["🔗", "Share a payment link", "Generate a one-tap payment link and send via WhatsApp or SMS. The payer clicks and settles in seconds — no app download required."],
+              ["💳", "Instant Circle Wallet", "A Circle Programmable Wallet is created on registration. MPC-secured, no seed phrase, and auto-funded with 10 USDC testnet on signup."],
+              ["🗂", "File number travels with you", "Register once at any MediPay hospital. Your file number, records, and wallet follow you across all 12 hospitals in 36 states."]
+            ].map(([ic, t, d]) => (
+              <div key={t} style={s.stepCard}>
+                <div style={s.stepNo}>{ic}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: palette.text, marginBottom: 8 }}>{t}</div>
                 <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.8 }}>{d}</div>
               </div>
             ))}
@@ -419,18 +419,18 @@ export default function MediPay() {
         </div>
 
         <div style={s.landSection}>
-          <div style={s.sectionTitle}>Why it feels soft</div>
-          <div style={s.sectionH2}>Rounded fonts, white surfaces, blurred medical objects.</div>
+          <div style={s.sectionTitle}>Why MediPay</div>
+          <div style={s.sectionH2}>Instant settlement. No bank delays. No app download for the payer.</div>
           <div style={s.trustGrid}>
             {[
-              ["🤍", "Mostly white canvas", "Bright, warm and airy rather than dark or heavy."],
-              ["🫧", "Blurred 3D health objects", "Floating capsules, crosses, DNA, and soft orbs in the background."],
-              ["✍🏽", "Rounded typography", "Nunito for the UI, Quicksand for the hero heading."],
-              ["🌿", "Muted accents", "Mint, blue, lavender and peach keep it gentle."],
+              ["⚡", "< 1 second settlement", "Powered by Circle Nanopayments on ARC Testnet. No bank queues, no transfer delays."],
+              ["🔒", "MPC-secured wallets", "Multi-Party Computation means no seed phrase to lose. Your wallet is safe and recoverable."],
+              ["🇳🇬", "12 hospitals + growing", "UDUTH, LUTH, UCH, ABUTH, and 8 more across Nigeria. Expanding to Ghana and Kenya."],
+              ["📱", "Shareable payment links", "Anyone can pay a link — no app, no crypto wallet, no registration. Just tap and settle."]
             ].map(([ic, t, d]) => (
               <div key={t} style={s.trustCard}>
                 <div style={{ fontSize: 24, marginBottom: 10 }}>{ic}</div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: palette.text, marginBottom: 8 }}>{t}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: palette.text, marginBottom: 8 }}>{t}</div>
                 <div style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.7 }}>{d}</div>
               </div>
             ))}
@@ -447,7 +447,7 @@ export default function MediPay() {
                   <span style={{ ...s.newsTagBadge, background: n.tagColor + "22", color: n.tagColor, border: "1px solid " + n.tagColor + "33" }}>{n.tag}</span>
                   <span style={{ fontSize: 11, color: palette.muted }}>{n.date}</span>
                 </div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: palette.text, lineHeight: 1.4, marginBottom: 8 }}>{n.title}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: palette.text, lineHeight: 1.4, marginBottom: 8 }}>{n.title}</div>
                 <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.8 }}>{n.body}</div>
               </div>
             ))}
@@ -457,11 +457,11 @@ export default function MediPay() {
         <div style={s.landSection}>
           <div style={s.ctaPanel}>
             <div style={{ maxWidth: 600 }}>
-              <div style={s.sectionTitle}>Ready to explore?</div>
-              <div style={s.sectionH2}>Start with the landing page, then enter the hospital flow.</div>
-              <div style={s.sectionLead}>This version now feels like a full healthcare product landing page, with a proper first impression before the app experience begins.</div>
+              <div style={s.sectionTitle}>Ready to get started?</div>
+              <div style={s.sectionH2}>Choose your hospital and register in under 2 minutes.</div>
+              <div style={s.sectionLead}>A Circle wallet is created automatically. You get 10 USDC testnet, a portable file number, and access to instant medical payments across Nigeria.</div>
             </div>
-            <button style={{ ...s.landCTA, marginBottom: 0 }} onClick={() => setScreen("hospitals")}><span>Open MediPay</span><span style={{ fontSize: 18 }}>→</span></button>
+            <button style={{ ...s.landCTA, marginBottom: 0 }} onClick={() => setScreen("hospitals")}><span>Find your hospital</span><span style={{ fontSize: 18 }}>→</span></button>
           </div>
         </div>
       </div>
@@ -1124,7 +1124,7 @@ const palette = {
 const btnShadow = "0 14px 28px rgba(63,183,163,0.24)";
 const cardShadow = "0 18px 45px rgba(89,118,148,0.12)";
 const softShadow = "0 10px 24px rgba(89,118,148,0.10)";
-const fontStack = "Nunito, ui-rounded, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const fontStack = "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
 const s = {
   shell: {
@@ -1162,24 +1162,24 @@ const s = {
   landGlow1: { position: "absolute", top: "7%", left: "4%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(122,219,199,0.28),transparent 68%)", pointerEvents: "none" },
   landGlow2: { position: "absolute", bottom: "4%", right: "4%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(150,180,255,0.24),transparent 70%)", pointerEvents: "none" },
   landLogo: { width: 78, height: 78, borderRadius: 24, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, boxShadow: "0 18px 38px rgba(63,183,163,0.28)" },
-  landH1: { fontFamily: "Quicksand, Nunito, system-ui, sans-serif", fontSize: "clamp(34px,6vw,64px)", fontWeight: 700, lineHeight: 1.04, marginBottom: 18, letterSpacing: "-0.8px", color: palette.text },
+  landH1: { fontFamily: "Inter, system-ui, -apple-system, sans-serif", fontSize: "clamp(34px,6vw,64px)", fontWeight: 700, lineHeight: 1.04, marginBottom: 18, letterSpacing: "-1.2px", color: palette.text },
   landSub: { fontSize: 16, color: palette.textSoft, lineHeight: 1.8, marginBottom: 34, maxWidth: 520 },
-  landCTA: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: palette.text, border: "none", borderRadius: 18, padding: "16px 34px", fontSize: 16, fontWeight: 900, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 34, boxShadow: btnShadow },
+  landCTA: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: palette.text, border: "none", borderRadius: 18, padding: "16px 34px", fontSize: 16, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 34, boxShadow: btnShadow },
   landFeatures: { display: "flex", gap: 14, marginBottom: 30, flexWrap: "wrap", justifyContent: "center" },
   landFeat: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.74)", border: "1px solid " + palette.line, borderRadius: 18, padding: "12px 14px", minWidth: 92, boxShadow: "0 10px 24px rgba(89,118,148,0.08)" },
   landStats: { display: "flex", gap: 24, padding: "18px 26px", background: "rgba(255,255,255,0.82)", border: "1px solid " + palette.line, borderRadius: 24, flexWrap: "wrap", justifyContent: "center", boxShadow: cardShadow },
   landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 22px" },
-  sectionTitle: { fontSize: 11, fontWeight: 900, letterSpacing: ".16em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 10 },
-  sectionH2: { fontFamily: "Quicksand, Nunito, system-ui, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700 },
+  sectionTitle: { fontSize: 11, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 10 },
+  sectionH2: { fontFamily: "Inter, system-ui, -apple-system, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700, letterSpacing: "-0.6px" },
   sectionLead: { fontSize: 15, color: palette.textSoft, lineHeight: 1.8, maxWidth: 760 },
   landingGrid: { width: "100%", maxWidth: 1120, margin: "0 auto", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 22, alignItems: "center", position: "relative", zIndex: 1 },
   heroCopy: { textAlign: "left", alignItems: "flex-start" },
   heroPills: { display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-start", margin: "0 0 18px" },
-  heroPill: { fontSize: 12, fontWeight: 800, color: palette.brandDeep, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 999, padding: "8px 12px", boxShadow: "0 10px 20px rgba(89,118,148,0.07)" },
+  heroPill: { fontSize: 12, fontWeight: 600, color: palette.brandDeep, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 999, padding: "8px 12px", boxShadow: "0 10px 20px rgba(89,118,148,0.07)" },
   heroVisual: { width: "100%", display: "flex", justifyContent: "center" },
   previewShell: { width: "100%", maxWidth: 420, background: "rgba(255,255,255,0.88)", border: "1px solid rgba(216,229,238,0.92)", borderRadius: 34, padding: 16, boxShadow: "0 28px 60px rgba(80,110,140,0.16)", backdropFilter: "blur(12px)" },
   previewTop: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 },
-  previewChip: { fontSize: 11, padding: "6px 10px", borderRadius: 999, background: palette.mint, color: palette.brandDeep, fontWeight: 900 },
+  previewChip: { fontSize: 11, padding: "6px 10px", borderRadius: 999, background: palette.mint, color: palette.brandDeep, fontWeight: 700 },
   previewCard: { background: "linear-gradient(135deg,#ffffff,#eefaf7)", border: "1px solid rgba(63,183,163,0.16)", borderRadius: 28, padding: 18, textAlign: "left", boxShadow: softShadow },
   previewRow: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12 },
   previewAvatar: { width: 58, height: 58, borderRadius: 20, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900, color: palette.text, boxShadow: "0 14px 28px rgba(63,183,163,0.24)" },
@@ -1187,7 +1187,7 @@ const s = {
   miniStat: { background: "rgba(255,255,255,0.88)", border: "1px solid " + palette.line, borderRadius: 18, padding: "12px 10px", textAlign: "center" },
   sectionGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 20 },
   stepCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 24, padding: 18, boxShadow: softShadow },
-  stepNo: { width: 36, height: 36, borderRadius: 14, background: palette.mint, color: palette.brandDeep, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, marginBottom: 12, border: "1px solid rgba(63,183,163,0.18)" },
+  stepNo: { width: 36, height: 36, borderRadius: 14, background: palette.mint, color: palette.brandDeep, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: 12, border: "1px solid rgba(63,183,163,0.18)" },
   trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginTop: 20 },
   trustCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: 16, textAlign: "center", boxShadow: softShadow },
   newsGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14, marginTop: 20 },
@@ -1228,7 +1228,7 @@ const s = {
   globalGlow: { position: "absolute", top: "-30%", right: "-10%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle,rgba(90,169,230,0.20),transparent 70%)", pointerEvents: "none" },
   comingSoonBadge: { fontSize: 10, padding: "4px 10px", borderRadius: 100, background: palette.peachSoft, border: "1px solid #ffd2c2", color: "#bb5a38", fontWeight: 800 },
   newsCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
-  newsTagBadge: { fontSize: 10, padding: "4px 10px", borderRadius: 100, fontWeight: 800 },
+  newsTagBadge: { fontSize: 10, padding: "4px 10px", borderRadius: 100, fontWeight: 700 },
   tipCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
   card: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
   payHdr: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 10 },
