@@ -427,65 +427,8 @@ export default function MediPay() {
 
           <div style={s.heroVisual}>
 
-            <div style={s.iphoneFrame}>
-              <div style={s.iphoneBezel}>
-                <div style={s.iphoneDynamicIsland} />
-                <div style={s.iphoneScreen}>
-                  <div style={s.iphoneStatusBar}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: "#1a1f2e", letterSpacing: "-0.3px" }}>9:41</span>
-                    <div style={{ display: "flex", gap: 3, alignItems: "center", color: "#1a1f2e", fontSize: 11 }}>
-                      <Ico.Bolt size={10} color="#1a1f2e" />
-                    </div>
-                  </div>
-                  <div style={s.iphoneContent}>
-                    <div style={s.iphoneBalanceCard}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                        <div>
-                          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>USDC Balance</div>
-                          <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-1px" }}>$0.00</div>
-                        </div>
-                        <div style={{ width: 30, height: 30, borderRadius: 10, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 14, color: "#fff" }}>M</div>
-                      </div>
-                      <div style={{ height: 4, background: "rgba(255,255,255,0.15)", borderRadius: 2, marginBottom: 4 }}>
-                        <div style={{ width: "68%", height: "100%", background: "rgba(255,255,255,0.5)", borderRadius: 2 }} />
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "rgba(255,255,255,0.5)" }}>
-                        <span>ARC Testnet</span>
-                        <span>Circle MPC</span>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 6 }}>
-                      {[["Pay", <Ico.CardIcon size={12} />], ["Link", <Ico.LinkIcon size={12} />], ["History", <Ico.ClockIcon size={12} />]].map(([lb, ic]) => (
-                        <div key={lb} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "8px 0", background: "rgba(255,255,255,0.7)", backdropFilter: "blur(8px)", borderRadius: 12, fontSize: 9, fontWeight: 600, color: "#25364b" }}>{ic}{lb}</div>
-                      ))}
-                    </div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: "#25364b", marginBottom: 2 }}>Quick transactions</div>
-                    <div style={s.iphoneTxList}>
-                      {[["LUTH", "N4,500", "12:30pm"], ["UDUTH", "N8,200", "10:15am"], ["ABUTH", "N2,000", "Yesterday"]].map(([h, amt, t]) => (
-                        <div key={h+t} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", background: "rgba(255,255,255,0.55)", borderRadius: 10, borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#3fb7a3" }} />
-                            <span style={{ fontSize: 10, fontWeight: 600, color: "#25364b" }}>{h}</span>
-                          </div>
-                          <div style={{ textAlign: "right" }}>
-                            <div style={{ fontSize: 10, fontWeight: 700, color: "#198f82" }}>{amt}</div>
-                            <div style={{ fontSize: 8, color: "#8da0b5" }}>{t}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div style={s.iphoneNav}>
-                      <div style={s.iphoneNavDotO} />
-                      <div style={s.iphoneNavDot} />
-                      <div style={s.iphoneNavDotO} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div style={s.iphoneHomeIndicator} />
-              <div style={s.iphoneSideBtn} />
-              <div style={s.iphoneSideBtn2} />
-              <div style={s.iphoneSideBtn3} />
+            <div style={s.phoneMockupWrap}>
+              <img src="/phone%20mockup.png" alt="MediPay app" style={s.phoneMockupImg} />
             </div>
           </div>
         </div>
