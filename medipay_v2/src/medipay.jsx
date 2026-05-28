@@ -427,53 +427,67 @@ export default function MediPay() {
           </div>
 
           <div style={s.heroVisual}>
-            <div style={s.phoneFrameOuter}>
-              <div style={s.phoneNotch} />
-              <div style={s.phoneScreen}>
-                <img src="/hero.png" alt="MediPay" style={s.heroImg} />
-                <div style={s.phoneOverlay} />
-                <div style={s.phoneUI}>
-                  <div style={s.phoneTopBar}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: "#fff" }}>9:41</span>
-                    <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                      <Ico.Bolt size={10} color="#fff" />
-                      <Ico.Bubbles size={8} color="#fff" />
+            <div style={s.heroBgSection}>
+              <img src="/hero.png" alt="" style={s.heroBgImg} />
+              <div style={s.heroBgOverlay} />
+            </div>
+            <div style={s.iphoneFrame}>
+              <div style={s.iphoneBezel}>
+                <div style={s.iphoneDynamicIsland} />
+                <div style={s.iphoneScreen}>
+                  <div style={s.iphoneStatusBar}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#1a1f2e", letterSpacing: "-0.3px" }}>9:41</span>
+                    <div style={{ display: "flex", gap: 3, alignItems: "center", color: "#1a1f2e", fontSize: 11 }}>
+                      <Ico.Bolt size={10} color="#1a1f2e" />
                     </div>
                   </div>
-                  <div style={s.phoneContent}>
-                    <div style={s.phonePill}>
-                      <Ico.Shield size={12} color={palette.brandDeep} />
-                      <span>Circle MPC</span>
-                    </div>
-                    <div style={s.phoneAmt}>N 15,200</div>
-                    <div style={s.phoneLabel}>Wallet Balance</div>
-                    <div style={s.phoneActions}>
-                      <div style={s.phoneActBtn}>
-                        <Ico.CardIcon size={16} color={palette.text} />
-                        <span>Pay</span>
+                  <div style={s.iphoneContent}>
+                    <div style={s.iphoneHdr}>
+                      <div>
+                        <div style={{ fontSize: 11, color: "#5f7188", marginBottom: 2 }}>Balance</div>
+                        <div style={{ fontSize: 28, fontWeight: 800, color: "#25364b", letterSpacing: "-1px" }}>N 0.00</div>
                       </div>
-                      <div style={s.phoneActBtn}>
-                        <Ico.LinkIcon size={16} color={palette.text} />
-                        <span>Share</span>
+                      <div style={s.iphoneLogo}>M</div>
+                    </div>
+                    <div style={s.iphoneQuickActions}>
+                      <div style={s.iphoneQaBtn}><Ico.CardIcon size={16} color="#198f82" /><span>Pay</span></div>
+                      <div style={s.iphoneQaBtn}><Ico.LinkIcon size={16} color="#198f82" /><span>Link</span></div>
+                      <div style={s.iphoneQaBtn}><Ico.ClockIcon size={16} color="#198f82" /><span>History</span></div>
+                    </div>
+                    <div style={s.iphoneActive}>
+                      <div style={{ fontSize: 11, color: "#fff", opacity: 0.7 }}>LUTH · Lagos</div>
+                      <Ico.ArrowRight size={14} color="#fff" />
+                    </div>
+                    <div style={s.iphoneHospitalList}>
+                      <div style={s.iphoneHospItem}>
+                        <Ico.HeartIcon size={12} color="#198f82" />
+                        <span>UDUTH</span>
+                        <Ico.CheckIcon size={10} color="#198f82" />
                       </div>
-                      <div style={s.phoneActBtn}>
-                        <Ico.ClockIcon size={16} color={palette.text} />
-                        <span>History</span>
+                      <div style={s.iphoneHospItem}>
+                        <Ico.HeartIcon size={12} color="#198f82" />
+                        <span>LUTH</span>
+                        <Ico.CheckIcon size={10} color="#198f82" />
+                      </div>
+                      <div style={s.iphoneHospItem}>
+                        <Ico.HeartIcon size={12} color="#198f82" />
+                        <span>UCH</span>
+                        <Ico.CheckIcon size={10} color="#198f82" />
                       </div>
                     </div>
-                    <div style={s.phoneHosp}>
-                      <Ico.MapPin size={12} color={palette.muted} />
-                      <span>LUTH · Lagos</span>
-                    </div>
-                    <div style={s.phoneDotGrid}>
-                      <div style={s.phoneDot} /><div style={s.phoneDot} /><div style={s.phoneDot} />
+                    <div style={s.iphoneNav}>
+                      <div style={s.iphoneNavDotO} />
+                      <div style={s.iphoneNavDot} />
+                      <div style={s.iphoneNavDotO} />
                     </div>
                   </div>
                 </div>
               </div>
-              <div style={s.phoneHomeBtn} />
+              <div style={s.iphoneHomeIndicator} />
+              <div style={s.iphoneSideBtn} />
+              <div style={s.iphoneSideBtn2} />
+              <div style={s.iphoneSideBtn3} />
             </div>
-            <div style={s.phoneGlow} />
           </div>
         </div>
 
@@ -1249,103 +1263,133 @@ const s = {
   landFeat: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.5)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 18, padding: "12px 14px", minWidth: 92, boxShadow: "0 10px 24px rgba(89,118,148,0.08)" },
   landStats: { display: "flex", gap: 24, padding: "18px 26px", background: "rgba(255,255,255,0.5)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 28, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 18px 40px rgba(80,110,140,0.08)" },
   
-  phoneFrameOuter: {
-    width: 280, height: 560, borderRadius: 48, padding: 8,
-    background: "linear-gradient(180deg,rgba(180,200,220,0.18),rgba(255,255,255,0.5))",
-    backdropFilter: "blur(32px)", WebkitBackdropFilter: "blur(32px)",
-    border: "1px solid rgba(255,255,255,0.7)",
-    boxShadow: "0 32px 72px rgba(80,110,140,0.18), inset 0 1px 0 rgba(255,255,255,0.8)",
-    position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
+  heroBgSection: {
+    position: "absolute", inset: 0, overflow: "hidden",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 0, pointerEvents: "none",
   },
-  phoneNotch: {
-    position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)",
-    width: 100, height: 22, borderRadius: 999,
-    background: "rgba(37,54,75,0.75)",
-    zIndex: 25, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-    backdropFilter: "blur(4px)",
+  heroBgImg: {
+    width: "160%", maxWidth: 900, height: "auto",
+    objectFit: "contain", opacity: 0.22,
+    filter: "blur(2px)",
   },
-  phoneScreen: {
-    width: "100%", height: "100%", borderRadius: 40,
-    position: "relative", overflow: "hidden",
-    background: "#f7fbff",
-  },
-  heroImg: {
-    position: "absolute", inset: 0, width: "100%", height: "100%",
-    objectFit: "cover", opacity: 0.18,
-  },
-  phoneOverlay: {
+  heroBgOverlay: {
     position: "absolute", inset: 0,
-    background: "linear-gradient(180deg,rgba(255,255,255,0.65) 0%,rgba(255,255,255,0.35) 50%,rgba(247,251,255,0.7) 100%)",
-    zIndex: 1,
+    background: "radial-gradient(ellipse at 50% 60%, transparent 30%, #f7fbff 80%)",
   },
-  phoneUI: {
-    position: "relative", zIndex: 2, height: "100%",
-    display: "flex", flexDirection: "column", padding: "32px 16px 16px",
-    fontFamily: fontStack,
+  iphoneFrame: {
+    position: "relative", zIndex: 2,
+    width: 290, height: 580,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    filter: "drop-shadow(0 32px 72px rgba(80,110,140,0.22))",
   },
-  phoneTopBar: {
+  iphoneBezel: {
+    width: "100%", height: "100%",
+    borderRadius: 52,
+    background: "linear-gradient(180deg,#2c2c2e,#1c1c1e)",
+    padding: 6,
+    boxShadow: "inset 0 2px 4px rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.15)",
+    position: "relative",
+  },
+  iphoneDynamicIsland: {
+    position: "absolute", top: 10, left: "50%", transform: "translateX(-50%)",
+    width: 110, height: 24,
+    borderRadius: 999,
+    background: "#1a1a1c",
+    zIndex: 10,
+    boxShadow: "inset 0 1px 2px rgba(255,255,255,0.08)",
+  },
+  iphoneScreen: {
+    width: "100%", height: "100%",
+    borderRadius: 46,
+    background: "#f7fbff",
+    overflow: "hidden",
+    position: "relative",
+    display: "flex", flexDirection: "column",
+  },
+  iphoneStatusBar: {
     display: "flex", justifyContent: "space-between", alignItems: "center",
-    padding: "0 6px", marginBottom: 16,
+    padding: "14px 18px 6px",
   },
-  phoneContent: {
-    flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-    justifyContent: "center", gap: 8,
+  iphoneContent: {
+    flex: 1, padding: "0 16px 16px",
+    display: "flex", flexDirection: "column", gap: 8,
   },
-  phonePill: {
-    display: "flex", alignItems: "center", gap: 6,
-    fontSize: 11, fontWeight: 600, color: palette.brandDeep,
-    background: "rgba(255,255,255,0.72)", backdropFilter: "blur(8px)",
-    padding: "6px 12px", borderRadius: 999,
-    border: "1px solid rgba(255,255,255,0.8)",
+  iphoneHdr: {
+    display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+    marginBottom: 4,
   },
-  phoneAmt: {
-    fontSize: 36, fontWeight: 700, color: palette.text,
-    letterSpacing: "-1px",
+  iphoneLogo: {
+    width: 36, height: 36, borderRadius: 12,
+    background: "linear-gradient(135deg,#79dbc7,#3fb7a3)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    fontWeight: 800, fontSize: 18, color: "#fff",
+    boxShadow: "0 8px 18px rgba(63,183,163,0.25)",
   },
-  phoneLabel: {
-    fontSize: 12, color: palette.textSoft,
-    marginBottom: 12,
+  iphoneQuickActions: {
+    display: "flex", gap: 8, marginBottom: 4,
   },
-  phoneActions: {
-    display: "flex", gap: 10,
-    marginBottom: 8,
+  iphoneQaBtn: {
+    flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+    padding: "10px 0",
+    background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)",
+    border: "1px solid rgba(255,255,255,0.75)",
+    borderRadius: 16,
+    fontSize: 11, fontWeight: 600, color: palette.text,
   },
-  phoneActBtn: {
-    display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-    width: 60, padding: "10px 0",
+  iphoneActive: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    padding: "10px 14px",
+    background: "linear-gradient(135deg,#55c9b6,#2eaa99)",
+    borderRadius: 14,
+    marginBottom: 4,
+  },
+  iphoneHospitalList: {
+    display: "flex", flexDirection: "column", gap: 6,
+    flex: 1,
+  },
+  iphoneHospItem: {
+    display: "flex", alignItems: "center", gap: 8,
+    padding: "8px 12px",
     background: "rgba(255,255,255,0.6)", backdropFilter: "blur(8px)",
-    border: "1px solid rgba(255,255,255,0.72)",
-    borderRadius: 18, fontSize: 11, fontWeight: 600, color: palette.textGray,
-    cursor: "default",
+    border: "1px solid rgba(255,255,255,0.65)",
+    borderRadius: 14,
+    fontSize: 12, fontWeight: 600, color: palette.text,
   },
-  phoneHosp: {
-    display: "flex", alignItems: "center", gap: 4,
-    fontSize: 12, color: palette.textSoft,
-    background: "rgba(255,255,255,0.5)", backdropFilter: "blur(6px)",
-    padding: "8px 14px", borderRadius: 999,
-    border: "1px solid rgba(255,255,255,0.6)",
-    marginTop: 4,
+  iphoneNav: {
+    display: "flex", justifyContent: "center", gap: 6,
+    padding: "8px 0",
   },
-  phoneDotGrid: {
-    display: "flex", gap: 6, marginTop: 10,
+  iphoneNavDot: {
+    width: 18, height: 5, borderRadius: 3,
+    background: palette.brand,
   },
-  phoneDot: {
-    width: 6, height: 6, borderRadius: "50%",
-    background: palette.brand, opacity: 0.5,
+  iphoneNavDotO: {
+    width: 5, height: 5, borderRadius: "50%",
+    background: "#dce8ef",
   },
-  phoneHomeBtn: {
-    position: "absolute", bottom: 12, left: "50%", transform: "translateX(-50%)",
-    width: 100, height: 4, borderRadius: 2,
-    background: "rgba(255,255,255,0.5)", zIndex: 25,
+  iphoneHomeIndicator: {
+    position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)",
+    width: 104, height: 4, borderRadius: 2,
+    background: "rgba(255,255,255,0.4)", zIndex: 10,
   },
-  phoneGlow: {
-    position: "absolute", top: "8%", left: "50%", transform: "translateX(-50%)",
-    width: 400, height: 400,
-    background: "radial-gradient(circle,rgba(122,219,199,0.21),transparent 62%)",
-    pointerEvents: "none", zIndex: -1,
+  iphoneSideBtn: {
+    position: "absolute", top: 120, right: -2, width: 3, height: 40,
+    background: "#333", borderRadius: "0 2px 2px 0",
+    zIndex: 0,
+  },
+  iphoneSideBtn2: {
+    position: "absolute", top: 168, right: -2, width: 3, height: 50,
+    background: "#333", borderRadius: "0 2px 2px 0",
+    zIndex: 0,
+  },
+  iphoneSideBtn3: {
+    position: "absolute", top: 140, left: -2, width: 3, height: 44,
+    background: "#333", borderRadius: "2px 0 0 2px",
+    zIndex: 0,
   },
 
-  landSection: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
+  landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 22px" },
   landSectionNarrow: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
   sectionTitle: { fontSize: 11, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 10 },
   sectionH2: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700, letterSpacing: "-0.6px" },
@@ -1363,12 +1407,12 @@ const s = {
   previewAvatar: { width: 58, height: 58, borderRadius: 20, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900, color: palette.text, boxShadow: "0 14px 28px rgba(63,183,163,0.24)" },
   miniStatGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginTop: 14 },
   miniStat: { background: "rgba(255,255,255,0.88)", border: "1px solid " + palette.line, borderRadius: 18, padding: "12px 10px", textAlign: "center" },
-  sectionGrid: { display: "flex", flexDirection: "column", gap: 14, marginTop: 20, maxWidth: 720, margin: "20px auto 0" },
-  stepCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 24, padding: 18, boxShadow: softShadow },
+  sectionGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginTop: 20 },
+  stepCard: { background: "linear-gradient(145deg,#ffffff 0%,#eefbf6 100%)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 24, padding: 18, boxShadow: cardShadow },
   stepNo: { width: 36, height: 36, borderRadius: 14, background: palette.mint, color: palette.brandDeep, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: 12, border: "1px solid rgba(63,183,163,0.18)" },
-  trustGrid: { display: "flex", flexDirection: "column", gap: 14, marginTop: 20, maxWidth: 720, margin: "20px auto 0" },
-  trustCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: 16, textAlign: "center", boxShadow: softShadow },
-  newsGrid: { display: "flex", flexDirection: "column", gap: 14, marginTop: 20, maxWidth: 720, margin: "20px auto 0" },
+  trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginTop: 20 },
+  trustCard: { background: "linear-gradient(145deg,#ffffff 0%,#edf9f5 100%)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 22, padding: 16, textAlign: "center", boxShadow: cardShadow },
+  newsGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 16, marginTop: 20 },
   ctaPanel: { background: "rgba(255,255,255,0.45)", backdropFilter: "blur(18px)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 32, padding: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", boxShadow: "0 18px 40px rgba(80,110,140,0.08)" },
   sub: { fontSize: 14, color: palette.textSoft, lineHeight: 1.7, margin: "8px 0 18px" }, hint: { fontSize: 13, color: palette.muted, lineHeight: 1.7, marginBottom: 16 },
   searchWrap: { display: "flex", alignItems: "center", gap: 10, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 18, padding: "0 16px", marginBottom: 18, boxShadow: softShadow },
