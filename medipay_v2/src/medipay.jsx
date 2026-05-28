@@ -1204,7 +1204,7 @@ const palette = {
 const btnShadow = "0 14px 28px rgba(63,183,163,0.24)";
 const cardShadow = "0 18px 45px rgba(89,118,148,0.12)";
 const softShadow = "0 10px 24px rgba(89,118,148,0.10)";
-const fontStack = "'Isotonic Trial', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const fontStack = "'Borgen', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
 const s = {
   shell: {
@@ -1242,7 +1242,7 @@ const s = {
   landGlow1: { position: "absolute", top: "7%", left: "4%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(122,219,199,0.28),transparent 68%)", pointerEvents: "none" },
   landGlow2: { position: "absolute", bottom: "4%", right: "4%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(150,180,255,0.24),transparent 70%)", pointerEvents: "none" },
   landLogo: { width: 78, height: 78, borderRadius: 24, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, boxShadow: "0 18px 38px rgba(63,183,163,0.28)" },
-  landH1: { fontFamily: "'Isotonic Trial', system-ui, -apple-system, sans-serif", fontSize: "clamp(34px,6vw,64px)", fontWeight: 700, lineHeight: 1.04, marginBottom: 18, letterSpacing: "-1.2px", color: palette.text },
+  landH1: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(34px,6vw,64px)", fontWeight: 700, lineHeight: 1.04, marginBottom: 18, letterSpacing: "-1.2px", color: palette.text },
   landSub: { fontSize: 16, color: palette.textSoft, lineHeight: 1.8, marginBottom: 34, maxWidth: 520 },
   landCTA: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: palette.text, border: "none", borderRadius: 18, padding: "16px 34px", fontSize: 16, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 34, boxShadow: btnShadow },
   landFeatures: { display: "flex", gap: 14, marginBottom: 30, flexWrap: "wrap", justifyContent: "center" },
@@ -1348,7 +1348,7 @@ const s = {
   landSection: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
   landSectionNarrow: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
   sectionTitle: { fontSize: 11, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 10 },
-  sectionH2: { fontFamily: "'Isotonic Trial', system-ui, -apple-system, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700, letterSpacing: "-0.6px" },
+  sectionH2: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700, letterSpacing: "-0.6px" },
   sectionLead: { fontSize: 15, color: palette.textSoft, lineHeight: 1.8, maxWidth: 720 },
   landingGrid: { width: "100%", maxWidth: 1120, margin: "0 auto", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 22, alignItems: "center", position: "relative", zIndex: 1 },
   heroCopy: { textAlign: "left", alignItems: "flex-start" },
