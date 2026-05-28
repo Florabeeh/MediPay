@@ -100,7 +100,7 @@ const HEALTH_TIPS = [
   { icon: "💧", color: "#0ea5e9", title: "Stay Hydrated", body: "Drink 8-12 glasses of water daily. Dehydration is a leading cause of hospital visits in Nigeria's hot climate." },
   { icon: "🩸", color: "#ef4444", title: "Know Your Genotype", body: "Confirm genotype before marriage. SS children suffer sickle cell disease — entirely preventable with proper planning." },
   { icon: "🍎", color: "#22c55e", title: "Eat Local Vegetables", body: "Ugwu, garden egg, and bitter leaf are rich in iron and vitamins. Include them in every meal." },
-  { icon: "🏃", color: "#f59e0b", title: "Exercise Daily", body: "30 minutes of walking daily reduces diabetes and hypertension risk by up to 35%." },
+  { icon: "🏃", color: "#b17700", title: "Exercise Daily", body: "30 minutes of walking daily reduces diabetes and hypertension risk by up to 35%." },
   { icon: "🩺", color: "#8b5cf6", title: "Annual Check-ups", body: "Silent killers — hypertension, diabetes, cancer — show no early symptoms. A yearly check saves lives." },
   { icon: "🌙", color: "#6366f1", title: "Sleep 7-9 Hours", body: "Poor sleep raises blood pressure and weakens immunity. Sleep at the same time each night." },
   { icon: "🧴", color: "#14b8a6", title: "Wash Your Hands", body: "20 seconds with soap prevents diarrhoea, typhoid, and cholera — top causes of illness in West Africa." },
@@ -339,23 +339,23 @@ export default function MediPay() {
         <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={s.landLogo}><span style={{ fontSize: 32, fontWeight: 800, color: "#fff" }}>M</span></div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-            <span style={{ fontSize: 40, fontWeight: 900, letterSpacing: "-2px", color: "#fff" }}>MediPay</span>
+            <span style={{ fontSize: 40, fontWeight: 900, letterSpacing: "-2px", color: palette.text }}>MediPay</span>
             {DEMO_MODE && <span style={s.demoBadge}>Demo</span>}
           </div>
-          <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 32 }}>Powered by Circle USDC on ARC Testnet</p>
-          <h1 style={s.landH1}>Healthcare payments,<br /><span style={{ color: "#1a9e5f" }}>finally simple.</span></h1>
+          <p style={{ fontSize: 13, color: palette.muted, marginBottom: 32 }}>Powered by Circle USDC on ARC Testnet</p>
+          <h1 style={s.landH1}>Healthcare payments,<br /><span style={{ color: palette.brandDeep }}>finally simple.</span></h1>
           <p style={s.landSub}>Register once. Pay anywhere in Nigeria and beyond.<br />Your Circle Programmable Wallet goes with you.</p>
           <button style={s.landCTA} onClick={() => setScreen("hospitals")}><span>Get Started</span><span style={{ fontSize: 18 }}>→</span></button>
           <div style={s.landFeatures}>
             {[["🔒", "MPC Secured"], ["⚡", "< 1s Settlement"], ["🇳🇬", "12 Hospitals"], ["💸", "USDC Native"]].map(([ic, lb]) => (
-              <div key={lb} style={s.landFeat}><span style={{ fontSize: 20 }}>{ic}</span><span style={{ fontSize: 12, color: "#9ca3af", marginTop: 4 }}>{lb}</span></div>
+              <div key={lb} style={s.landFeat}><span style={{ fontSize: 20 }}>{ic}</span><span style={{ fontSize: 12, color: palette.textSoft, marginTop: 4 }}>{lb}</span></div>
             ))}
           </div>
           <div style={s.landStats}>
             {[["12", "Hospitals"], ["< 1s", "Finality"], ["N0", "Fees"], ["36", "States"]].map(([v, l]) => (
               <div key={l} style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 22, fontWeight: 800, color: "#1a9e5f" }}>{v}</div>
-                <div style={{ fontSize: 11, color: "#6b7280" }}>{l}</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: palette.brandDeep }}>{v}</div>
+                <div style={{ fontSize: 11, color: palette.muted }}>{l}</div>
               </div>
             ))}
           </div>
@@ -370,15 +370,15 @@ export default function MediPay() {
       <div style={s.pg}>
         <p style={s.sub}>Choose the hospital you are currently visiting.</p>
         <div style={s.searchWrap}>
-          <span style={{ fontSize: 16, color: "#6b7280" }}>🔍</span>
+          <span style={{ fontSize: 16, color: palette.muted }}>🔍</span>
           <input style={s.searchInp} placeholder="Search hospital or state..." value={searchH} onChange={e => setSearchH(e.target.value)} autoComplete="off" />
         </div>
         <div style={s.hGrid}>
           {filtered.map(h => (
             <button key={h.id} style={s.hCard} onClick={() => handleHospSelect(h)}>
               <div style={s.hIdBadge}>{h.id}</div>
-              <div style={{ fontSize: 12, color: "#d1d5db", lineHeight: 1.4, margin: "8px 0 4px" }}>{h.full}</div>
-              <div style={{ fontSize: 11, color: "#6b7280" }}>📍 {h.state} State</div>
+              <div style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.4, margin: "8px 0 4px" }}>{h.full}</div>
+              <div style={{ fontSize: 11, color: palette.muted }}>📍 {h.state} State</div>
             </button>
           ))}
         </div>
@@ -391,9 +391,9 @@ export default function MediPay() {
       <PBar title={hospital?.id} onBack={() => setScreen("hospitals")} />
       <div style={s.pg}>
         <div style={s.hospBanner}>
-          <div style={{ fontSize: 26, fontWeight: 800, color: "#1a9e5f" }}>{hospital?.id}</div>
-          <div style={{ fontSize: 13, color: "#9ca3af" }}>{hospital?.full}</div>
-          <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4 }}>📍 {hospital?.state} State</div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: palette.brandDeep }}>{hospital?.id}</div>
+          <div style={{ fontSize: 13, color: palette.textSoft }}>{hospital?.full}</div>
+          <div style={{ fontSize: 11, color: palette.muted, marginTop: 4 }}>📍 {hospital?.state} State</div>
         </div>
         <p style={s.sub}>No crypto experience needed. A Circle Programmable Wallet is created for you automatically — secured by MPC, no seed phrase.</p>
         <div style={s.authTabs}>
@@ -405,7 +405,7 @@ export default function MediPay() {
           <div>
             <L t="Your MediPay file number" />
             <input style={s.inp} placeholder="e.g. UDUTH-123456-4521" value={existFN} onChange={e => setExistFN(e.target.value)} autoComplete="off" spellCheck={false} />
-            <p style={s.hint}>This retrieves your records and links your wallet to <strong style={{ color: "#e5e7eb" }}>{hospital?.id}</strong>.</p>
+            <p style={s.hint}>This retrieves your records and links your wallet to <strong style={{ color: palette.text }}>{hospital?.id}</strong>.</p>
             {loading && <Stp s={step} />}
             <GBtn disabled={loading} onClick={handleAuth}>{loading ? "Retrieving..." : "Retrieve My Records"}</GBtn>
           </div>
@@ -418,7 +418,7 @@ export default function MediPay() {
               <button style={s.socialBtn} onClick={handleAuth}>📧  Continue with Email</button>
               <button style={s.socialBtn} onClick={handleAuth}>🇬  Continue with Google</button>
             </div>
-            <p style={{ fontSize: 11, color: "#6b7280", textAlign: "center" }}>Circle MPC-secured — no seed phrase exposed.</p>
+            <p style={{ fontSize: 11, color: palette.muted, textAlign: "center" }}>Circle MPC-secured — no seed phrase exposed.</p>
           </div>
         )}
       </div>
@@ -458,25 +458,25 @@ export default function MediPay() {
       <div style={s.pg}>
         <div style={s.fileCard}>
           <div style={s.fileCheck}>✓</div>
-          <div style={{ fontSize: 13, color: "#9ca3af", marginBottom: 8 }}>Registration Successful</div>
-          <div style={{ fontSize: 10, color: "#6b7280", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>Your MediPay File Number</div>
+          <div style={{ fontSize: 13, color: palette.textSoft, marginBottom: 8 }}>Registration Successful</div>
+          <div style={{ fontSize: 10, color: palette.muted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>Your MediPay File Number</div>
           <div style={s.fileNo}>{fileNo}</div>
-          <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 20 }}>{hospital?.full}</div>
+          <div style={{ fontSize: 12, color: palette.textSoft, marginBottom: 20 }}>{hospital?.full}</div>
           <div style={s.walletReveal}>
-            <div style={{ fontSize: 10, color: "#6b7280", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 6 }}>Circle Programmable Wallet · ARC Testnet</div>
-            <div style={{ fontSize: 11, fontFamily: "monospace", color: "#1a9e5f", wordBreak: "break-all", marginBottom: 8 }}>{walletAddr}</div>
+            <div style={{ fontSize: 10, color: palette.muted, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 6 }}>Circle Programmable Wallet · ARC Testnet</div>
+            <div style={{ fontSize: 11, fontFamily: "monospace", color: palette.brandDeep, wordBreak: "break-all", marginBottom: 8 }}>{walletAddr}</div>
             {faucetSent && (
               <div style={s.faucetBadge}>
                 🎉 10 USDC auto-sent from Circle faucet!
                 <a href={"https://faucet.circle.com"} target="_blank" rel="noreferrer"
-                  style={{ display: "block", fontSize: 11, color: "#1a9e5f", marginTop: 4, textDecoration: "underline" }}>
+                  style={{ display: "block", fontSize: 11, color: palette.brandDeep, marginTop: 4, textDecoration: "underline" }}>
                   Balance not showing? Claim manually here →
                 </a>
               </div>
             )}
           </div>
-          <p style={{ fontSize: 12, color: "#9ca3af", lineHeight: 1.7, marginBottom: 20 }}>
-            <strong style={{ color: "#e5e7eb" }}>Save this number.</strong> Quote it at any MediPay hospital — your records and wallet follow you across Nigeria.
+          <p style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.7, marginBottom: 20 }}>
+            <strong style={{ color: palette.text }}>Save this number.</strong> Quote it at any MediPay hospital — your records and wallet follow you across Nigeria.
           </p>
           <GBtn onClick={() => { setTab("home"); setScreen("dashboard"); }}>Go to Dashboard →</GBtn>
         </div>
@@ -491,18 +491,18 @@ export default function MediPay() {
         <div style={s.rcpCard}>
           <div style={s.rcpHeader}>
             <div style={s.logoMk}><span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>M</span></div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>MediPay</div>
-            <div style={{ fontSize: 13, color: "#1a9e5f", marginTop: 2 }}>✓ Payment Confirmed · ARC Testnet</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: palette.text }}>MediPay</div>
+            <div style={{ fontSize: 13, color: palette.brandDeep, marginTop: 2 }}>✓ Payment Confirmed · ARC Testnet</div>
           </div>
           <div style={s.rcpDash} />
           {[["Patient", receipt?.patient], ["File Number", receipt?.fileNo], ["Hospital", receipt?.hospital], ["Category", receipt?.category], ["Service", receipt?.item], ["Note", receipt?.note || "--"], ["Amount (NGN)", fmt(receipt?.amount)], ["Amount (USDC)", receipt?.usdc + " USDC"], ["Network", "ARC-TESTNET"], ["Settlement", "< 1 second (Circle MPC)"], ["Date", receipt?.date]].map(([k, v]) => v && (
-            <div key={k} style={s.rcpRow}><span style={{ fontSize: 12, color: "#9ca3af" }}>{k}</span><span style={{ fontSize: 12, color: "#e5e7eb", fontWeight: 500, textAlign: "right", wordBreak: "break-word", maxWidth: "55%" }}>{v}</span></div>
+            <div key={k} style={s.rcpRow}><span style={{ fontSize: 12, color: palette.textSoft }}>{k}</span><span style={{ fontSize: 12, color: palette.text, fontWeight: 500, textAlign: "right", wordBreak: "break-word", maxWidth: "55%" }}>{v}</span></div>
           ))}
           <div style={s.rcpDash} />
           <div style={s.rcpTotal}>{fmt(receipt?.amount)}</div>
-          <div style={{ fontSize: 12, color: "#6b7280", textAlign: "center", marginTop: 4 }}>{receipt?.usdc} USDC · Circle ARC Testnet</div>
-          <div style={{ fontSize: 8, color: "#1f2937", textAlign: "center", margin: "12px 0 4px", letterSpacing: 1 }}>|||||||||||||||||||||||||||||||||||||||||||||||||||||</div>
-          <p style={{ fontSize: 10, color: "#6b7280", textAlign: "center", wordBreak: "break-all" }}>Tx: {receipt?.id}</p>
+          <div style={{ fontSize: 12, color: palette.muted, textAlign: "center", marginTop: 4 }}>{receipt?.usdc} USDC · Circle ARC Testnet</div>
+          <div style={{ fontSize: 9, color: "#d9e5ed", textAlign: "center", margin: "12px 0 4px", letterSpacing: 1 }}>|||||||||||||||||||||||||||||||||||||||||||||||||||||</div>
+          <p style={{ fontSize: 10, color: palette.muted, textAlign: "center", wordBreak: "break-all" }}>Tx: {receipt?.id}</p>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button style={s.outlineBtn} onClick={() => openShareReceipt(receipt)}>⬆ Share</button>
@@ -521,14 +521,14 @@ export default function MediPay() {
           <div style={s.welcomeBanner}>
             <div style={s.welcomeGlow} />
             <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{ fontSize: 13, color: "#9ca3af", marginBottom: 4 }}>Welcome back</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>{user?.name || "Patient"}</div>
-              <div style={{ fontSize: 12, color: "#1a9e5f", marginTop: 4, fontFamily: "monospace" }}>{fileNo}</div>
+              <div style={{ fontSize: 13, color: palette.textSoft, marginBottom: 4 }}>Welcome back</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: palette.text }}>{user?.name || "Patient"}</div>
+              <div style={{ fontSize: 12, color: palette.brandDeep, marginTop: 4, fontFamily: "monospace" }}>{fileNo}</div>
             </div>
             <div style={s.welcomeBalance}>
-              <div style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>USDC Balance</div>
-              <div style={{ fontSize: 26, fontWeight: 900, color: "#1a9e5f" }}>{usdcBal !== null ? usdcBal : "--"}</div>
-              <div style={{ fontSize: 11, color: "#6b7280" }}>ARC Testnet</div>
+              <div style={{ fontSize: 10, color: palette.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>USDC Balance</div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: palette.brandDeep }}>{usdcBal !== null ? usdcBal : "--"}</div>
+              <div style={{ fontSize: 11, color: palette.muted }}>ARC Testnet</div>
             </div>
           </div>
           <div style={s.statsRow}>
@@ -538,14 +538,14 @@ export default function MediPay() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
             <button style={s.qaCard} onClick={() => switchTab("pay")}>
-              <div style={{ ...s.qaIcon, background: "linear-gradient(135deg,#1a9e5f22,#0d7a4722)", border: "1px solid #1a9e5f44" }}>💳</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#e5e7eb" }}>Make Payment</div>
-              <div style={{ fontSize: 12, color: "#9ca3af" }}>Tests, drugs, surgery</div>
+              <div style={{ ...s.qaIcon, background: "linear-gradient(135deg,#dff7ef,#ecfbf6)", border: "1px solid rgba(63,183,163,0.22)" }}>💳</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: palette.text }}>Make Payment</div>
+              <div style={{ fontSize: 12, color: palette.textSoft }}>Tests, drugs, surgery</div>
             </button>
             <button style={s.qaCard} onClick={() => switchTab("history")}>
-              <div style={{ ...s.qaIcon, background: "linear-gradient(135deg,#3b82f622,#1d4ed822)", border: "1px solid #3b82f644" }}>📋</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#e5e7eb" }}>History</div>
-              <div style={{ fontSize: 12, color: "#9ca3af" }}>{history.length} transaction{history.length !== 1 ? "s" : ""}</div>
+              <div style={{ ...s.qaIcon, background: "linear-gradient(135deg,#e8f5ff,#f0f1ff)", border: "1px solid #cde9ff" }}>📋</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: palette.text }}>History</div>
+              <div style={{ fontSize: 12, color: palette.textSoft }}>{history.length} transaction{history.length !== 1 ? "s" : ""}</div>
             </button>
           </div>
           <SL t="Your Linked Hospitals" />
@@ -554,13 +554,13 @@ export default function MediPay() {
               <div key={h.id} style={s.linkedCard}>
                 <div style={s.linkedIcon}>{h.id.slice(0, 4)}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#e5e7eb" }}>{h.id}</div>
-                  <div style={{ fontSize: 11, color: "#9ca3af", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.full}</div>
-                  <div style={{ fontSize: 10, color: "#6b7280" }}>📍 {h.state} State</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: palette.text }}>{h.id}</div>
+                  <div style={{ fontSize: 11, color: palette.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.full}</div>
+                  <div style={{ fontSize: 10, color: palette.muted }}>📍 {h.state} State</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#1a9e5f" }} />
-                  <span style={{ fontSize: 11, color: "#1a9e5f", fontWeight: 600 }}>Active</span>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: palette.brand }} />
+                  <span style={{ fontSize: 11, color: palette.brandDeep, fontWeight: 600 }}>Active</span>
                 </div>
               </div>
             ))}
@@ -570,15 +570,15 @@ export default function MediPay() {
             <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <span style={{ fontSize: 22 }}>🌍</span><span style={{ fontSize: 16, fontWeight: 800, color: "#fff" }}>Global MediPay</span>
+                  <span style={{ fontSize: 22 }}>🌍</span><span style={{ fontSize: 16, fontWeight: 800, color: palette.text }}>Global MediPay</span>
                   <span style={s.comingSoonBadge}>Coming Soon</span>
                 </div>
-                <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.6, maxWidth: 400 }}>Once registered in Nigeria, use MediPay in Ghana, Kenya, South Africa, UK and beyond.</p>
+                <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, maxWidth: 400 }}>Once registered in Nigeria, use MediPay in Ghana, Kenya, South Africa, UK and beyond.</p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {["🇬🇭 Ghana","🇰🇪 Kenya","🇿🇦 South Africa","🇬🇧 UK"].map(c => (
-                  <div key={c} style={{ fontSize: 12, color: "#9ca3af", display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#374151" }} />{c} <span style={{ fontSize: 10, color: "#6b7280" }}>Q4 2026</span>
+                  <div key={c} style={{ fontSize: 12, color: palette.textSoft, display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: palette.lineStrong }} />{c} <span style={{ fontSize: 10, color: palette.muted }}>Q4 2026</span>
                   </div>
                 ))}
               </div>
@@ -590,10 +590,10 @@ export default function MediPay() {
               <div key={i} style={s.newsCard}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                   <span style={{ ...s.newsTagBadge, background: n.tagColor + "22", color: n.tagColor, border: "0.5px solid " + n.tagColor + "44" }}>{n.tag}</span>
-                  <span style={{ fontSize: 10, color: "#6b7280" }}>{n.date}</span>
+                  <span style={{ fontSize: 10, color: palette.muted }}>{n.date}</span>
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#e5e7eb", marginBottom: 6, lineHeight: 1.4 }}>{n.title}</div>
-                <div style={{ fontSize: 12, color: "#9ca3af", lineHeight: 1.6 }}>{n.body}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: palette.text, marginBottom: 6, lineHeight: 1.4 }}>{n.title}</div>
+                <div style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.6 }}>{n.body}</div>
               </div>
             ))}
           </div>
@@ -602,19 +602,19 @@ export default function MediPay() {
             {HEALTH_TIPS.map((t, i) => (
               <div key={i} style={{ ...s.tipCard, borderTop: "3px solid " + t.color }}>
                 <div style={{ fontSize: 28, marginBottom: 8 }}>{t.icon}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#e5e7eb", marginBottom: 6 }}>{t.title}</div>
-                <div style={{ fontSize: 12, color: "#9ca3af", lineHeight: 1.6 }}>{t.body}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: palette.text, marginBottom: 6 }}>{t.title}</div>
+                <div style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.6 }}>{t.body}</div>
               </div>
             ))}
           </div>
           <SL t="About MediPay" />
-          <div style={{ ...s.card, marginBottom: 30, padding: "22px", background: "linear-gradient(135deg,#0d1f14,#0d1117)", border: "1px solid #1a9e5f33" }}>
-            <div style={{ fontSize: 17, fontWeight: 800, color: "#fff", marginBottom: 10 }}>What is MediPay?</div>
-            <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.9, marginBottom: 10 }}>Nigeria's first blockchain-powered medical payment platform. Register once, pay anywhere — tests, surgery, medication, therapy — without cash, without queues.</p>
-            <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.9, marginBottom: 16 }}>Powered by <strong style={{ color: "#1a9e5f" }}>Circle Programmable Wallets</strong> and <strong style={{ color: "#1a9e5f" }}>Circle Nanopayments on ARC Testnet</strong>.</p>
+          <div style={{ ...s.card, marginBottom: 30, padding: "22px", background: "linear-gradient(135deg,#ffffff,#eefbf6)", border: "1px solid rgba(63,183,163,0.18)" }}>
+            <div style={{ fontSize: 17, fontWeight: 800, color: palette.text, marginBottom: 10 }}>What is MediPay?</div>
+            <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.9, marginBottom: 10 }}>Nigeria's first blockchain-powered medical payment platform. Register once, pay anywhere — tests, surgery, medication, therapy — without cash, without queues.</p>
+            <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.9, marginBottom: 16 }}>Powered by <strong style={{ color: palette.brandDeep }}>Circle Programmable Wallets</strong> and <strong style={{ color: palette.brandDeep }}>Circle Nanopayments on ARC Testnet</strong>.</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {["Circle Programmable Wallet","Nanopayments","ARC Testnet","x402 Protocol","USDC","Auto Faucet"].map(t => (
-                <span key={t} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 100, background: "#1a9e5f18", border: "0.5px solid #1a9e5f44", color: "#1a9e5f", fontWeight: 600 }}>{t}</span>
+                <span key={t} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, fontWeight: 600 }}>{t}</span>
               ))}
             </div>
           </div>
@@ -624,12 +624,12 @@ export default function MediPay() {
       {tab === "pay" && (
         <div style={s.pg}>
           <div style={s.payHdr}>
-            <div><div style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>Make a Payment</div><div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2 }}>at {hospital?.id}</div></div>
+            <div><div style={{ fontSize: 18, fontWeight: 800, color: palette.text }}>Make a Payment</div><div style={{ fontSize: 12, color: palette.textSoft, marginTop: 2 }}>at {hospital?.id}</div></div>
             {usdcBal !== null && usdcBal !== "--" && (
               <div style={s.payBal}>
-                <span style={{ fontSize: 10, color: "#6b7280" }}>Balance</span>
-                <span style={{ fontSize: 15, fontWeight: 800, color: "#1a9e5f" }}>{usdcBal} USDC</span>
-                <button style={{ background: "none", border: "none", color: "#1a9e5f", cursor: "pointer", fontSize: 14 }} onClick={() => refreshBalance()}>↻</button>
+                <span style={{ fontSize: 10, color: palette.muted }}>Balance</span>
+                <span style={{ fontSize: 15, fontWeight: 800, color: palette.brandDeep }}>{usdcBal} USDC</span>
+                <button style={{ background: "none", border: "none", color: palette.brandDeep, cursor: "pointer", fontSize: 14 }} onClick={() => refreshBalance()}>↻</button>
               </div>
             )}
           </div>
@@ -637,14 +637,14 @@ export default function MediPay() {
           <div style={{ position: "relative", marginBottom: 14 }}>
             <button style={s.dropBtn} onClick={() => { setShowCat(!showCat); setShowItem(false); }}>
               <span style={{ flex: 1, textAlign: "left" }}>{paycat ? CATS[paycat].icon + "  " + paycat : "Select category..."}</span>
-              <span style={{ color: "#6b7280" }}>▾</span>
+              <span style={{ color: palette.muted }}>▾</span>
             </button>
             {showCat && (
               <div style={s.dropMenu}>
                 {Object.keys(CATS).map(cat => (
                   <button key={cat} style={s.dropItem} onClick={() => { setPaycat(cat); setPayitem(""); setPayprice(0); setShowCat(false); }}>
                     <span style={{ fontSize: 18 }}>{CATS[cat].icon}</span><span style={{ flex: 1, fontWeight: 500 }}>{cat}</span>
-                    <span style={{ fontSize: 11, color: "#6b7280" }}>{CATS[cat].items.length} services</span>
+                    <span style={{ fontSize: 11, color: palette.muted }}>{CATS[cat].items.length} services</span>
                   </button>
                 ))}
               </div>
@@ -655,13 +655,13 @@ export default function MediPay() {
               <L t={"Select " + paycat + " type"} />
               <div style={{ position: "relative", marginBottom: 14 }}>
                 <button style={s.dropBtn} onClick={() => { setShowItem(!showItem); setShowCat(false); }}>
-                  <span style={{ flex: 1, textAlign: "left" }}>{payitem || "Choose " + paycat + "..."}</span><span style={{ color: "#6b7280" }}>▾</span>
+                  <span style={{ flex: 1, textAlign: "left" }}>{payitem || "Choose " + paycat + "..."}</span><span style={{ color: palette.muted }}>▾</span>
                 </button>
                 {showItem && (
                   <div style={s.dropMenu}>
                     {CATS[paycat].items.map((it, i) => (
                       <button key={it} style={s.dropItem} onClick={() => { setPayitem(it); setPayprice(CATS[paycat].prices[i]); setShowItem(false); }}>
-                        <span style={{ flex: 1 }}>{it}</span><span style={{ color: "#1a9e5f", fontWeight: 700, fontSize: 13 }}>{fmt(CATS[paycat].prices[i])}</span>
+                        <span style={{ flex: 1 }}>{it}</span><span style={{ color: palette.brandDeep, fontWeight: 700, fontSize: 13 }}>{fmt(CATS[paycat].prices[i])}</span>
                       </button>
                     ))}
                   </div>
@@ -671,9 +671,9 @@ export default function MediPay() {
           )}
           {payitem && (
             <div style={s.priceBox}>
-              <div style={{ fontSize: 12, color: "#9ca3af" }}>Total to pay</div>
-              <div style={{ fontSize: 36, fontWeight: 900, color: "#1a9e5f", letterSpacing: "-1px" }}>{fmt(payprice)}</div>
-              <div style={{ fontSize: 12, color: "#6b7280" }}>≈ {(payprice / NGN_USDC).toFixed(4)} USDC · ARC Testnet</div>
+              <div style={{ fontSize: 12, color: palette.textSoft }}>Total to pay</div>
+              <div style={{ fontSize: 36, fontWeight: 900, color: palette.brandDeep, letterSpacing: "-1px" }}>{fmt(payprice)}</div>
+              <div style={{ fontSize: 12, color: palette.muted }}>≈ {(payprice / NGN_USDC).toFixed(4)} USDC · ARC Testnet</div>
             </div>
           )}
           <L t="Note for hospital (optional)" />
@@ -685,37 +685,37 @@ export default function MediPay() {
               <span style={{ fontSize: 18 }}>🔗</span><span style={{ fontSize: 11, fontWeight: 600 }}>Share Link</span>
             </button>
           </div>
-          <p style={{ fontSize: 11, color: "#6b7280", textAlign: "center", lineHeight: 1.6 }}>Use Share Link to send a payment request to a family member.</p>
+          <p style={{ fontSize: 11, color: palette.muted, textAlign: "center", lineHeight: 1.6 }}>Use Share Link to send a payment request to a family member.</p>
         </div>
       )}
 
       {tab === "history" && (
         <div style={s.pg}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 4 }}>Transaction History</div>
-          <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 20 }}>{history.length} total · {history.filter(h => h.status === "pending").length} pending</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 4 }}>Transaction History</div>
+          <div style={{ fontSize: 12, color: palette.textSoft, marginBottom: 20 }}>{history.length} total · {history.filter(h => h.status === "pending").length} pending</div>
           {history.length === 0 ? (
-            <div style={s.empty}><div style={{ fontSize: 40, marginBottom: 12 }}>📋</div><div style={{ fontSize: 15, fontWeight: 600, color: "#9ca3af", marginBottom: 6 }}>No transactions yet</div><div style={{ fontSize: 13, color: "#6b7280" }}>Make your first payment from the Pay tab</div></div>
+            <div style={s.empty}><div style={{ fontSize: 40, marginBottom: 12 }}>📋</div><div style={{ fontSize: 15, fontWeight: 600, color: palette.textSoft, marginBottom: 6 }}>No transactions yet</div><div style={{ fontSize: 13, color: palette.muted }}>Make your first payment from the Pay tab</div></div>
           ) : history.map(r => (
-            <div key={r.id} style={{ ...s.histCard, ...(r.status === "pending" ? { borderLeft: "3px solid #f59e0b" } : { borderLeft: "3px solid #1a9e5f" }) }}>
+            <div key={r.id} style={{ ...s.histCard, ...(r.status === "pending" ? { borderLeft: "4px solid #f5c85b" } : { borderLeft: "4px solid #3fb7a3" }) }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                     <span style={{ fontSize: 16 }}>{CATS[r.category]?.icon}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#e5e7eb" }}>{r.category}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: palette.text }}>{r.category}</span>
                     <span style={{ ...s.statusBadge, ...(r.status === "pending" ? s.statusPending : s.statusDone) }}>{r.status === "pending" ? "⏳ Pending" : "✓ Confirmed"}</span>
                     {r.type === "payment_link" && <span style={s.linkBadge}>🔗 Link</span>}
                   </div>
-                  <div style={{ fontSize: 12, color: "#9ca3af", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.item}</div>
-                  <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4 }}>{r.date}</div>
+                  <div style={{ fontSize: 12, color: palette.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.item}</div>
+                  <div style={{ fontSize: 11, color: palette.muted, marginTop: 4 }}>{r.date}</div>
                   {r.status === "pending" && r.link && (
-                    <button style={{ fontSize: 11, color: "#3b82f6", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 4, textDecoration: "underline" }} onClick={() => { setPayLink(r.link); setShowPayLink(true); }}>View payment link</button>
+                    <button style={{ fontSize: 11, color: "#2872b2", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 4, textDecoration: "underline" }} onClick={() => { setPayLink(r.link); setShowPayLink(true); }}>View payment link</button>
                   )}
                 </div>
                 <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: r.status === "pending" ? "#f59e0b" : "#1a9e5f" }}>{fmt(r.amount)}</div>
-                  <div style={{ fontSize: 11, color: "#6b7280" }}>{r.usdc} USDC</div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: r.status === "pending" ? "#b17700" : palette.brandDeep }}>{fmt(r.amount)}</div>
+                  <div style={{ fontSize: 11, color: palette.muted }}>{r.usdc} USDC</div>
                   {r.status === "confirmed" && (
-                    <button style={{ fontSize: 11, color: "#9ca3af", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 6, textDecoration: "underline" }} onClick={() => openShareReceipt(r)}>Share ⬆</button>
+                    <button style={{ fontSize: 11, color: palette.textSoft, background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 6, textDecoration: "underline" }} onClick={() => openShareReceipt(r)}>Share ⬆</button>
                   )}
                 </div>
               </div>
@@ -731,27 +731,27 @@ export default function MediPay() {
             <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
               <div style={s.avatar}>{(user?.name || "P")[0]}</div>
               <div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>{user?.name}</div>
-                <div style={{ fontSize: 12, color: "#1a9e5f", fontFamily: "monospace", marginTop: 4 }}>{fileNo}</div>
-                <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2 }}>{hospital?.id} · {hospital?.state}</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: palette.text }}>{user?.name}</div>
+                <div style={{ fontSize: 12, color: palette.brandDeep, fontFamily: "monospace", marginTop: 4 }}>{fileNo}</div>
+                <div style={{ fontSize: 12, color: palette.textSoft, marginTop: 2 }}>{hospital?.id} · {hospital?.state}</div>
               </div>
             </div>
           </div>
           <div style={s.walletCard}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-              <div><div style={{ fontSize: 11, color: "#6b7280", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 3 }}>Circle Programmable Wallet</div><div style={{ fontSize: 11, color: "#9ca3af" }}>ARC Testnet · SCA Account</div></div>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff", fontSize: 15 }}>C</div>
+              <div><div style={{ fontSize: 11, color: palette.muted, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 3 }}>Circle Programmable Wallet</div><div style={{ fontSize: 11, color: palette.textSoft }}>ARC Testnet · SCA Account</div></div>
+              <div style={{ width: 34, height: 34, borderRadius: 12, background: "linear-gradient(135deg,#55c9b6,#2eaa99)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff", fontSize: 15, boxShadow: "0 10px 22px rgba(63,183,163,0.20)" }}>C</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-              <div style={{ fontSize: 11, fontFamily: "monospace", color: "#1a9e5f", wordBreak: "break-all", flex: 1, padding: "8px 10px", background: "#0d1117", borderRadius: 8 }}>{walletAddr || "--"}</div>
+              <div style={{ fontSize: 11, fontFamily: "monospace", color: palette.brandDeep, wordBreak: "break-all", flex: 1, padding: "8px 10px", background: "#f5fbfd", borderRadius: 8 }}>{walletAddr || "--"}</div>
               <CopyBtn text={walletAddr} />
             </div>
             <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 3 }}>USDC Balance</div>
+                <div style={{ fontSize: 11, color: palette.muted, marginBottom: 3 }}>USDC Balance</div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                  <span style={{ fontSize: 28, fontWeight: 900, color: "#1a9e5f" }}>{balLoading ? "..." : usdcBal !== null ? usdcBal : "--"}</span>
-                  <span style={{ fontSize: 13, color: "#6b7280" }}>USDC</span>
+                  <span style={{ fontSize: 28, fontWeight: 900, color: palette.brandDeep }}>{balLoading ? "..." : usdcBal !== null ? usdcBal : "--"}</span>
+                  <span style={{ fontSize: 13, color: palette.muted }}>USDC</span>
                 </div>
               </div>
               <button style={s.refBtn} onClick={() => refreshBalance()}>↻ Refresh</button>
@@ -760,7 +760,7 @@ export default function MediPay() {
               <div style={s.faucetBadge}>
                 🎉 10 USDC auto-sent from Circle faucet on registration
                 <a href={"https://faucet.circle.com"} target="_blank" rel="noreferrer"
-                  style={{ display: "block", fontSize: 11, color: "#1a9e5f", marginTop: 4, textDecoration: "underline" }}>
+                  style={{ display: "block", fontSize: 11, color: palette.brandDeep, marginTop: 4, textDecoration: "underline" }}>
                   Balance still 0? Claim manually here →
                 </a>
               </div>
@@ -768,38 +768,38 @@ export default function MediPay() {
             <div style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               <a href="https://faucet.circle.com" target="_blank" rel="noreferrer"
                 style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700,
-                  color: "#1a9e5f", background: "#1a9e5f18", border: "0.5px solid #1a9e5f44",
+                  color: palette.brandDeep, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)",
                   borderRadius: 8, padding: "7px 14px", textDecoration: "none" }}>
                 💧 Get Free Test USDC (Public Faucet)
               </a>
-              <span style={{ fontSize: 11, color: "#6b7280" }}>Paste your wallet address above at the faucet</span>
+              <span style={{ fontSize: 11, color: palette.muted }}>Paste your wallet address above at the faucet</span>
             </div>
-            <div style={{ marginTop: 8, fontSize: 10, color: "#6b7280" }}>Wallet ID: {walletId || "--"}</div>
+            <div style={{ marginTop: 8, fontSize: 10, color: palette.muted }}>Wallet ID: {walletId || "--"}</div>
           </div>
           <SL t="Profile Details" />
           <div style={s.card}>
             {[["Home Hospital", hospital?.id + " · " + hospital?.state], ["Email", user?.email || form.email || "--"], ["Phone", user?.phone || form.phone || "--"], ["Date of Birth", user?.dob || form.dob || "--"], ["Blood Group", user?.bloodGroup || form.bloodGroup || "--"], ["Genotype", user?.genotype || form.genotype || "--"], ["State", user?.state || form.state || "--"], ["Network", "ARC-TESTNET (Circle)"]].map(([k, v]) => v && (
-              <div key={k} style={s.profRow}><span style={{ fontSize: 13, color: "#9ca3af" }}>{k}</span><span style={{ fontSize: 13, color: "#e5e7eb", fontWeight: 500, textAlign: "right", wordBreak: "break-word" }}>{v}</span></div>
+              <div key={k} style={s.profRow}><span style={{ fontSize: 13, color: palette.textSoft }}>{k}</span><span style={{ fontSize: 13, color: palette.text, fontWeight: 500, textAlign: "right", wordBreak: "break-word" }}>{v}</span></div>
             ))}
           </div>
           <div style={{ marginTop: 22 }}>
             <SL t="Hospital Access" />
-            <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.6, marginBottom: 14 }}>Moved to a new state? Link your records to another hospital. Your file number and Circle wallet remain unchanged.</p>
+            <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 14 }}>Moved to a new state? Link your records to another hospital. Your file number and Circle wallet remain unchanged.</p>
             <button style={s.transferBtn} onClick={() => { setShowTrf(true); setTrfDone(false); setTrfTarget(""); }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: "#1a9e5f22", border: "1px solid #1a9e5f44", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🔗</div>
-                <div><div style={{ fontSize: 15, fontWeight: 700, color: "#e5e7eb" }}>Link to Another Hospital</div><div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2 }}>Currently linked to {linked.length} hospital{linked.length !== 1 ? "s" : ""}</div></div>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🔗</div>
+                <div><div style={{ fontSize: 15, fontWeight: 700, color: palette.text }}>Link to Another Hospital</div><div style={{ fontSize: 12, color: palette.textSoft, marginTop: 2 }}>Currently linked to {linked.length} hospital{linked.length !== 1 ? "s" : ""}</div></div>
               </div>
-              <span style={{ color: "#1a9e5f", fontSize: 22 }}>›</span>
+              <span style={{ color: palette.brandDeep, fontSize: 22 }}>›</span>
             </button>
           </div>
           <div style={{ ...s.globalCard, marginTop: 20 }}>
             <div style={s.globalGlow} />
             <div style={{ position: "relative", zIndex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <span style={{ fontSize: 22 }}>🌍</span><span style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>International Use</span><span style={s.comingSoonBadge}>Coming Soon</span>
+                <span style={{ fontSize: 22 }}>🌍</span><span style={{ fontSize: 15, fontWeight: 700, color: palette.text }}>International Use</span><span style={s.comingSoonBadge}>Coming Soon</span>
               </div>
-              <p style={{ fontSize: 12, color: "#9ca3af", lineHeight: 1.6 }}>Your MediPay wallet will work in Ghana, Kenya, South Africa and beyond.</p>
+              <p style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.6 }}>Your MediPay wallet will work in Ghana, Kenya, South Africa and beyond.</p>
             </div>
           </div>
           <button style={s.signOutBtn} onClick={() => { setUser(null); resetForm(); setFileNo(""); setWalletId(""); setWalletAddr(""); setUsdcBal(null); setFaucetSent(false); setHistory([]); setLinked([]); setScreen("landing"); }}>Sign Out</button>
@@ -810,10 +810,10 @@ export default function MediPay() {
         <Mdl onClose={() => setShowTrf(false)}>
           {!trfDone ? (
             <div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 6 }}>Link Records to New Hospital</div>
-              <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.6, marginBottom: 14 }}>Your file <strong style={{ color: "#1a9e5f" }}>{fileNo}</strong> and payment history will be accessible at the new hospital.</p>
+              <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 6 }}>Link Records to New Hospital</div>
+              <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 14 }}>Your file <strong style={{ color: palette.brandDeep }}>{fileNo}</strong> and payment history will be accessible at the new hospital.</p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
-                {linked.map(h => <span key={h.id} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 100, background: "#1a9e5f22", border: "0.5px solid #1a9e5f44", color: "#1a9e5f", fontWeight: 600 }}>✓ {h.id}</span>)}
+                {linked.map(h => <span key={h.id} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, fontWeight: 600 }}>✓ {h.id}</span>)}
               </div>
               <L t="Select hospital to link" />
               <div style={{ position: "relative", marginBottom: 16 }}>
@@ -822,9 +822,9 @@ export default function MediPay() {
                 </button>
                 {trfDrop && (
                   <div style={s.dropMenu}>
-                    {availTrf.length === 0 ? <div style={{ padding: 14, color: "#6b7280", textAlign: "center", fontSize: 13 }}>All hospitals already linked</div> : availTrf.map(h => (
+                    {availTrf.length === 0 ? <div style={{ padding: 14, color: palette.muted, textAlign: "center", fontSize: 13 }}>All hospitals already linked</div> : availTrf.map(h => (
                       <button key={h.id} style={s.dropItem} onClick={() => { setTrfTarget(h.id); setTrfDrop(false); }}>
-                        <strong style={{ color: "#1a9e5f", minWidth: 56 }}>{h.id}</strong><span style={{ flex: 1, fontSize: 12 }}>{h.full}</span><span style={{ fontSize: 11, color: "#6b7280" }}>{h.state}</span>
+                        <strong style={{ color: palette.brandDeep, minWidth: 56 }}>{h.id}</strong><span style={{ flex: 1, fontSize: 12 }}>{h.full}</span><span style={{ fontSize: 11, color: palette.muted }}>{h.state}</span>
                       </button>
                     ))}
                   </div>
@@ -839,8 +839,8 @@ export default function MediPay() {
           ) : (
             <div style={{ textAlign: "center", padding: "12px 0" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 8 }}>Records Linked!</div>
-              <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.6, marginBottom: 20 }}>Records now accessible at <strong style={{ color: "#1a9e5f" }}>{HOSPITALS.find(h => h.id === trfTarget)?.id}</strong>. Quote file <strong style={{ color: "#1a9e5f" }}>{fileNo}</strong>.</p>
+              <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 8 }}>Records Linked!</div>
+              <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 20 }}>Records now accessible at <strong style={{ color: palette.brandDeep }}>{HOSPITALS.find(h => h.id === trfTarget)?.id}</strong>. Quote file <strong style={{ color: palette.brandDeep }}>{fileNo}</strong>.</p>
               <GBtn onClick={() => setShowTrf(false)}>Done ✓</GBtn>
             </div>
           )}
@@ -849,17 +849,17 @@ export default function MediPay() {
 
       {showPayLink && (
         <Mdl onClose={() => setShowPayLink(false)}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 6 }}>🔗 Payment Link Created</div>
-          <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.6, marginBottom: 16 }}>Share this with a family member. It appears in your History as Pending until payment is completed.</p>
-          <div style={{ background: "#0d1117", border: "1px solid #1a9e5f33", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
-            <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 6 }}>Payment details</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#e5e7eb", marginBottom: 4 }}>{payitem}</div>
-            <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 2 }}>Hospital: {hospital?.id}</div>
-            <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 8 }}>File No: {fileNo}</div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: "#1a9e5f" }}>{fmt(payprice)}</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 6 }}>🔗 Payment Link Created</div>
+          <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 16 }}>Share this with a family member. It appears in your History as Pending until payment is completed.</p>
+          <div style={{ background: "#f5fbfd", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
+            <div style={{ fontSize: 12, color: palette.muted, marginBottom: 6 }}>Payment details</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: palette.text, marginBottom: 4 }}>{payitem}</div>
+            <div style={{ fontSize: 12, color: palette.textSoft, marginBottom: 2 }}>Hospital: {hospital?.id}</div>
+            <div style={{ fontSize: 12, color: palette.textSoft, marginBottom: 8 }}>File No: {fileNo}</div>
+            <div style={{ fontSize: 24, fontWeight: 900, color: palette.brandDeep }}>{fmt(payprice)}</div>
           </div>
-          <div style={{ background: "#0d1117", border: "0.5px solid #374151", borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 11, fontFamily: "monospace", color: "#9ca3af", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{payLink}</span>
+          <div style={{ background: "#f5fbfd", border: "1px solid " + palette.lineStrong, borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 11, fontFamily: "monospace", color: palette.textSoft, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{payLink}</span>
             <button style={s.refBtn} onClick={copyPayLink}>{payLinkCopied ? "✓ Copied" : "Copy"}</button>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -884,7 +884,7 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
         <div style={s.tbL}>
           {showNav && isMobile && <button style={s.burger} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "✕" : "☰"}</button>}
           <div style={s.logoMk}><span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>M</span></div>
-          <div><span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.5px", color: "#fff" }}>MediPay</span>{DEMO_MODE && <span style={s.demoBadge}>Demo</span>}</div>
+          <div><span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.5px", color: palette.text }}>MediPay</span>{DEMO_MODE && <span style={s.demoBadge}>Demo</span>}</div>
         </div>
         {showNav && (
           <div style={s.tbR}>
@@ -892,8 +892,8 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
               <button key={k} style={{ ...s.topBtn, ...(tab === k ? s.topBtnOn : {}) }} onClick={() => switchTab(k)}><span>{ic}</span><span>{lb}</span></button>
             ))}
             <div style={s.balChip}>
-              <span style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Balance</span>
-              <span style={{ fontSize: 14, fontWeight: 800, color: "#1a9e5f" }}>{balLoading ? "..." : usdcBal !== null ? usdcBal + " USDC" : "--"}</span>
+              <span style={{ fontSize: 10, color: palette.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Balance</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: palette.brandDeep }}>{balLoading ? "..." : usdcBal !== null ? usdcBal + " USDC" : "--"}</span>
             </div>
           </div>
         )}
@@ -906,9 +906,9 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
               {tab === k && <div style={s.dItemDot} />}
             </button>
           ))}
-          <div style={{ padding: "14px 20px", borderTop: "0.5px solid #1f2937", marginTop: 4 }}>
-            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 3 }}>File Number</div>
-            <div style={{ fontSize: 13, fontFamily: "monospace", color: "#1a9e5f", fontWeight: 600 }}>{fileNo || "--"}</div>
+          <div style={{ padding: "14px 20px", borderTop: "1px solid " + palette.line, marginTop: 4 }}>
+            <div style={{ fontSize: 11, color: palette.muted, marginBottom: 3 }}>File Number</div>
+            <div style={{ fontSize: 13, fontFamily: "monospace", color: palette.brandDeep, fontWeight: 600 }}>{fileNo || "--"}</div>
           </div>
         </div>
       )}
@@ -916,24 +916,24 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
         {showNav && !isMobile && (
           <div style={s.sidebar}>
             <div style={{ padding: "20px 12px 12px" }}>
-              <div style={{ fontSize: 10, color: "#6b7280", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 12, paddingLeft: 6 }}>Navigation</div>
+              <div style={{ fontSize: 10, color: palette.muted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 12, paddingLeft: 6 }}>Navigation</div>
               {NAV.map(([k, ic, lb]) => (
                 <button key={k} style={{ ...s.sideBtn, ...(tab === k ? s.sideBtnOn : {}) }} onClick={() => switchTab(k)}>
                   <span style={{ fontSize: 18 }}>{ic}</span><span style={{ fontSize: 14, fontWeight: tab === k ? 700 : 400 }}>{lb}</span>
-                  {tab === k && <div style={{ marginLeft: "auto", width: 4, height: 20, borderRadius: 2, background: "#1a9e5f" }} />}
+                  {tab === k && <div style={{ marginLeft: "auto", width: 4, height: 20, borderRadius: 2, background: palette.brand }} />}
                 </button>
               ))}
             </div>
             <div style={s.sidefoot}>
-              <div style={{ fontSize: 10, color: "#6b7280", marginBottom: 4, fontWeight: 600 }}>Circle Wallet</div>
-              <div style={{ fontSize: 10, fontFamily: "monospace", color: "#1a9e5f", wordBreak: "break-all", marginBottom: 4 }}>{walletAddr ? walletAddr.slice(0, 22) + "..." : "--"}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: "#1a9e5f" }} /><span style={{ fontSize: 10, color: "#6b7280" }}>ARC-TESTNET</span></div>
+              <div style={{ fontSize: 10, color: palette.muted, marginBottom: 4, fontWeight: 600 }}>Circle Wallet</div>
+              <div style={{ fontSize: 10, fontFamily: "monospace", color: palette.brandDeep, wordBreak: "break-all", marginBottom: 4 }}>{walletAddr ? walletAddr.slice(0, 22) + "..." : "--"}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: palette.brand }} /><span style={{ fontSize: 10, color: palette.muted }}>ARC-TESTNET</span></div>
             </div>
           </div>
         )}
         <div style={{ flex: 1, minWidth: 0, marginLeft: showNav && !isMobile ? 220 : 0 }}>{children}</div>
       </div>
-      {toast.msg && <div style={{ ...s.toast, ...(toast.type === "err" ? { background: "#dc2626" } : {}) }}>{toast.msg}</div>}
+      {toast.msg && <div style={{ ...s.toast, ...(toast.type === "err" ? { background: palette.danger } : {}) }}>{toast.msg}</div>}
     </div>
   );
 }
@@ -942,131 +942,167 @@ const CopyBtn = ({ text }) => {
   const [copied, setCopied] = React.useState(false);
   const copy = () => { if (!text) return; navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); };
   return (
-    <button onClick={copy} style={{ flexShrink: 0, background: copied ? "#1a9e5f22" : "#111827", border: "0.5px solid " + (copied ? "#1a9e5f" : "#374151"), borderRadius: 8, padding: "8px 12px", fontSize: 12, color: copied ? "#1a9e5f" : "#9ca3af", cursor: "pointer", fontFamily: "inherit", fontWeight: 600, whiteSpace: "nowrap", transition: "all .2s" }}>
+    <button onClick={copy} style={{ flexShrink: 0, background: copied ? palette.mint : "#fff", border: "1px solid " + (copied ? "rgba(63,183,163,0.30)" : palette.lineStrong), borderRadius: 12, padding: "8px 12px", fontSize: 12, color: copied ? palette.brandDeep : palette.textSoft, cursor: "pointer", fontFamily: "inherit", fontWeight: 600, whiteSpace: "nowrap", transition: "all .2s" }}>
       {copied ? "✓ Copied" : "Copy"}
     </button>
   );
 };
 const PBar = ({ title, onBack }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: "0.5px solid #1f2937", position: "sticky", top: 0, background: "#0d1117", zIndex: 20 }}>
-    <button style={{ background: "none", border: "none", color: "#9ca3af", fontSize: 13, cursor: "pointer", padding: "6px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6, border: "0.5px solid #374151" }} onClick={onBack}>← Back</button>
-    <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: "#e5e7eb" }}>{title}</span>
+  <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: "1px solid " + palette.line, position: "sticky", top: 0, background: "#f5fbfd", zIndex: 20 }}>
+    <button style={{ background: "none", border: "none", color: palette.textSoft, fontSize: 13, cursor: "pointer", padding: "6px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6, border: "1px solid " + palette.lineStrong }} onClick={onBack}>← Back</button>
+    <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: palette.text }}>{title}</span>
   </div>
 );
 const GBtn = ({ children, onClick, disabled, xstyle }) => (
-  <button style={{ background: disabled ? "#374151" : "linear-gradient(135deg,#1a9e5f,#0d7a47)", color: "#fff", border: "none", borderRadius: 12, padding: "14px 20px", fontSize: 14, fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginBottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, ...(xstyle || {}) }} disabled={disabled} onClick={onClick}>{children}</button>
+  <button style={{ background: disabled ? palette.lineStrong : "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff", border: "none", borderRadius: 18, padding: "14px 20px", fontSize: 14, fontWeight: 900, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginBottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: disabled ? "none" : btnShadow, ...(xstyle || {}) }} disabled={disabled} onClick={onClick}>{children}</button>
 );
 const ShareModal = ({ rec, copied, onCopy, onNative, onDownload, onClose }) => (
   <Mdl onClose={onClose}>
-    <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 10 }}>Share Receipt</div>
-    <div style={{ background: "#0d1117", border: "0.5px solid #374151", borderRadius: 10, padding: 14, fontFamily: "monospace", fontSize: 11, lineHeight: 1.9, color: "#9ca3af", marginBottom: 16, maxHeight: 200, overflowY: "auto", whiteSpace: "pre-wrap" }}>
+    <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 10 }}>Share Receipt</div>
+    <div style={{ background: "#f5fbfd", border: "1px solid " + palette.lineStrong, borderRadius: 10, padding: 14, fontFamily: "monospace", fontSize: 11, lineHeight: 1.9, color: palette.textSoft, marginBottom: 16, maxHeight: 200, overflowY: "auto", whiteSpace: "pre-wrap" }}>
       {["== MEDIPAY RECEIPT ==","Patient:  "+rec.patient,"File No:  "+rec.fileNo,"Hospital: "+(rec.hospital||""),"Category: "+rec.category,"Service:  "+rec.item,rec.note?"Note:     "+rec.note:null,"Amount:   "+("N"+Number(rec.amount).toLocaleString()),"USDC:     "+rec.usdc+" USDC","Network:  ARC-TESTNET","Date:     "+rec.date,"Tx ID:    "+rec.id,"========================","Powered by Circle on ARC Testnet"].filter(Boolean).join("\n")}
     </div>
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <button style={{ background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onCopy(rec)}>{copied ? "✓ Copied to clipboard!" : "📋 Copy Receipt Text"}</button>
-      <button style={{ background: "linear-gradient(135deg,#1565c0,#0d47a1)", color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onNative(rec)}>📤 Share via WhatsApp / SMS</button>
-      <button style={{ background: "linear-gradient(135deg,#7c3aed,#5b21b6)", color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onDownload(rec)}>⬇ Save as Image (PNG)</button>
-      <button style={{ background: "none", border: "1.5px solid #374151", color: "#9ca3af", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 600, cursor: "pointer" }} onClick={onClose}>Close</button>
+      <button style={{ background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onCopy(rec)}>{copied ? "✓ Copied to clipboard!" : "📋 Copy Receipt Text"}</button>
+      <button style={{ background: "linear-gradient(135deg,#78bff0,#5aa9e6)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onNative(rec)}>📤 Share via WhatsApp / SMS</button>
+      <button style={{ background: "linear-gradient(135deg,#aaaef4,#8f93ea)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onDownload(rec)}>⬇ Save as Image (PNG)</button>
+      <button style={{ background: "none", border: "1px solid " + palette.lineStrong, color: palette.textSoft, borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 600, cursor: "pointer" }} onClick={onClose}>Close</button>
     </div>
   </Mdl>
 );
-const L = ({ t }) => <div style={{ fontSize: 12, color: "#9ca3af", fontWeight: 600, marginBottom: 6, marginTop: 6 }}>{t}</div>;
-const SL = ({ t }) => <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: "#6b7280", marginBottom: 12 }}>{t}</div>;
-const Stp = ({ s: st }) => st ? <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#1a9e5f", padding: "10px 0", lineHeight: 1.5 }}><span style={{ animation: "spin .8s linear infinite", display: "inline-block" }}>◌</span>{st}</div> : null;
+const L = ({ t }) => <div style={{ fontSize: 12, color: palette.textSoft, fontWeight: 600, marginBottom: 6, marginTop: 6 }}>{t}</div>;
+const SL = ({ t }) => <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: palette.muted, marginBottom: 12 }}>{t}</div>;
+const Stp = ({ s: st }) => st ? <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: palette.brandDeep, padding: "10px 0", lineHeight: 1.5 }}><span style={{ animation: "spin .8s linear infinite", display: "inline-block" }}>◌</span>{st}</div> : null;
 const Mdl = ({ children, onClose }) => (
-  <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)", padding: "20px" }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-    <div style={{ background: "#111827", borderRadius: "20px", padding: "28px 24px 36px", width: "100%", maxWidth: 540, maxHeight: "85vh", overflowY: "auto", border: "0.5px solid #374151", boxShadow: "0 24px 64px rgba(0,0,0,0.8)" }}>{children}</div>
+  <div style={{ position: "fixed", inset: 0, background: "rgba(37,54,75,0.28)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)", padding: "20px" }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+    <div style={{ background: palette.surfaceSoft, borderRadius: "20px", padding: "28px 24px 36px", width: "100%", maxWidth: 540, maxHeight: "85vh", overflowY: "auto", border: "1px solid " + palette.lineStrong, boxShadow: "0 24px 64px rgba(80,110,140,0.22)" }}>{children}</div>
   </div>
 );
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
+const palette = {
+  bg: "#f7fbff",
+  bg2: "#eef8f5",
+  surface: "rgba(255,255,255,0.92)",
+  surfaceSoft: "#ffffff",
+  card: "rgba(255,255,255,0.86)",
+  line: "#e4edf3",
+  lineStrong: "#d8e5ee",
+  text: "#25364b",
+  textSoft: "#5f7188",
+  muted: "#8da0b5",
+  brand: "#3fb7a3",
+  brandDeep: "#198f82",
+  mint: "#dff7ef",
+  blue: "#5aa9e6",
+  blueSoft: "#e8f5ff",
+  lavender: "#8f93ea",
+  lavenderSoft: "#f0f1ff",
+  peach: "#ffb59d",
+  peachSoft: "#fff0e9",
+  yellow: "#f5c85b",
+  yellowSoft: "#fff8df",
+  danger: "#ef6b73",
+};
+
+const btnShadow = "0 14px 28px rgba(63,183,163,0.24)";
+const cardShadow = "0 18px 45px rgba(89,118,148,0.12)";
+const softShadow = "0 10px 24px rgba(89,118,148,0.10)";
+const fontStack = "Inter, ui-rounded, Nunito, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
 const s = {
-  shell: { minHeight: "100vh", background: "#0d1117", color: "#e5e7eb", fontFamily: "system-ui,-apple-system,sans-serif" },
-  topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", height: 64, borderBottom: "0.5px solid #1f2937", position: "sticky", top: 0, background: "rgba(13,17,23,0.95)", backdropFilter: "blur(12px)", zIndex: 30, gap: 12 },
-  tbL: { display: "flex", alignItems: "center", gap: 10 }, tbR: { display: "flex", alignItems: "center", gap: 8 },
-  burger: { background: "none", border: "none", color: "#e5e7eb", fontSize: 22, cursor: "pointer", padding: "4px 8px", lineHeight: 1 },
-  logoMk: { width: 38, height: 38, borderRadius: 10, background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 20px #1a9e5f44" },
-  demoBadge: { fontSize: 10, padding: "2px 8px", borderRadius: 100, background: "#451a03", border: "0.5px solid #92400e", color: "#fbbf24", marginLeft: 6 },
-  topBtn: { background: "none", border: "none", color: "#9ca3af", fontSize: 13, fontWeight: 500, cursor: "pointer", padding: "7px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6 },
-  topBtnOn: { background: "#1a9e5f18", color: "#1a9e5f", fontWeight: 700, border: "0.5px solid #1a9e5f33" },
-  balChip: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1, background: "#111827", padding: "7px 14px", borderRadius: 10, border: "0.5px solid #1f2937", flexShrink: 0 },
-  drawer: { position: "fixed", top: 64, left: 0, right: 0, background: "#111827", zIndex: 25, borderBottom: "0.5px solid #1f2937", boxShadow: "0 8px 32px rgba(0,0,0,0.8)" },
-  dItem: { width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", background: "none", border: "none", borderBottom: "0.5px solid #1f2937", color: "#9ca3af", cursor: "pointer", textAlign: "left", fontFamily: "inherit" },
-  dItemOn: { color: "#1a9e5f", background: "rgba(26,158,95,0.06)" }, dItemDot: { marginLeft: "auto", width: 8, height: 8, borderRadius: "50%", background: "#1a9e5f" },
-  sidebar: { width: 220, background: "#111827", borderRight: "0.5px solid #1f2937", position: "fixed", top: 64, bottom: 0, left: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", overflowY: "auto", zIndex: 20 },
-  sideBtn: { width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "11px 14px", background: "none", border: "none", color: "#9ca3af", cursor: "pointer", borderRadius: 8, textAlign: "left", fontFamily: "inherit", fontSize: 13, margin: "1px 0" },
-  sideBtnOn: { background: "rgba(26,158,95,0.1)", color: "#1a9e5f" }, sidefoot: { padding: "16px 14px", borderTop: "0.5px solid #1f2937" },
-  pg: { padding: "20px 24px 80px", maxWidth: 860, margin: "0 auto" },
-  landWrap: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "40px 24px", textAlign: "center", position: "relative", overflow: "hidden" },
-  landGlow1: { position: "absolute", top: "10%", left: "20%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle,rgba(26,158,95,0.12),transparent 70%)", pointerEvents: "none" },
-  landGlow2: { position: "absolute", bottom: "10%", right: "10%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(59,130,246,0.08),transparent 70%)", pointerEvents: "none" },
-  landLogo: { width: 72, height: 72, borderRadius: 20, background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, boxShadow: "0 0 40px rgba(26,158,95,0.4)" },
-  landH1: { fontSize: "clamp(28px,5vw,48px)", fontWeight: 900, lineHeight: 1.15, marginBottom: 16, letterSpacing: "-1.5px", color: "#fff" },
-  landSub: { fontSize: 16, color: "#9ca3af", lineHeight: 1.7, marginBottom: 36, maxWidth: 380 },
-  landCTA: { background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", color: "#fff", border: "none", borderRadius: 14, padding: "16px 36px", fontSize: 16, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 40, boxShadow: "0 8px 32px rgba(26,158,95,0.4)" },
-  landFeatures: { display: "flex", gap: 24, marginBottom: 40, flexWrap: "wrap", justifyContent: "center" },
-  landFeat: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
-  landStats: { display: "flex", gap: 32, padding: "20px 32px", background: "#111827", border: "0.5px solid #1f2937", borderRadius: 16, flexWrap: "wrap", justifyContent: "center" },
-  sub: { fontSize: 13, color: "#9ca3af", lineHeight: 1.6, margin: "8px 0 16px" }, hint: { fontSize: 12, color: "#6b7280", lineHeight: 1.6, marginBottom: 16 },
-  searchWrap: { display: "flex", alignItems: "center", gap: 10, background: "#111827", border: "0.5px solid #374151", borderRadius: 12, padding: "0 14px", marginBottom: 16 },
-  searchInp: { flex: 1, background: "none", border: "none", outline: "none", padding: "12px 0", fontSize: 14, color: "#e5e7eb", fontFamily: "inherit" },
-  hGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 12, paddingBottom: 20 },
-  hCard: { background: "#111827", border: "0.5px solid #1f2937", borderRadius: 14, padding: "16px 14px", cursor: "pointer", textAlign: "left" },
-  hIdBadge: { display: "inline-block", fontSize: 14, fontWeight: 800, color: "#1a9e5f", background: "#1a9e5f18", border: "0.5px solid #1a9e5f44", padding: "3px 10px", borderRadius: 6 },
-  hospBanner: { background: "linear-gradient(135deg,#0d1f14,#0d1117)", border: "1px solid #1a9e5f33", borderRadius: 14, padding: "18px 20px", margin: "10px 0 18px" },
-  authTabs: { display: "flex", gap: 4, marginBottom: 20, background: "#111827", borderRadius: 12, padding: 4, border: "0.5px solid #1f2937" },
-  authTab: { flex: 1, padding: "10px 8px", fontSize: 13, fontWeight: 600, border: "none", borderRadius: 9, background: "none", color: "#9ca3af", cursor: "pointer" },
-  authTabOn: { background: "#1a9e5f", color: "#fff" },
-  inp: { width: "100%", background: "#111827", border: "0.5px solid #374151", borderRadius: 10, padding: "13px 14px", fontSize: 14, color: "#e5e7eb", marginBottom: 14, outline: "none", fontFamily: "inherit", boxSizing: "border-box", caretColor: "#1a9e5f" },
-  socialBtn: { width: "100%", background: "#111827", border: "0.5px solid #374151", borderRadius: 12, padding: "14px", fontSize: 14, color: "#e5e7eb", cursor: "pointer", fontFamily: "inherit", textAlign: "center", fontWeight: 500 },
-  fileCard: { background: "#111827", border: "1px solid #1a9e5f33", borderRadius: 20, padding: "32px 24px", maxWidth: 480, margin: "24px auto", textAlign: "center" },
-  fileCheck: { width: 60, height: 60, borderRadius: "50%", background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, color: "#fff", margin: "0 auto 16px", boxShadow: "0 0 30px rgba(26,158,95,0.4)" },
-  fileNo: { fontSize: 28, fontWeight: 900, color: "#1a9e5f", letterSpacing: 2, marginBottom: 6, fontFamily: "monospace" },
-  walletReveal: { background: "#0d1117", border: "0.5px solid #1a9e5f44", borderRadius: 12, padding: "14px", marginBottom: 16, textAlign: "left" },
-  faucetBadge: { fontSize: 12, color: "#1a9e5f", background: "#1a9e5f15", borderRadius: 8, padding: "7px 10px", marginTop: 8 },
-  rcpCard: { background: "#111827", border: "0.5px solid #1f2937", borderRadius: 16, padding: "24px 20px", maxWidth: 520, margin: "0 auto 16px" },
-  rcpHeader: { textAlign: "center", marginBottom: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
-  rcpDash: { borderTop: "1.5px dashed #1f2937", margin: "14px 0" },
-  rcpRow: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "6px 0", borderBottom: "0.5px solid #1f293720", gap: 10 },
-  rcpTotal: { fontSize: 30, fontWeight: 900, color: "#1a9e5f", textAlign: "center", marginTop: 14, letterSpacing: "-1px" },
-  welcomeBanner: { background: "linear-gradient(135deg,#0d1f14,#0d1117,#111827)", border: "1px solid #1a9e5f33", borderRadius: 16, padding: "22px 24px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", position: "relative", overflow: "hidden" },
-  welcomeGlow: { position: "absolute", top: "-50%", right: "-10%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle,rgba(26,158,95,0.15),transparent 70%)", pointerEvents: "none" },
-  welcomeBalance: { textAlign: "right" },
-  statsRow: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 20 },
-  statBox: { background: "#111827", border: "0.5px solid #1f2937", borderRadius: 12, padding: "14px 8px", textAlign: "center" },
-  statV: { fontSize: 20, fontWeight: 800, color: "#1a9e5f" }, statL: { fontSize: 10, color: "#9ca3af", marginTop: 3 },
-  qaCard: { background: "#111827", border: "0.5px solid #1f2937", borderRadius: 14, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, textAlign: "left" },
-  qaIcon: { width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 4 },
-  linkedCard: { background: "#111827", border: "0.5px solid #1f2937", borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 },
-  linkedIcon: { width: 42, height: 42, borderRadius: 10, background: "#1a9e5f18", border: "0.5px solid #1a9e5f44", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#1a9e5f", fontSize: 11, flexShrink: 0 },
-  globalCard: { background: "linear-gradient(135deg,#0d1f29,#0d1117)", border: "1px solid #1d4ed844", borderRadius: 16, padding: "22px 24px", marginBottom: 28, position: "relative", overflow: "hidden" },
-  globalGlow: { position: "absolute", top: "-30%", right: "-10%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle,rgba(59,130,246,0.12),transparent 70%)", pointerEvents: "none" },
-  comingSoonBadge: { fontSize: 10, padding: "3px 10px", borderRadius: 100, background: "#451a03", border: "0.5px solid #92400e", color: "#fbbf24", fontWeight: 700 },
-  newsCard: { background: "#111827", border: "0.5px solid #1f2937", borderRadius: 14, padding: "16px" },
-  newsTagBadge: { fontSize: 10, padding: "3px 10px", borderRadius: 100, fontWeight: 700 },
-  tipCard: { background: "#111827", border: "0.5px solid #1f2937", borderRadius: 14, padding: "16px" },
-  card: { background: "#111827", border: "0.5px solid #1f2937", borderRadius: 14, padding: "16px" },
+  shell: {
+    minHeight: "100vh",
+    background:
+      "radial-gradient(circle at 12% 6%, rgba(117,213,194,0.30), transparent 28%), radial-gradient(circle at 92% 12%, rgba(152,183,255,0.28), transparent 30%), linear-gradient(180deg,#f8fcff 0%,#eef8f5 48%,#f8fbff 100%)",
+    color: palette.text,
+    fontFamily: fontStack,
+  },
+  topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 18px", height: 66, borderBottom: "1px solid rgba(216,229,238,0.78)", position: "sticky", top: 0, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(18px)", zIndex: 30, gap: 12, boxShadow: "0 8px 24px rgba(80,110,140,0.07)" },
+  tbL: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 }, tbR: { display: "flex", alignItems: "center", gap: 8 },
+  burger: { background: palette.surfaceSoft, border: "1px solid " + palette.line, color: palette.textSoft, fontSize: 19, cursor: "pointer", padding: "6px 10px", lineHeight: 1, borderRadius: 12, boxShadow: "0 6px 16px rgba(89,118,148,0.10)" },
+  logoMk: { width: 40, height: 40, borderRadius: 14, background: "linear-gradient(135deg,#79dbc7,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 12px 26px rgba(63,183,163,0.30)", color: palette.text },
+  demoBadge: { fontSize: 10, padding: "3px 9px", borderRadius: 100, background: palette.yellowSoft, border: "1px solid #f7df94", color: "#a66b00", marginLeft: 6, fontWeight: 800 },
+  topBtn: { background: "transparent", border: "1px solid transparent", color: palette.textSoft, fontSize: 13, fontWeight: 700, cursor: "pointer", padding: "8px 12px", borderRadius: 999, display: "flex", alignItems: "center", gap: 6, transition: "all .2s ease" },
+  topBtnOn: { background: palette.mint, color: palette.brandDeep, fontWeight: 800, border: "1px solid rgba(63,183,163,0.22)", boxShadow: "0 8px 18px rgba(63,183,163,0.12)" },
+  balChip: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1, background: "rgba(255,255,255,0.92)", padding: "8px 14px", borderRadius: 16, border: "1px solid " + palette.line, flexShrink: 0, boxShadow: softShadow },
+  drawer: { position: "fixed", top: 66, left: 10, right: 10, background: "rgba(255,255,255,0.96)", zIndex: 25, border: "1px solid " + palette.line, borderRadius: "0 0 22px 22px", boxShadow: "0 22px 50px rgba(80,110,140,0.18)", overflow: "hidden" },
+  dItem: { width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "15px 18px", background: "none", border: "none", borderBottom: "1px solid #eef3f7", color: palette.textSoft, cursor: "pointer", textAlign: "left", fontFamily: "inherit" },
+  dItemOn: { color: palette.brandDeep, background: "linear-gradient(90deg,rgba(223,247,239,0.95),rgba(255,255,255,0.5))" }, dItemDot: { marginLeft: "auto", width: 8, height: 8, borderRadius: "50%", background: palette.brand },
+  sidebar: { width: 220, background: "rgba(255,255,255,0.78)", backdropFilter: "blur(16px)", borderRight: "1px solid " + palette.line, position: "fixed", top: 66, bottom: 0, left: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", overflowY: "auto", zIndex: 20 },
+  sideBtn: { width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "none", border: "none", color: palette.textSoft, cursor: "pointer", borderRadius: 14, textAlign: "left", fontFamily: "inherit", fontSize: 13, margin: "2px 0", transition: "all .2s ease" },
+  sideBtnOn: { background: palette.mint, color: palette.brandDeep, boxShadow: "0 10px 22px rgba(63,183,163,0.13)" }, sidefoot: { padding: "16px 14px", borderTop: "1px solid " + palette.line },
+  pg: { padding: "22px 24px 80px", maxWidth: 900, margin: "0 auto" },
+  landWrap: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 66px)", padding: "42px 22px 70px", textAlign: "center", position: "relative", overflow: "hidden" },
+  landGlow1: { position: "absolute", top: "7%", left: "4%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(122,219,199,0.28),transparent 68%)", pointerEvents: "none" },
+  landGlow2: { position: "absolute", bottom: "4%", right: "4%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(150,180,255,0.24),transparent 70%)", pointerEvents: "none" },
+  landLogo: { width: 78, height: 78, borderRadius: 24, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, boxShadow: "0 18px 38px rgba(63,183,163,0.28)" },
+  landH1: { fontSize: "clamp(34px,6vw,64px)", fontWeight: 900, lineHeight: 1.04, marginBottom: 18, letterSpacing: "0", color: palette.text },
+  landSub: { fontSize: 16, color: palette.textSoft, lineHeight: 1.8, marginBottom: 34, maxWidth: 520 },
+  landCTA: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: palette.text, border: "none", borderRadius: 18, padding: "16px 34px", fontSize: 16, fontWeight: 900, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 34, boxShadow: btnShadow },
+  landFeatures: { display: "flex", gap: 14, marginBottom: 30, flexWrap: "wrap", justifyContent: "center" },
+  landFeat: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.74)", border: "1px solid " + palette.line, borderRadius: 18, padding: "12px 14px", minWidth: 92, boxShadow: "0 10px 24px rgba(89,118,148,0.08)" },
+  landStats: { display: "flex", gap: 24, padding: "18px 26px", background: "rgba(255,255,255,0.82)", border: "1px solid " + palette.line, borderRadius: 24, flexWrap: "wrap", justifyContent: "center", boxShadow: cardShadow },
+  sub: { fontSize: 14, color: palette.textSoft, lineHeight: 1.7, margin: "8px 0 18px" }, hint: { fontSize: 13, color: palette.muted, lineHeight: 1.7, marginBottom: 16 },
+  searchWrap: { display: "flex", alignItems: "center", gap: 10, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 18, padding: "0 16px", marginBottom: 18, boxShadow: softShadow },
+  searchInp: { flex: 1, background: "none", border: "none", outline: "none", padding: "14px 0", fontSize: 16, color: palette.text, fontFamily: "inherit", minWidth: 0 },
+  hGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))", gap: 14, paddingBottom: 20 },
+  hCard: { background: palette.card, border: "1px solid " + palette.line, borderRadius: 22, padding: "18px 16px", cursor: "pointer", textAlign: "left", boxShadow: softShadow, transition: "all .2s ease" },
+  hIdBadge: { display: "inline-block", fontSize: 14, fontWeight: 900, color: palette.brandDeep, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", padding: "5px 11px", borderRadius: 12 },
+  hospBanner: { background: "linear-gradient(135deg,#ffffff,#e9fbf5)", border: "1px solid rgba(63,183,163,0.20)", borderRadius: 24, padding: "20px 22px", margin: "10px 0 18px", boxShadow: cardShadow },
+  authTabs: { display: "flex", gap: 6, marginBottom: 20, background: "#eef6f8", borderRadius: 18, padding: 5, border: "1px solid " + palette.line },
+  authTab: { flex: 1, padding: "11px 8px", fontSize: 13, fontWeight: 800, border: "none", borderRadius: 14, background: "none", color: palette.textSoft, cursor: "pointer" },
+  authTabOn: { background: "#fff", color: palette.brandDeep, boxShadow: "0 8px 18px rgba(89,118,148,0.10)" },
+  inp: { width: "100%", background: "rgba(255,255,255,0.96)", border: "1px solid " + palette.lineStrong, borderRadius: 16, padding: "14px 15px", fontSize: 16, color: palette.text, marginBottom: 14, outline: "none", fontFamily: "inherit", boxSizing: "border-box", caretColor: palette.brand },
+  socialBtn: { width: "100%", background: "#fff", border: "1px solid " + palette.line, borderRadius: 18, padding: "15px", fontSize: 14, color: palette.text, cursor: "pointer", fontFamily: "inherit", textAlign: "center", fontWeight: 800, boxShadow: softShadow },
+  fileCard: { background: "rgba(255,255,255,0.92)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 30, padding: "34px 24px", maxWidth: 500, margin: "24px auto", textAlign: "center", boxShadow: cardShadow },
+  fileCheck: { width: 64, height: 64, borderRadius: "50%", background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, color: palette.text, margin: "0 auto 16px", boxShadow: "0 16px 32px rgba(63,183,163,0.26)" },
+  fileNo: { fontSize: 27, fontWeight: 900, color: palette.brandDeep, letterSpacing: 1, marginBottom: 8, fontFamily: "ui-monospace,SFMono-Regular,Menlo,monospace", wordBreak: "break-word" },
+  walletReveal: { background: "#f5fbfd", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 18, padding: "15px", marginBottom: 16, textAlign: "left" },
+  faucetBadge: { fontSize: 12, color: palette.brandDeep, background: palette.mint, borderRadius: 14, padding: "9px 11px", marginTop: 8, border: "1px solid rgba(63,183,163,0.16)" },
+  rcpCard: { background: "#fff", border: "1px solid " + palette.line, borderRadius: 26, padding: "25px 20px", maxWidth: 530, margin: "0 auto 16px", boxShadow: cardShadow },
+  rcpHeader: { textAlign: "center", marginBottom: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 },
+  rcpDash: { borderTop: "1.5px dashed #dce8ef", margin: "14px 0" },
+  rcpRow: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "8px 0", borderBottom: "1px solid #f0f5f8", gap: 10 },
+  rcpTotal: { fontSize: 31, fontWeight: 900, color: palette.brandDeep, textAlign: "center", marginTop: 14, letterSpacing: "0" },
+  welcomeBanner: { background: "linear-gradient(135deg,#ffffff 0%,#e6fbf4 62%,#edf4ff 100%)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 28, padding: "24px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", position: "relative", overflow: "hidden", boxShadow: cardShadow },
+  welcomeGlow: { position: "absolute", top: "-50%", right: "-10%", width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle,rgba(90,169,230,0.20),transparent 70%)", pointerEvents: "none" },
+  welcomeBalance: { textAlign: "right", background: "rgba(255,255,255,0.72)", border: "1px solid rgba(255,255,255,0.8)", padding: "12px 16px", borderRadius: 22 },
+  statsRow: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 },
+  statBox: { background: "rgba(255,255,255,0.88)", border: "1px solid " + palette.line, borderRadius: 20, padding: "15px 8px", textAlign: "center", boxShadow: "0 10px 24px rgba(89,118,148,0.07)" },
+  statV: { fontSize: 21, fontWeight: 900, color: palette.brandDeep }, statL: { fontSize: 11, color: palette.textSoft, marginTop: 4, fontWeight: 700 },
+  qaCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 24, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 7, textAlign: "left", boxShadow: softShadow },
+  qaIcon: { width: 48, height: 48, borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 4 },
+  linkedCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 20, padding: "15px 16px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 8px 18px rgba(89,118,148,0.06)" },
+  linkedIcon: { width: 44, height: 44, borderRadius: 16, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: palette.brandDeep, fontSize: 11, flexShrink: 0 },
+  globalCard: { background: "linear-gradient(135deg,#ffffff,#e8f5ff)", border: "1px solid rgba(90,169,230,0.20)", borderRadius: 28, padding: "22px 24px", marginBottom: 28, position: "relative", overflow: "hidden", boxShadow: cardShadow },
+  globalGlow: { position: "absolute", top: "-30%", right: "-10%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle,rgba(90,169,230,0.20),transparent 70%)", pointerEvents: "none" },
+  comingSoonBadge: { fontSize: 10, padding: "4px 10px", borderRadius: 100, background: palette.peachSoft, border: "1px solid #ffd2c2", color: "#bb5a38", fontWeight: 800 },
+  newsCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
+  newsTagBadge: { fontSize: 10, padding: "4px 10px", borderRadius: 100, fontWeight: 800 },
+  tipCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
+  card: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
   payHdr: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 10 },
-  payBal: { display: "flex", alignItems: "center", gap: 10, background: "#0d1f14", border: "0.5px solid #1a9e5f33", borderRadius: 10, padding: "8px 14px" },
-  dropBtn: { width: "100%", background: "#111827", border: "0.5px solid #374151", borderRadius: 12, padding: "13px 16px", fontSize: 14, color: "#e5e7eb", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit" },
-  dropMenu: { position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "#111827", border: "0.5px solid #374151", borderRadius: 12, zIndex: 200, maxHeight: 280, overflowY: "auto", boxShadow: "0 16px 48px rgba(0,0,0,0.8)" },
-  dropItem: { width: "100%", padding: "12px 16px", background: "none", border: "none", borderBottom: "0.5px solid #1f2937", color: "#e5e7eb", cursor: "pointer", textAlign: "left", fontSize: 13, fontFamily: "inherit", display: "flex", alignItems: "center", gap: 10 },
-  priceBox: { background: "linear-gradient(135deg,#0d1f14,#0d1117)", border: "1px solid #1a9e5f44", borderRadius: 14, padding: "20px", marginBottom: 16, textAlign: "center" },
-  histCard: { background: "#111827", border: "0.5px solid #1f2937", borderRadius: 14, padding: "16px", marginBottom: 10 },
-  statusBadge: { fontSize: 10, padding: "2px 8px", borderRadius: 100, fontWeight: 700 },
-  statusDone: { background: "#1a9e5f22", color: "#1a9e5f", border: "0.5px solid #1a9e5f44" },
-  statusPending: { background: "#f59e0b22", color: "#f59e0b", border: "0.5px solid #f59e0b44" },
-  linkBadge: { fontSize: 10, padding: "2px 8px", borderRadius: 100, background: "#3b82f622", color: "#3b82f6", border: "0.5px solid #3b82f644", fontWeight: 700 },
-  profileHero: { background: "linear-gradient(135deg,#0d1f14,#0d1117,#111827)", border: "1px solid #1a9e5f33", borderRadius: 16, padding: "24px", marginBottom: 18, position: "relative", overflow: "hidden" },
-  profileGlow: { position: "absolute", top: "-50%", right: "-10%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle,rgba(26,158,95,0.15),transparent 70%)", pointerEvents: "none" },
-  avatar: { width: 64, height: 64, borderRadius: "50%", background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: "#fff", flexShrink: 0, boxShadow: "0 0 24px rgba(26,158,95,0.4)" },
-  walletCard: { background: "linear-gradient(135deg,#0d1a14,#0d1117)", border: "1px solid #1a9e5f44", borderRadius: 16, padding: "20px", marginBottom: 20 },
-  profRow: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "12px 0", borderBottom: "0.5px solid #1f2937", gap: 10 },
-  transferBtn: { width: "100%", background: "#111827", border: "1px solid #1a9e5f33", borderRadius: 14, padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left", fontFamily: "inherit" },
-  refBtn: { background: "#1a9e5f18", border: "0.5px solid #1a9e5f44", borderRadius: 8, padding: "8px 14px", fontSize: 12, color: "#1a9e5f", cursor: "pointer", fontFamily: "inherit", fontWeight: 600, flexShrink: 0 },
-  greenBtn: { background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 14, fontWeight: 700, cursor: "pointer", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 },
-  outlineBtn: { background: "transparent", color: "#9ca3af", border: "1.5px solid #374151", borderRadius: 12, padding: "13px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 },
-  signOutBtn: { width: "100%", marginTop: 22, padding: "14px", background: "transparent", border: "1.5px solid #dc2626", color: "#dc2626", borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: "pointer" },
-  empty: { textAlign: "center", color: "#6b7280", padding: "60px 0", lineHeight: 1.8 },
-  toast: { position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: "#1a9e5f", color: "#fff", padding: "12px 24px", borderRadius: 100, fontSize: 13, fontWeight: 600, zIndex: 600, whiteSpace: "nowrap", boxShadow: "0 8px 32px rgba(0,0,0,0.4)" },
+  payBal: { display: "flex", alignItems: "center", gap: 10, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", borderRadius: 18, padding: "9px 14px" },
+  dropBtn: { width: "100%", background: "#fff", border: "1px solid " + palette.lineStrong, borderRadius: 18, padding: "14px 16px", fontSize: 16, color: palette.text, cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit", boxShadow: "0 8px 18px rgba(89,118,148,0.06)" },
+  dropMenu: { position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, background: "#fff", border: "1px solid " + palette.lineStrong, borderRadius: 20, zIndex: 200, maxHeight: 290, overflowY: "auto", boxShadow: "0 22px 50px rgba(80,110,140,0.18)" },
+  dropItem: { width: "100%", padding: "13px 16px", background: "none", border: "none", borderBottom: "1px solid #eef3f7", color: palette.text, cursor: "pointer", textAlign: "left", fontSize: 14, fontFamily: "inherit", display: "flex", alignItems: "center", gap: 10 },
+  priceBox: { background: "linear-gradient(135deg,#ffffff,#e9fbf5)", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 24, padding: "22px", marginBottom: 16, textAlign: "center", boxShadow: cardShadow },
+  histCard: { background: "rgba(255,255,255,0.92)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", marginBottom: 10, boxShadow: softShadow },
+  statusBadge: { fontSize: 10, padding: "3px 8px", borderRadius: 100, fontWeight: 800, whiteSpace: "nowrap" },
+  statusDone: { background: palette.mint, color: palette.brandDeep, border: "1px solid rgba(63,183,163,0.22)" },
+  statusPending: { background: palette.yellowSoft, color: "#b17700", border: "1px solid #f4dda0" },
+  linkBadge: { fontSize: 10, padding: "3px 8px", borderRadius: 100, background: palette.blueSoft, color: "#2872b2", border: "1px solid #cde9ff", fontWeight: 800 },
+  profileHero: { background: "linear-gradient(135deg,#ffffff,#e6fbf4,#edf4ff)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 28, padding: "24px", marginBottom: 18, position: "relative", overflow: "hidden", boxShadow: cardShadow },
+  profileGlow: { position: "absolute", top: "-50%", right: "-10%", width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle,rgba(63,183,163,0.20),transparent 70%)", pointerEvents: "none" },
+  avatar: { width: 66, height: 66, borderRadius: "50%", background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 29, fontWeight: 900, color: palette.text, flexShrink: 0, boxShadow: "0 15px 30px rgba(63,183,163,0.26)" },
+  walletCard: { background: "linear-gradient(135deg,#ffffff,#edf9f5)", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 26, padding: "20px", marginBottom: 20, boxShadow: cardShadow },
+  profRow: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "12px 0", borderBottom: "1px solid #eef3f7", gap: 10 },
+  transferBtn: { width: "100%", background: "rgba(255,255,255,0.92)", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 22, padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left", fontFamily: "inherit", boxShadow: softShadow },
+  refBtn: { background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", borderRadius: 12, padding: "8px 14px", fontSize: 12, color: palette.brandDeep, cursor: "pointer", fontFamily: "inherit", fontWeight: 800, flexShrink: 0 },
+  greenBtn: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: palette.text, border: "none", borderRadius: 18, padding: "15px", fontSize: 14, fontWeight: 900, cursor: "pointer", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: btnShadow },
+  outlineBtn: { background: "#fff", color: palette.textSoft, border: "1px solid " + palette.lineStrong, borderRadius: 18, padding: "13px 16px", fontSize: 13, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "0 8px 18px rgba(89,118,148,0.07)" },
+  signOutBtn: { width: "100%", marginTop: 22, padding: "14px", background: "#fff", border: "1px solid #ffd4d8", color: palette.danger, borderRadius: 18, fontSize: 14, fontWeight: 800, cursor: "pointer", boxShadow: softShadow },
+  empty: { textAlign: "center", color: palette.muted, padding: "60px 0", lineHeight: 1.8 },
+  toast: { position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: palette.brand, color: palette.text, padding: "12px 24px", borderRadius: 100, fontSize: 13, fontWeight: 800, zIndex: 600, whiteSpace: "nowrap", boxShadow: "0 12px 32px rgba(63,183,163,0.28)" },
 };
