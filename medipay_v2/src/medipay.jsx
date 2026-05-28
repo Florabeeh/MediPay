@@ -336,28 +336,132 @@ export default function MediPay() {
     <Shell {...shellProps}>
       <div style={s.landWrap}>
         <div style={s.landGlow1} /><div style={s.landGlow2} />
-        <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={s.landLogo}><span style={{ fontSize: 32, fontWeight: 800, color: "#fff" }}>M</span></div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-            <span style={{ fontSize: 40, fontWeight: 900, letterSpacing: "-2px", color: palette.text }}>MediPay</span>
-            {DEMO_MODE && <span style={s.demoBadge}>Demo</span>}
+
+        <div style={s.landingGrid}>
+          <div style={{ ...s.heroCopy, position: "relative", zIndex: 1 }}>
+            <div style={s.heroPills}>
+              <span style={s.heroPill}>Soft healthcare UI</span>
+              <span style={s.heroPill}>Circle Programmable Wallet</span>
+              <span style={s.heroPill}>12 hospitals live</span>
+            </div>
+            <div style={s.landLogo}><span style={{ fontSize: 32, fontWeight: 800, color: "#fff" }}>M</span></div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 40, fontWeight: 900, letterSpacing: "-2px", color: palette.text }}>MediPay</span>
+              {DEMO_MODE && <span style={s.demoBadge}>Demo</span>}
+            </div>
+            <p style={{ fontSize: 13, color: palette.muted, marginBottom: 18 }}>Powered by Circle USDC on ARC Testnet</p>
+            <h1 style={s.landH1}>Healthcare payments,<br /><span style={{ color: palette.brandDeep }}>finally simple.</span></h1>
+            <p style={s.landSub}>Register once. Pay anywhere in Nigeria and beyond.<br />Your Circle Programmable Wallet goes with you.</p>
+            <button style={s.landCTA} onClick={() => setScreen("hospitals")}><span>Get Started</span><span style={{ fontSize: 18 }}>→</span></button>
+            <div style={s.landFeatures}>
+              {[["🔒", "MPC Secured"], ["⚡", "< 1s Settlement"], ["🇳🇬", "12 Hospitals"], ["💸", "USDC Native"]].map(([ic, lb]) => (
+                <div key={lb} style={s.landFeat}><span style={{ fontSize: 20 }}>{ic}</span><span style={{ fontSize: 12, color: palette.textSoft, marginTop: 4 }}>{lb}</span></div>
+              ))}
+            </div>
+            <div style={s.landStats}>
+              {[["12", "Hospitals"], ["< 1s", "Finality"], ["N0", "Fees"], ["36", "States"]].map(([v, l]) => (
+                <div key={l} style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: palette.brandDeep }}>{v}</div>
+                  <div style={{ fontSize: 11, color: palette.muted }}>{l}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <p style={{ fontSize: 13, color: palette.muted, marginBottom: 32 }}>Powered by Circle USDC on ARC Testnet</p>
-          <h1 style={s.landH1}>Healthcare payments,<br /><span style={{ color: palette.brandDeep }}>finally simple.</span></h1>
-          <p style={s.landSub}>Register once. Pay anywhere in Nigeria and beyond.<br />Your Circle Programmable Wallet goes with you.</p>
-          <button style={s.landCTA} onClick={() => setScreen("hospitals")}><span>Get Started</span><span style={{ fontSize: 18 }}>→</span></button>
-          <div style={s.landFeatures}>
-            {[["🔒", "MPC Secured"], ["⚡", "< 1s Settlement"], ["🇳🇬", "12 Hospitals"], ["💸", "USDC Native"]].map(([ic, lb]) => (
-              <div key={lb} style={s.landFeat}><span style={{ fontSize: 20 }}>{ic}</span><span style={{ fontSize: 12, color: palette.textSoft, marginTop: 4 }}>{lb}</span></div>
-            ))}
+
+          <div style={s.heroVisual}>
+            <div style={s.previewShell}>
+              <div style={s.previewTop}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: palette.textSoft }}>Live app preview</div>
+                <div style={s.previewChip}>Secure</div>
+              </div>
+              <div style={s.previewCard}>
+                <div style={s.previewRow}>
+                  <div>
+                    <div style={{ fontSize: 11, color: palette.muted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>Circle wallet</div>
+                    <div style={{ fontSize: 20, fontWeight: 900, color: palette.text }}>N 0.00</div>
+                    <div style={{ fontSize: 12, color: palette.textSoft, marginTop: 4 }}>Ready for hospital payment</div>
+                  </div>
+                  <div style={s.previewAvatar}>🫧</div>
+                </div>
+                <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.7 }}>
+                  Soft surfaces, gentle type, and blurred medical shapes — built to feel like a modern healthcare app, not a fintech dashboard.
+                </div>
+                <div style={s.miniStatGrid}>
+                  {[["12", "Hospitals"], ["<1s", "Settlement"], ["0", "Fees"], ["MPC", "Secured"]].map(([v, l]) => (
+                    <div key={l} style={s.miniStat}>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: palette.brandDeep }}>{v}</div>
+                      <div style={{ fontSize: 11, color: palette.muted }}>{l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-          <div style={s.landStats}>
-            {[["12", "Hospitals"], ["< 1s", "Finality"], ["N0", "Fees"], ["36", "States"]].map(([v, l]) => (
-              <div key={l} style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 22, fontWeight: 800, color: palette.brandDeep }}>{v}</div>
-                <div style={{ fontSize: 11, color: palette.muted }}>{l}</div>
+        </div>
+
+        <div style={s.landSection}>
+          <div style={s.sectionTitle}>How it works</div>
+          <div style={s.sectionH2}>A calm hospital payment flow, end to end.</div>
+          <div style={s.sectionLead}>The app starts with a friendly landing experience, then guides the patient into hospital selection, file registration, and payment with soft visual cues throughout.</div>
+          <div style={s.sectionGrid}>
+            {[
+              ["1", "Choose your hospital", "Search and select the hospital you are visiting, from UDUTH to LUTH and beyond."],
+              ["2", "Register or retrieve", "Create a profile or pull your existing file number in one smooth flow."],
+              ["3", "Pay and share", "Settle instantly with Circle USDC, then share a receipt or payment link."]
+            ].map(([n, t, d]) => (
+              <div key={n} style={s.stepCard}>
+                <div style={s.stepNo}>{n}</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: palette.text, marginBottom: 8 }}>{t}</div>
+                <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.8 }}>{d}</div>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div style={s.landSection}>
+          <div style={s.sectionTitle}>Why it feels soft</div>
+          <div style={s.sectionH2}>Rounded fonts, white surfaces, blurred medical objects.</div>
+          <div style={s.trustGrid}>
+            {[
+              ["🤍", "Mostly white canvas", "Bright, warm and airy rather than dark or heavy."],
+              ["🫧", "Blurred 3D health objects", "Floating capsules, crosses, DNA, and soft orbs in the background."],
+              ["✍🏽", "Rounded typography", "Nunito for the UI, Quicksand for the hero heading."],
+              ["🌿", "Muted accents", "Mint, blue, lavender and peach keep it gentle."],
+            ].map(([ic, t, d]) => (
+              <div key={t} style={s.trustCard}>
+                <div style={{ fontSize: 24, marginBottom: 10 }}>{ic}</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: palette.text, marginBottom: 8 }}>{t}</div>
+                <div style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.7 }}>{d}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={s.landSection}>
+          <div style={s.sectionTitle}>Hospital network</div>
+          <div style={s.sectionH2}>Built for real hospitals, not just a demo screen.</div>
+          <div style={s.newsGrid}>
+            {NEWS.map(n => (
+              <div key={n.title} style={s.newsCard}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
+                  <span style={{ ...s.newsTagBadge, background: n.tagColor + "22", color: n.tagColor, border: "1px solid " + n.tagColor + "33" }}>{n.tag}</span>
+                  <span style={{ fontSize: 11, color: palette.muted }}>{n.date}</span>
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: palette.text, lineHeight: 1.4, marginBottom: 8 }}>{n.title}</div>
+                <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.8 }}>{n.body}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={s.landSection}>
+          <div style={s.ctaPanel}>
+            <div style={{ maxWidth: 600 }}>
+              <div style={s.sectionTitle}>Ready to explore?</div>
+              <div style={s.sectionH2}>Start with the landing page, then enter the hospital flow.</div>
+              <div style={s.sectionLead}>This version now feels like a full healthcare product landing page, with a proper first impression before the app experience begins.</div>
+            </div>
+            <button style={{ ...s.landCTA, marginBottom: 0 }} onClick={() => setScreen("hospitals")}><span>Open MediPay</span><span style={{ fontSize: 18 }}>→</span></button>
           </div>
         </div>
       </div>
@@ -1064,6 +1168,30 @@ const s = {
   landFeatures: { display: "flex", gap: 14, marginBottom: 30, flexWrap: "wrap", justifyContent: "center" },
   landFeat: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.74)", border: "1px solid " + palette.line, borderRadius: 18, padding: "12px 14px", minWidth: 92, boxShadow: "0 10px 24px rgba(89,118,148,0.08)" },
   landStats: { display: "flex", gap: 24, padding: "18px 26px", background: "rgba(255,255,255,0.82)", border: "1px solid " + palette.line, borderRadius: 24, flexWrap: "wrap", justifyContent: "center", boxShadow: cardShadow },
+  landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 22px" },
+  sectionTitle: { fontSize: 11, fontWeight: 900, letterSpacing: ".16em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 10 },
+  sectionH2: { fontFamily: "Quicksand, Nunito, system-ui, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700 },
+  sectionLead: { fontSize: 15, color: palette.textSoft, lineHeight: 1.8, maxWidth: 760 },
+  landingGrid: { width: "100%", maxWidth: 1120, margin: "0 auto", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 22, alignItems: "center", position: "relative", zIndex: 1 },
+  heroCopy: { textAlign: "left", alignItems: "flex-start" },
+  heroPills: { display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-start", margin: "0 0 18px" },
+  heroPill: { fontSize: 12, fontWeight: 800, color: palette.brandDeep, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 999, padding: "8px 12px", boxShadow: "0 10px 20px rgba(89,118,148,0.07)" },
+  heroVisual: { width: "100%", display: "flex", justifyContent: "center" },
+  previewShell: { width: "100%", maxWidth: 420, background: "rgba(255,255,255,0.88)", border: "1px solid rgba(216,229,238,0.92)", borderRadius: 34, padding: 16, boxShadow: "0 28px 60px rgba(80,110,140,0.16)", backdropFilter: "blur(12px)" },
+  previewTop: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 },
+  previewChip: { fontSize: 11, padding: "6px 10px", borderRadius: 999, background: palette.mint, color: palette.brandDeep, fontWeight: 900 },
+  previewCard: { background: "linear-gradient(135deg,#ffffff,#eefaf7)", border: "1px solid rgba(63,183,163,0.16)", borderRadius: 28, padding: 18, textAlign: "left", boxShadow: softShadow },
+  previewRow: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12 },
+  previewAvatar: { width: 58, height: 58, borderRadius: 20, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900, color: palette.text, boxShadow: "0 14px 28px rgba(63,183,163,0.24)" },
+  miniStatGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginTop: 14 },
+  miniStat: { background: "rgba(255,255,255,0.88)", border: "1px solid " + palette.line, borderRadius: 18, padding: "12px 10px", textAlign: "center" },
+  sectionGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 20 },
+  stepCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 24, padding: 18, boxShadow: softShadow },
+  stepNo: { width: 36, height: 36, borderRadius: 14, background: palette.mint, color: palette.brandDeep, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, marginBottom: 12, border: "1px solid rgba(63,183,163,0.18)" },
+  trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginTop: 20 },
+  trustCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: 16, textAlign: "center", boxShadow: softShadow },
+  newsGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14, marginTop: 20 },
+  ctaPanel: { background: "linear-gradient(135deg,#ffffff,#e8f5ff,#edf9f5)", border: "1px solid rgba(90,169,230,0.18)", borderRadius: 28, padding: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", boxShadow: cardShadow },
   sub: { fontSize: 14, color: palette.textSoft, lineHeight: 1.7, margin: "8px 0 18px" }, hint: { fontSize: 13, color: palette.muted, lineHeight: 1.7, marginBottom: 16 },
   searchWrap: { display: "flex", alignItems: "center", gap: 10, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 18, padding: "0 16px", marginBottom: 18, boxShadow: softShadow },
   searchInp: { flex: 1, background: "none", border: "none", outline: "none", padding: "14px 0", fontSize: 16, color: palette.text, fontFamily: "inherit", minWidth: 0 },
