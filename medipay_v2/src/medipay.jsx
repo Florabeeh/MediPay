@@ -388,12 +388,12 @@ export default function MediPay() {
 
   const NAV = [["home", <Ico.HomeIcon size={18} />, "Home"], ["pay", <Ico.CardIcon size={18} />, "Pay"], ["history", <Ico.ClockIcon size={18} />, "History"], ["profile", <Ico.UserIcon size={18} />, "Profile"]];
   const switchTab = t => { setTab(t); setMenuOpen(false); };
-  const shellProps = { isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast };
+  const shellProps = { isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, setScreen };
 
   if (screen === "landing") return (
-    <Shell {...shellProps}>
+    <Shell {...shellProps} isLanding={true}>
       <div style={s.landWrap}>
-        <div style={s.landGlow1} /><div style={s.landGlow2} />
+        <div style={s.landGlow1} /><div style={s.landGlow2} /><div style={s.landGridPat} />
 
         <div style={s.landingGrid}>
           <div style={{ ...s.heroCopy, position: "relative", zIndex: 1 }}>
@@ -538,7 +538,7 @@ export default function MediPay() {
             {NEWS.map(n => (
               <div key={n.title} style={s.newsCard}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
-                  <span style={{ ...s.newsTagBadge, background: n.tagColor + "22", color: n.tagColor, border: "1px solid " + n.tagColor + "33" }}>{n.tag}</span>
+                  <span style={{ ...s.newsTagBadge, background: "rgba(63,183,163,0.10)", color: palette.brandDeep, border: "1px solid rgba(63,183,163,0.18)" }}>{n.tag}</span>
                   <span style={{ fontSize: 11, color: palette.muted }}>{n.date}</span>
                 </div>
                 <div style={{ fontSize: 16, fontWeight: 700, color: palette.text, lineHeight: 1.4, marginBottom: 8 }}>{n.title}</div>
@@ -556,6 +556,40 @@ export default function MediPay() {
               <div style={s.sectionLead}>A Circle wallet is created automatically. You get 10 USDC testnet, a portable file number, and access to instant medical payments across Nigeria.</div>
             </div>
             <button style={{ ...s.landCTA, marginBottom: 0 }} onClick={() => setScreen("hospitals")}><span>Find your hospital</span><Ico.ArrowRight size={18} /></button>
+          </div>
+        </div>
+
+        <div style={s.landingFooter}>
+          <div style={s.footerGrid}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <div style={s.logoMk}><span style={{ fontSize: 16, fontWeight: 800, color: "#fff" }}>M</span></div>
+                <span style={{ fontSize: 15, fontWeight: 700, color: palette.text }}>MediPay</span>
+              </div>
+              <p style={{ fontSize: 12, color: palette.muted, lineHeight: 1.7, maxWidth: 280 }}>Nigeria&#39;s blockchain-powered medical payment platform. Powered by Circle USDC on ARC Testnet.</p>
+            </div>
+            <div>
+              <div style={s.footerTitle}>Product</div>
+              <button style={s.footerLink} onClick={() => setScreen("hospitals")}>Find a Hospital</button>
+              <div style={s.footerLink}>How it Works</div>
+              <div style={s.footerLink}>Pricing</div>
+            </div>
+            <div>
+              <div style={s.footerTitle}>Network</div>
+              <div style={s.footerLink}>12 Hospitals</div>
+              <div style={s.footerLink}>36 States</div>
+              <div style={s.footerLink}>Circle Network</div>
+            </div>
+            <div>
+              <div style={s.footerTitle}>Company</div>
+              <div style={s.footerLink}>About</div>
+              <div style={s.footerLink}>Blog</div>
+              <div style={s.footerLink}>Contact</div>
+            </div>
+          </div>
+          <div style={s.footerBottom}>
+            <span style={{ fontSize: 11, color: palette.muted }}>&copy; 2026 MediPay. All rights reserved.</span>
+            <span style={{ fontSize: 11, color: palette.muted }}>Powered by Circle</span>
           </div>
         </div>
       </div>
@@ -787,7 +821,7 @@ export default function MediPay() {
             {NEWS.map((n, i) => (
               <div key={i} style={s.newsCard}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                  <span style={{ ...s.newsTagBadge, background: n.tagColor + "22", color: n.tagColor, border: "0.5px solid " + n.tagColor + "44" }}>{n.tag}</span>
+                  <span style={{ ...s.newsTagBadge, background: "rgba(63,183,163,0.10)", color: palette.brandDeep, border: "1px solid rgba(63,183,163,0.18)" }}>{n.tag}</span>
                   <span style={{ fontSize: 10, color: palette.muted }}>{n.date}</span>
                 </div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: palette.text, marginBottom: 6, lineHeight: 1.4 }}>{n.title}</div>
@@ -1075,7 +1109,7 @@ export default function MediPay() {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast }) {
+function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, isLanding, setScreen }) {
   return (
     <div style={s.shell}>
       <HealthObjects dense={showNav} />
@@ -1085,7 +1119,18 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
           <div style={s.logoMk}><span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>M</span></div>
           <div><span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.5px", color: palette.text }}>MediPay</span>{DEMO_MODE && <span style={s.demoBadge}>Demo</span>}</div>
         </div>
-        {showNav && (
+        {isLanding ? (
+          <div style={s.tbR}>
+            {!isMobile && [
+              ["Features", () => {}],
+              ["Hospitals", () => setScreen("hospitals")],
+              ["About", () => {}]
+            ].map(([lb, fn]) => (
+              <button key={lb} style={s.topBtn} onClick={fn}>{lb}</button>
+            ))}
+            <button style={s.landNavCta} onClick={() => setScreen("hospitals")}>Get Started <Ico.ArrowRight size={14} /></button>
+          </div>
+        ) : showNav && (
           <div style={s.tbR}>
             {!isMobile && NAV.map(([k, ic, lb]) => (
               <button key={k} style={{ ...s.topBtn, ...(tab === k ? s.topBtnOn : {}) }} onClick={() => switchTab(k)}><span>{ic}</span><span>{lb}</span></button>
@@ -1215,9 +1260,9 @@ const palette = {
   danger: "#ef6b73",
 };
 
-const btnShadow = "0 14px 28px rgba(63,183,163,0.24)";
-const cardShadow = "0 18px 45px rgba(89,118,148,0.12)";
-const softShadow = "0 10px 24px rgba(89,118,148,0.10)";
+const btnShadow = "inset 0 1px rgba(255,255,255,.7), 0 0 0 1px rgba(63,183,163,.18), 0 12px 34px rgba(63,183,163,0.22)";
+const cardShadow = "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)";
+const softShadow = "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 28px rgba(80,110,140,.08)";
 const fontStack = "'Borgen', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
 const s = {
@@ -1237,12 +1282,12 @@ const s = {
   bioBlobPeach: { background: "linear-gradient(145deg,#ffffff,#fff0e9 58%,#ffc3ad)", color: "#e98f70" },
   bioBlobLav: { background: "linear-gradient(145deg,#ffffff,#f0f1ff 58%,#b6b9ff)", color: "#8f93ea" },
   bioOrb: { position: "absolute", width: 58, height: 58, borderRadius: "50%", boxShadow: "inset 8px 10px 18px rgba(255,255,255,.85), inset -10px -12px 18px rgba(89,118,148,.13), 0 20px 42px rgba(89,118,148,.10)", opacity: .32 },
-  topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 18px", height: 66, borderBottom: "1px solid rgba(255,255,255,0.65)", position: "sticky", top: 0, background: "rgba(255,255,255,0.5)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)", zIndex: 30, gap: 12, boxShadow: "0 8px 32px rgba(80,110,140,0.06)" },
+  topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: 64, borderBottom: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, background: "rgba(255,255,255,0.75)", backdropFilter: "blur(22px) saturate(150%)", WebkitBackdropFilter: "blur(22px) saturate(150%)", zIndex: 30, gap: 12 },
   tbL: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 }, tbR: { display: "flex", alignItems: "center", gap: 8 },
   burger: { background: palette.surfaceSoft, border: "1px solid " + palette.line, color: palette.textSoft, fontSize: 19, cursor: "pointer", padding: "6px 10px", lineHeight: 1, borderRadius: 12, boxShadow: "0 6px 16px rgba(89,118,148,0.10)" },
   logoMk: { width: 40, height: 40, borderRadius: 14, background: "linear-gradient(135deg,#79dbc7,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 12px 26px rgba(63,183,163,0.30)", color: palette.text },
-  demoBadge: { fontSize: 10, padding: "3px 9px", borderRadius: 100, background: palette.yellowSoft, border: "1px solid #f7df94", color: "#a66b00", marginLeft: 6, fontWeight: 800 },
-  topBtn: { background: "transparent", border: "1px solid transparent", color: palette.textSoft, fontSize: 13, fontWeight: 700, cursor: "pointer", padding: "8px 12px", borderRadius: 999, display: "flex", alignItems: "center", gap: 6, transition: "all .2s ease" },
+  demoBadge: { fontSize: 10, padding: "3px 9px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, marginLeft: 6, fontWeight: 800 },
+  topBtn: { background: "transparent", border: "none", color: palette.textSoft, fontSize: 14, fontWeight: 500, cursor: "pointer", padding: "8px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6, transition: "all .2s ease" },
   topBtnOn: { background: palette.mint, color: palette.brandDeep, fontWeight: 800, border: "1px solid rgba(63,183,163,0.22)", boxShadow: "0 8px 18px rgba(63,183,163,0.12)" },
   balChip: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1, background: "rgba(255,255,255,0.92)", padding: "8px 14px", borderRadius: 16, border: "1px solid " + palette.line, flexShrink: 0, boxShadow: softShadow },
   drawer: { position: "fixed", top: 66, left: 10, right: 10, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(22px)", zIndex: 25, border: "1px solid rgba(255,255,255,0.65)", borderRadius: "0 0 26px 26px", boxShadow: "0 22px 50px rgba(80,110,140,0.10)", overflow: "hidden" },
@@ -1252,15 +1297,16 @@ const s = {
   sideBtn: { width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "none", border: "none", color: palette.textSoft, cursor: "pointer", borderRadius: 14, textAlign: "left", fontFamily: "inherit", fontSize: 13, margin: "2px 0", transition: "all .2s ease" },
   sideBtnOn: { background: palette.mint, color: palette.brandDeep, boxShadow: "0 10px 22px rgba(63,183,163,0.13)" }, sidefoot: { padding: "16px 14px", borderTop: "1px solid " + palette.line },
   pg: { padding: "22px 24px 80px", maxWidth: 900, margin: "0 auto" },
-  landWrap: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 66px)", padding: "42px 22px 70px", textAlign: "center", position: "relative", overflow: "hidden" },
-  landGlow1: { position: "absolute", top: "7%", left: "4%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(122,219,199,0.28),transparent 68%)", pointerEvents: "none" },
-  landGlow2: { position: "absolute", bottom: "4%", right: "4%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(150,180,255,0.24),transparent 70%)", pointerEvents: "none" },
+  landGridPat: { position: "absolute", inset: 0, pointerEvents: "none", backgroundImage: "radial-gradient(circle, rgba(63,183,163,0.08) 1px, transparent 1px)", backgroundSize: "48px 48px", maskImage: "radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%)", zIndex: 0 },
+  landWrap: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 66px)", padding: "60px 22px 100px", textAlign: "center", position: "relative", overflow: "hidden" },
+  landGlow1: { position: "absolute", top: "4%", left: "2%", width: 560, height: 480, borderRadius: "50%", background: "radial-gradient(circle,rgba(122,219,199,0.25),transparent 68%)", pointerEvents: "none", filter: "blur(40px)" },
+  landGlow2: { position: "absolute", bottom: "6%", right: "2%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(90,169,230,0.20),transparent 70%)", pointerEvents: "none", filter: "blur(40px)" },
   landLogo: { width: 78, height: 78, borderRadius: 24, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, boxShadow: "0 18px 38px rgba(63,183,163,0.28)" },
   landH1: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(34px,6vw,64px)", fontWeight: 700, lineHeight: 1.04, marginBottom: 18, letterSpacing: "-1.2px", color: palette.text },
   landSub: { fontSize: 16, color: palette.textSoft, lineHeight: 1.8, marginBottom: 34, maxWidth: 520 },
-  landCTA: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: palette.text, border: "none", borderRadius: 18, padding: "16px 34px", fontSize: 16, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 34, boxShadow: btnShadow },
+  landCTA: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff", border: "none", borderRadius: 999, padding: "14px 32px", fontSize: 15, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 34, boxShadow: btnShadow, transition: "all .2s ease", lineHeight: 1.33 },
   landFeatures: { display: "flex", gap: 14, marginBottom: 30, flexWrap: "wrap", justifyContent: "center" },
-  landFeat: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.5)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 18, padding: "12px 14px", minWidth: 92, boxShadow: "0 10px 24px rgba(89,118,148,0.08)" },
+  landFeat: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(14px) saturate(150%)", border: "1px solid rgba(63,183,163,0.12)", borderRadius: 18, padding: "14px 16px", minWidth: 96, boxShadow: "inset 0 1px rgba(255,255,255,.8), 0 0 0 1px rgba(63,183,163,.06), 0 8px 24px rgba(80,110,140,.06)" },
   landStats: { display: "flex", gap: 24, padding: "18px 26px", background: "rgba(255,255,255,0.5)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 28, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 18px 40px rgba(80,110,140,0.08)" },
   
   heroBgSection: {
@@ -1389,15 +1435,48 @@ const s = {
     zIndex: 0,
   },
 
-  landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 22px" },
+  
+  landingFooterDeco: { position: "absolute", top: -1, left: "10%", right: "10%", height: 1, background: "linear-gradient(90deg,transparent,rgba(63,183,163,0.30),transparent)", pointerEvents: "none" },
+  landingFooter: {
+    width: "100%", maxWidth: 1120, margin: "0 auto", padding: "64px 0 24px",
+    borderTop: "1px solid " + palette.line,
+    position: "relative",
+  },
+  footerGrid: {
+    display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr",
+    gap: 32, marginBottom: 40,
+  },
+  footerTitle: {
+    fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em",
+    color: palette.text, marginBottom: 14,
+  },
+  footerLink: {
+    fontSize: 13, color: palette.textSoft, lineHeight: 2.2, cursor: "pointer",
+    background: "none", border: "none", padding: 0, fontFamily: "inherit",
+    textAlign: "left", display: "block",
+  },
+  footerBottom: {
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    paddingTop: 20, borderTop: "1px solid " + palette.line,
+    flexWrap: "wrap", gap: 10,
+  },
+  landNavCta: {
+    background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff",
+    border: "none", borderRadius: 999, padding: "8px 18px",
+    fontSize: 13, fontWeight: 700, cursor: "pointer",
+    display: "flex", alignItems: "center", gap: 6,
+    fontFamily: "inherit", whiteSpace: "nowrap",
+    boxShadow: "0 8px 20px rgba(63,183,163,0.22)",
+  },
+  landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 80px" },
   landSectionNarrow: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
-  sectionTitle: { fontSize: 11, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 10 },
+  sectionTitle: { fontSize: 12, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 12 },
   sectionH2: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700, letterSpacing: "-0.6px" },
   sectionLead: { fontSize: 15, color: palette.textSoft, lineHeight: 1.8, maxWidth: 720 },
-  landingGrid: { width: "100%", maxWidth: 1120, margin: "0 auto", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 22, alignItems: "center", position: "relative", zIndex: 1 },
+  landingGrid: { width: "100%", maxWidth: 1120, margin: "0 auto 60px", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 60, alignItems: "center", position: "relative", zIndex: 1 },
   heroCopy: { textAlign: "left", alignItems: "flex-start" },
   heroPills: { display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-start", margin: "0 0 18px" },
-  heroPill: { fontSize: 12, fontWeight: 600, color: palette.brandDeep, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 999, padding: "8px 12px", boxShadow: "0 10px 20px rgba(89,118,148,0.07)" },
+  heroPill: { fontSize: 12, fontWeight: 600, color: palette.brandDeep, background: "rgba(63,183,163,0.08)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 999, padding: "8px 14px", boxShadow: "none" },
   heroVisual: { width: "100%", display: "flex", justifyContent: "center" },
   previewShell: { width: "100%", maxWidth: 420, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(18px)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 36, padding: 16, boxShadow: "0 28px 60px rgba(80,110,140,0.12), inset 0 1px 2px rgba(255,255,255,.72)" },
   previewTop: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 },
@@ -1407,13 +1486,13 @@ const s = {
   previewAvatar: { width: 58, height: 58, borderRadius: 20, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900, color: palette.text, boxShadow: "0 14px 28px rgba(63,183,163,0.24)" },
   miniStatGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginTop: 14 },
   miniStat: { background: "rgba(255,255,255,0.88)", border: "1px solid " + palette.line, borderRadius: 18, padding: "12px 10px", textAlign: "center" },
-  sectionGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginTop: 20 },
-  stepCard: { background: "linear-gradient(145deg,#ffffff 0%,#eefbf6 100%)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 24, padding: 18, boxShadow: cardShadow },
+  sectionGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 28, marginTop: 36 },
+  stepCard: { background: "linear-gradient(145deg,#ffffff 0%,#eefbf6 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 28, padding: 28, boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
   stepNo: { width: 36, height: 36, borderRadius: 14, background: palette.mint, color: palette.brandDeep, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: 12, border: "1px solid rgba(63,183,163,0.18)" },
-  trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginTop: 20 },
-  trustCard: { background: "linear-gradient(145deg,#ffffff 0%,#edf9f5 100%)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 22, padding: 16, textAlign: "center", boxShadow: cardShadow },
-  newsGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 16, marginTop: 20 },
-  ctaPanel: { background: "rgba(255,255,255,0.45)", backdropFilter: "blur(18px)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 32, padding: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", boxShadow: "0 18px 40px rgba(80,110,140,0.08)" },
+  trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 24, marginTop: 36 },
+  trustCard: { background: "linear-gradient(145deg,#ffffff 0%,#edf9f5 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 24, padding: 24, textAlign: "center", boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
+  newsGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 24, marginTop: 36 },
+  ctaPanel: { background: "linear-gradient(135deg,rgba(255,255,255,0.55),rgba(223,247,239,0.35))", backdropFilter: "blur(18px) saturate(150%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 32, padding: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap", boxShadow: "inset 0 1px rgba(255,255,255,.8), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
   sub: { fontSize: 14, color: palette.textSoft, lineHeight: 1.7, margin: "8px 0 18px" }, hint: { fontSize: 13, color: palette.muted, lineHeight: 1.7, marginBottom: 16 },
   searchWrap: { display: "flex", alignItems: "center", gap: 10, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 18, padding: "0 16px", marginBottom: 18, boxShadow: softShadow },
   searchInp: { flex: 1, background: "none", border: "none", outline: "none", padding: "14px 0", fontSize: 16, color: palette.text, fontFamily: "inherit", minWidth: 0 },
@@ -1448,7 +1527,7 @@ const s = {
   linkedIcon: { width: 44, height: 44, borderRadius: 16, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: palette.brandDeep, fontSize: 11, flexShrink: 0 },
   globalCard: { background: "linear-gradient(135deg,#ffffff,#e8f5ff)", border: "1px solid rgba(90,169,230,0.20)", borderRadius: 28, padding: "22px 24px", marginBottom: 28, position: "relative", overflow: "hidden", boxShadow: cardShadow },
   globalGlow: { position: "absolute", top: "-30%", right: "-10%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle,rgba(90,169,230,0.20),transparent 70%)", pointerEvents: "none" },
-  comingSoonBadge: { fontSize: 10, padding: "4px 10px", borderRadius: 100, background: palette.peachSoft, border: "1px solid #ffd2c2", color: "#bb5a38", fontWeight: 800 },
+  comingSoonBadge: { fontSize: 10, padding: "4px 10px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, fontWeight: 800 },
   newsCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
   newsTagBadge: { fontSize: 10, padding: "4px 10px", borderRadius: 100, fontWeight: 700 },
   tipCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
