@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { auth, db, signInWithGoogle, signInEmail, signUpEmail, logOut, getPatientRecord, savePatientRecord } from "./firebase";
+import { auth, signInWithGoogle, signInEmail, signUpEmail, logOut, getPatientRecord, savePatientRecord } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 // ─── Circle API ───────────────────────────────────────────────────────────────
@@ -7,25 +7,12 @@ const DEMO_MODE = process.env.REACT_APP_DEMO_MODE !== "false";
 const API_KEY   = process.env.REACT_APP_CIRCLE_API_KEY || "";
 const CIRCLE_API = "/circle-api";
 
-async function circlePost(path, body, apiKey) {
-  if (DEMO_MODE) { await new Promise(r => setTimeout(r, 1200)); return null; }
-  const res = await fetch(CIRCLE_API + path, { method: "POST", headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  const data = await res.json();
-  if (!res.ok) { console.error("Circle error:", data); throw new Error(data?.message || data?.error || "Circle API " + res.status); }
-  return data;
-}
 async function circleGet(path, apiKey) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 800)); return null; }
   const res = await fetch(CIRCLE_API + path, { headers: { "Authorization": "Bearer " + apiKey } });
   const data = await res.json();
   if (!res.ok) throw new Error(data?.message || "Circle API " + res.status);
   return data;
-}
-async function getCiphertext() {
-  const res = await fetch("/get-ciphertext");
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "Failed to get ciphertext");
-  return data.ciphertext;
 }
 async function createCircleWallet(refId) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 1400)); return { id: "wlt_" + Math.random().toString(36).slice(2, 14), address: "0x" + [...Array(20)].map(() => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join(""), blockchain: "ARC-TESTNET", state: "LIVE", accountType: "SCA" }; }
@@ -96,12 +83,6 @@ const HEALTH_TIPS = [
   { icon: "🧴", color: "#14b8a6", title: "Wash Your Hands",     body: "20 seconds with soap prevents diarrhoea, typhoid, and cholera — top causes of illness in West Africa." },
   { icon: "💉", color: "#f97316", title: "Vaccinate Children",  body: "Routine vaccines protect against polio, measles, yellow fever. Visit your nearest PHC." },
 ];
-const NEWS = [
-  { tag: "Launch",     tagColor: "#22c55e", title: "MediPay live across 12 Nigerian hospitals",    body: "Register once at UDUTH, LUTH, UCH, ABUTH and 8 others with a single Circle Programmable Wallet.", date: "May 2026" },
-  { tag: "Feature",    tagColor: "#3b82f6", title: "Transfer records across states instantly",      body: "Moving from Sokoto to Lagos? Your history travels with you. Just enter your file number at any MediPay hospital.", date: "May 2026" },
-  { tag: "Technology", tagColor: "#8b5cf6", title: "Powered by Circle on ARC Testnet",             body: "Every payment settles in under 1 second using Circle Nanopayments. No bank delays, no transfer fees.", date: "May 2026" },
-  { tag: "Vision",     tagColor: "#f59e0b", title: "Expanding to Ghana and Kenya by Q4 2026",      body: "After Nigeria pilot, MediPay partners with Korle-Bu Teaching Hospital Ghana and Kenyatta National Hospital Kenya.", date: "April 2026" },
-];
 const NGN_USDC  = 1650;
 const HOSP_ADDR = "0x742d35Cc6634C0532925a3b8D4C9b4AA12b5e6f4";
 const fmt   = n  => "N" + Number(n).toLocaleString();
@@ -162,7 +143,7 @@ export default function MediPay() {
   const [isMobile,  setIsMobile]  = useState(window.innerWidth < 900);
   const [showPayLink,   setShowPayLink]   = useState(false); const [payLink, setPayLink] = useState(""); const [payLinkCopied, setPayLinkCopied] = useState(false);
   const [showShareModal,setShowShareModal]= useState(false); const [shareReceipt, setShareReceipt] = useState(null); const [rcpCopied, setRcpCopied] = useState(false);
-  const [pendingLinks,  setPendingLinks]  = useState([]);
+  const [,           setPendingLinks]      = useState([]);
   // Email auth form
   const [authEmail, setAuthEmail] = useState(""); const [authPw, setAuthPw] = useState(""); const [authMode, setAuthMode] = useState("login"); const [authErr, setAuthErr] = useState("");
 
@@ -218,28 +199,6 @@ export default function MediPay() {
     setBalLoading(false);
   };
 
-  // Save full record to Firestore
-  const persistRecord = async (overrides = {}) => {
-    if (!fbUser) return;
-    const rec = {
-      uid: fbUser.uid, email: fbUser.email || femail,
-      name: form.name || user?.name || "",
-      fileNo, walletId, walletAddress: walletAddr,
-      hospitalId: hospital?.id || "",
-      linkedHospitals: linked.map(h => h.id),
-      faucetSent, history,
-      dob: form.dob || user?.dob || "",
-      phone: form.phone || user?.phone || "",
-      gender: form.gender || user?.gender || "",
-      bloodGroup: form.bloodGroup || user?.bloodGroup || "",
-      genotype: form.genotype || user?.genotype || "",
-      state: form.state || user?.state || "",
-      address: form.address || user?.address || "",
-      updatedAt: new Date().toISOString(),
-      ...overrides,
-    };
-    await savePatientRecord(fbUser.uid, rec);
-  };
 
   const setupWallet = async (refId) => {
     setStep("Creating your Circle Programmable Wallet on ARC Testnet...");
@@ -952,7 +911,7 @@ const ShareModal = ({ rec, copied, onCopy, onNative, onDownload, onClose }) => (
   <Mdl onClose={onClose}>
     <div style={{ fontSize:18,fontWeight:800,color:"#fff",marginBottom:10 }}>Share Receipt</div>
     <div style={{ background:"#0d1117",border:"0.5px solid #374151",borderRadius:10,padding:14,fontFamily:"monospace",fontSize:11,lineHeight:1.9,color:"#9ca3af",marginBottom:16,maxHeight:200,overflowY:"auto",whiteSpace:"pre-wrap" }}>
-      {["== MEDIPAY RECEIPT ==","Patient:  "+rec.patient,"File No:  "+rec.fileNo,"Hospital: "+(rec.hospital||""),"Service:  "+rec.item,"Amount:   "+("N"+Number(rec.amount).toLocaleString()),"USDC:     "+rec.usdc+" USDC","Date:     "+rec.date,"Tx ID:    "+rec.id,"========================","Powered by Circle on ARC Testnet"].join("\n")}
+      {["== MEDIPAY RECEIPT ==","Patient:  "+rec.patient,"File No:  "+rec.fileNo,"Hospital: "+(rec.hospital||""),"Service:  "+rec.item,"Amount:   "+fmt(rec.amount),"USDC:     "+rec.usdc+" USDC","Date:     "+rec.date,"Tx ID:    "+rec.id,"========================","Powered by Circle on ARC Testnet"].join("\n")}
     </div>
     <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
       <button style={{ background:"linear-gradient(135deg,#1a9e5f,#0d7a47)",color:"#fff",border:"none",borderRadius:12,padding:"13px",fontSize:14,fontWeight:700,cursor:"pointer" }} onClick={()=>onCopy(rec)}>{copied?"✓ Copied!":"📋 Copy Receipt"}</button>
