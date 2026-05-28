@@ -6,3 +6,4 @@ build/
 .env.production.local
 npm-debug.log*
 .DS_Store
+.env
