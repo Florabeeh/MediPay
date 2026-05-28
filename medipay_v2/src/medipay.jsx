@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { auth, signInWithGoogle, signInEmail, signUpEmail, getPatientRecord } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 // ─── Circle API ───────────────────────────────────────────────────────────────
 const DEMO_MODE = process.env.REACT_APP_DEMO_MODE !== "false";
@@ -234,6 +236,9 @@ Ico.Bubbles = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||18} he
 
 export default function MediPay() {
   const [screen, setScreen] = useState("landing");
+  const [fbUser, setFbUser] = useState(undefined); // undefined=loading, null=logged out
+  const [authEmail, setAuthEmail] = useState(""); const [authPw, setAuthPw] = useState(""); const [authErr, setAuthErr] = useState("");
+  const [showAuth, setShowAuth] = useState(false);
   const [hospital, setHospital] = useState(null);
   const [authMode, setAuthMode] = useState("signup");
   const [user, setUser] = useState(null);
@@ -261,6 +266,33 @@ export default function MediPay() {
     const h = () => setIsMobile(window.innerWidth < 900);
     window.addEventListener("resize", h);
     return () => window.removeEventListener("resize", h);
+  }, []);
+
+  // ── Firebase auth listener ──────────────────────────────────────────────────
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (fbU) => {
+      setFbUser(fbU);
+      if (!fbU) { setScreen("landing"); return; }
+      try {
+        const rec = await getPatientRecord(fbU.uid);
+        if (rec) {
+          setUser({ name: rec.name || "", dob: rec.dob || "", gender: rec.gender || "", phone: rec.phone || "", email: rec.email || "", address: rec.address || "", state: rec.state || "", bloodGroup: rec.bloodGroup || "", genotype: rec.genotype || "" });
+          setFileNo(rec.fileNo || ""); setWalletId(rec.walletId || ""); setWalletAddr(rec.walletAddress || "");
+          setLinked(rec.linkedHospitals?.map(id => ({ id, ...(HOSPITALS.find(h => h.id === id) || {}) })) || []);
+          setFaucetSent(rec.faucetSent || false); setHistory(rec.history || []);
+          setTab("home"); setScreen("dashboard");
+          if (rec.walletId) refreshBalance(rec.walletId);
+        } else {
+          if (fbU.email) setFemail(fbU.email);
+          setScreen("hospitals");
+        }
+      } catch(e) {
+        console.error("Firestore load error:", e);
+        setScreen("hospitals");
+      }
+    });
+    return unsub;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toast_ = (msg, type) => { setToast({ msg, type: type || "ok" }); setTimeout(() => setToast({ msg: "", type: "ok" }), 3200); };
@@ -291,6 +323,22 @@ export default function MediPay() {
   };
 
   const handleHospSelect = h => { setHospital(h); setScreen("auth"); };
+
+  const requireAuth = () => {
+    if (fbUser) { setScreen("hospitals"); }
+    else { setShowAuth(true); }
+  };
+
+  const handleFirebaseAuth = async (mode) => {
+    if (!authEmail || !authPw) { setAuthErr("Enter email and password"); return; }
+    setAuthErr(""); setLoading(true);
+    try {
+      if (mode === "login") await signInEmail(authEmail, authPw);
+      else await signUpEmail(authEmail, authPw);
+      setShowAuth(false);
+    } catch(e) { setAuthErr(e.message); }
+    setLoading(false);
+  };
 
   const handleAuth = async () => {
     setLoading(true);
@@ -389,7 +437,7 @@ export default function MediPay() {
 
   const NAV = [["home", <Ico.HomeIcon size={18} />, "Home"], ["pay", <Ico.CardIcon size={18} />, "Pay"], ["history", <Ico.ClockIcon size={18} />, "History"], ["profile", <Ico.UserIcon size={18} />, "Profile"]];
   const switchTab = t => { setTab(t); setMenuOpen(false); };
-  const shellProps = { isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, setScreen };
+  const shellProps = { isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, setScreen, onRequireAuth: requireAuth };
 
   if (screen === "landing") return (
     <Shell {...shellProps} isLanding={true}>
@@ -410,7 +458,7 @@ export default function MediPay() {
             <p style={{ fontSize: 13, color: palette.muted, marginBottom: 18 }}>Powered by Circle USDC on ARC Testnet</p>
             <h1 style={s.landH1}>Healthcare payments,<br /><span style={{ color: palette.brandDeep }}>finally simple.</span></h1>
             <p style={s.landSub}>Register once. Pay anywhere in Nigeria and beyond.<br />Your Circle Programmable Wallet goes with you.</p>
-            <button style={s.landCTA} onClick={() => setScreen("hospitals")}><span>Get Started</span><Ico.ArrowRight size={18} /></button>
+            <button style={s.landCTA} onClick={requireAuth}><span>Get Started</span><Ico.ArrowRight size={18} /></button>
             <div style={s.landFeatures}>
               {[[<Ico.Shield size={20} />, "MPC Secured"], [<Ico.Bolt size={20} />, "< 1s Settlement"], [<Ico.NGFlag size={20} />, "12 Hospitals"], [<Ico.ActivityIcon size={20} />, "USDC Native"]].map(([ic, lb]) => (
                 <div key={lb} style={s.landFeat}>{ic}<span style={{ fontSize: 12, color: palette.textSoft, marginTop: 4 }}>{lb}</span></div>
@@ -499,7 +547,7 @@ export default function MediPay() {
               <div style={s.sectionH2}>Choose your hospital and register in under 2 minutes.</div>
               <div style={s.sectionLead}>A Circle wallet is created automatically. You get 10 USDC testnet, a portable file number, and access to instant medical payments across Nigeria.</div>
             </div>
-            <button style={{ ...s.landCTA, marginBottom: 0 }} onClick={() => setScreen("hospitals")}><span>Find your hospital</span><Ico.ArrowRight size={18} /></button>
+            <button style={{ ...s.landCTA, marginBottom: 0 }} onClick={requireAuth}><span>Find your hospital</span><Ico.ArrowRight size={18} /></button>
           </div>
         </div>
 
@@ -514,7 +562,7 @@ export default function MediPay() {
             </div>
             <div>
               <div style={s.footerTitle}>Product</div>
-              <button style={s.footerLink} onClick={() => setScreen("hospitals")}>Find a Hospital</button>
+              <button style={s.footerLink} onClick={requireAuth}>Find a Hospital</button>
               <div style={s.footerLink}>How it Works</div>
               <div style={s.footerLink}>Pricing</div>
             </div>
@@ -537,6 +585,43 @@ export default function MediPay() {
           </div>
         </div>
       </div>
+
+      {/* ── Auth Modal ──────────────────────────────────────────── */}
+      {showAuth && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)", padding: 20 }} onClick={e => { if (e.target === e.currentTarget) setShowAuth(false); }}>
+          <div style={{ background: "#fff", borderRadius: 24, padding: "32px 28px", maxWidth: 400, width: "100%", boxShadow: "0 25px 60px rgba(0,0,0,0.3)" }}>
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <div style={{ width: 56, height: 56, borderRadius: 16, background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                <span style={{ fontSize: 24, fontWeight: 800, color: "#fff" }}>M</span>
+              </div>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: 0 }}>Welcome to MediPay</h2>
+              <p style={{ fontSize: 13, color: "#6b7280", marginTop: 4 }}>Sign in or create your account</p>
+            </div>
+            <div style={{ display: "flex", gap: 4, marginBottom: 20, background: "#f3f4f6", borderRadius: 10, padding: 4 }}>
+              {[["login", "Sign In"], ["signup", "Create Account"]].map(([m, l]) => (
+                <button key={m} style={{ flex: 1, padding: "9px 8px", fontSize: 13, fontWeight: 600, border: "none", borderRadius: 7, background: authMode === m ? "#1a9e5f" : "transparent", color: authMode === m ? "#fff" : "#6b7280", cursor: "pointer" }} onClick={() => { setAuthMode(m); setAuthErr(""); }}>{l}</button>
+              ))}
+            </div>
+            <button onClick={async () => { setAuthErr(""); try { await signInWithGoogle(); setShowAuth(false); } catch(e) { setAuthErr(e.message); } }}
+              style={{ width: "100%", background: "#fff", border: "1px solid #e5e7eb", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 14, color: "#111827" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              Continue with Google
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <div style={{ flex: 1, height: 1, background: "#e5e7eb" }} />
+              <span style={{ fontSize: 12, color: "#9ca3af" }}>or</span>
+              <div style={{ flex: 1, height: 1, background: "#e5e7eb" }} />
+            </div>
+            <input style={{ width: "100%", padding: "12px 14px", border: "1.5px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", marginBottom: 10, color: "#111827", background: "#f9fafb" }} placeholder="Email address" type="email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} autoComplete="email" />
+            <input style={{ width: "100%", padding: "12px 14px", border: "1.5px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", marginBottom: 12, color: "#111827", background: "#f9fafb" }} placeholder="Password" type="password" value={authPw} onChange={e => setAuthPw(e.target.value)} autoComplete={authMode === "login" ? "current-password" : "new-password"} />
+            {authErr && <div style={{ fontSize: 12, color: "#ef4444", marginBottom: 12, padding: "8px 12px", background: "#fef2f2", borderRadius: 8 }}>{authErr.replace("Firebase: ", "").replace(/\(auth\/.*\)/, "")}</div>}
+            {loading && <div style={{ fontSize: 12, color: "#1a9e5f", textAlign: "center", padding: "8px 0" }}>Processing...</div>}
+            <button onClick={() => handleFirebaseAuth(authMode)} style={{ width: "100%", background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+              {authMode === "login" ? "Sign In" : "Create Account"}
+            </button>
+          </div>
+        </div>
+      )}
     </Shell>
   );
 
@@ -1053,7 +1138,7 @@ export default function MediPay() {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, isLanding, setScreen }) {
+function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, isLanding, onRequireAuth }) {
   return (
     <div style={s.shell}>
       <HealthObjects dense={showNav} />
@@ -1066,13 +1151,13 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
         {isLanding && !isMobile && (
           <div style={s.tbC}>
             {["Features", "Hospitals", "About"].map((lb) => (
-              <button key={lb} style={s.topBtn} onClick={() => lb === "Hospitals" && setScreen("hospitals")}>{lb}</button>
+              <button key={lb} style={s.topBtn} onClick={() => lb === "Hospitals" && onRequireAuth()}>{lb}</button>
             ))}
           </div>
         )}
         {isLanding ? (
           <div style={s.tbR}>
-            {!isMobile && <button style={s.landNavCta} onClick={() => setScreen("hospitals")}>Get Started <Ico.ArrowRight size={14} /></button>}
+            {!isMobile && <button style={s.landNavCta} onClick={onRequireAuth}>Get Started <Ico.ArrowRight size={14} /></button>}
           </div>
         ) : showNav && (
           <div style={s.tbR}>
