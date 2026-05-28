@@ -86,25 +86,25 @@ const HOSPITALS = [
 ];
 
 const CATS = {
-  Surgery: { icon: "🔪", items: ["Brain Surgery", "Open Heart Surgery", "Kidney Transplant", "Liver Transplant", "Appendectomy", "Caesarean Section", "Spinal Surgery", "Hip Replacement", "Knee Replacement", "Eye Surgery (Cataract)", "Hernia Repair", "Thyroidectomy"], prices: [950000, 1200000, 2500000, 3800000, 180000, 250000, 750000, 900000, 850000, 320000, 150000, 420000] },
-  Investigations: { icon: "🧪", items: ["Full Blood Count", "Liver Function Test", "Kidney Function Test", "Malaria RDT", "HIV Screening", "Hepatitis B&C Panel", "Blood Culture", "Thyroid Function Test", "Widal Test", "Stool MCS", "Urinalysis", "Coagulation Profile"], prices: [3500, 5500, 6000, 2000, 4500, 9000, 15000, 12000, 2500, 3000, 1500, 18000] },
-  Radiology: { icon: "🩻", items: ["Chest X-Ray", "Abdominal Ultrasound", "CT Scan (Head)", "MRI Brain", "Echocardiogram", "Pelvic Ultrasound", "Mammogram", "Bone Density Scan", "Barium Meal", "Fluoroscopy", "Nuclear Medicine Scan", "PET Scan"], prices: [8000, 15000, 85000, 180000, 55000, 12000, 25000, 30000, 20000, 35000, 200000, 450000] },
-  Medication: { icon: "💊", items: ["Antimalarial Course", "Antibiotic Course", "Antihypertensive (1mo)", "Diabetic Medication (1mo)", "Chemotherapy Round", "ARV (1 month)", "Painkillers", "IV Fluids (per bag)", "Insulin (per vial)", "Anticoagulants", "Immunosuppressants", "Vitamins"], prices: [4500, 6000, 8500, 12000, 350000, 18000, 3500, 2500, 15000, 25000, 45000, 4000] },
-  Therapy: { icon: "🧠", items: ["Physiotherapy Session", "Occupational Therapy", "Speech Therapy", "Dialysis Session", "Chemotherapy Session", "Radiation Therapy", "Cardiac Rehab", "Wound Dressing", "Blood Transfusion", "IV Infusion Therapy", "Respiratory Therapy", "Hydrotherapy"], prices: [8000, 9500, 10000, 85000, 150000, 200000, 25000, 5000, 45000, 15000, 18000, 12000] },
-  Pharmacy: { icon: "🏪", items: ["Prescription Dispensing", "Over-the-Counter Meds", "Medical Consumables", "Surgical Supplies", "Formulary Drugs", "Vaccination Package", "Nebulizer Medication", "Ophthalmic Drops", "Topical Creams", "Ear/Nasal Drops", "ORS", "Asthma Inhaler"], prices: [2000, 3500, 5000, 8000, 12000, 25000, 7000, 4500, 2500, 3000, 1500, 18000] },
-  Rehabilitation: { icon: "🦽", items: ["Post-Stroke Rehab", "Post-Surgery Recovery", "Orthopedic Rehab", "Cardiac Rehab Program", "Pulmonary Rehab", "Substance Abuse Rehab", "TBI Rehab", "Spinal Cord Rehab", "Pediatric Rehab", "Geriatric Rehab", "Sports Injury Rehab", "Amputee Rehab"], prices: [45000, 35000, 40000, 55000, 50000, 80000, 120000, 100000, 30000, 35000, 25000, 65000] },
-  Procedures: { icon: "⚕️", items: ["Endoscopy", "Colonoscopy", "Bone Marrow Biopsy", "Lumbar Puncture", "Liver Biopsy", "Bronchoscopy", "Cystoscopy", "Circumcision", "Dental Extraction", "Vasectomy", "Colposcopy", "Hysteroscopy"], prices: [55000, 60000, 75000, 35000, 80000, 65000, 50000, 15000, 12000, 20000, 30000, 45000] },
+  Surgery: { icon: <Ico.ScalpelIcon size={18} />, items: ["Brain Surgery", "Open Heart Surgery", "Kidney Transplant", "Liver Transplant", "Appendectomy", "Caesarean Section", "Spinal Surgery", "Hip Replacement", "Knee Replacement", "Eye Surgery (Cataract)", "Hernia Repair", "Thyroidectomy"], prices: [950000, 1200000, 2500000, 3800000, 180000, 250000, 750000, 900000, 850000, 320000, 150000, 420000] },
+  Investigations: { icon: <Ico.MicroscopeIcon size={18} />, items: ["Full Blood Count", "Liver Function Test", "Kidney Function Test", "Malaria RDT", "HIV Screening", "Hepatitis B&C Panel", "Blood Culture", "Thyroid Function Test", "Widal Test", "Stool MCS", "Urinalysis", "Coagulation Profile"], prices: [3500, 5500, 6000, 2000, 4500, 9000, 15000, 12000, 2500, 3000, 1500, 18000] },
+  Radiology: { icon: <Ico.ActivityIcon size={18} />, items: ["Chest X-Ray", "Abdominal Ultrasound", "CT Scan (Head)", "MRI Brain", "Echocardiogram", "Pelvic Ultrasound", "Mammogram", "Bone Density Scan", "Barium Meal", "Fluoroscopy", "Nuclear Medicine Scan", "PET Scan"], prices: [8000, 15000, 85000, 180000, 55000, 12000, 25000, 30000, 20000, 35000, 200000, 450000] },
+  Medication: { icon: <Ico.PillIcon size={18} />, items: ["Antimalarial Course", "Antibiotic Course", "Antihypertensive (1mo)", "Diabetic Medication (1mo)", "Chemotherapy Round", "ARV (1 month)", "Painkillers", "IV Fluids (per bag)", "Insulin (per vial)", "Anticoagulants", "Immunosuppressants", "Vitamins"], prices: [4500, 6000, 8500, 12000, 350000, 18000, 3500, 2500, 15000, 25000, 45000, 4000] },
+  Therapy: { icon: <Ico.BrainIcon size={18} />, items: ["Physiotherapy Session", "Occupational Therapy", "Speech Therapy", "Dialysis Session", "Chemotherapy Session", "Radiation Therapy", "Cardiac Rehab", "Wound Dressing", "Blood Transfusion", "IV Infusion Therapy", "Respiratory Therapy", "Hydrotherapy"], prices: [8000, 9500, 10000, 85000, 150000, 200000, 25000, 5000, 45000, 15000, 18000, 12000] },
+  Pharmacy: { icon: <Ico.StoreIcon size={18} />, items: ["Prescription Dispensing", "Over-the-Counter Meds", "Medical Consumables", "Surgical Supplies", "Formulary Drugs", "Vaccination Package", "Nebulizer Medication", "Ophthalmic Drops", "Topical Creams", "Ear/Nasal Drops", "ORS", "Asthma Inhaler"], prices: [2000, 3500, 5000, 8000, 12000, 25000, 7000, 4500, 2500, 3000, 1500, 18000] },
+  Rehabilitation: { icon: <Ico.WheelchairIcon size={18} />, items: ["Post-Stroke Rehab", "Post-Surgery Recovery", "Orthopedic Rehab", "Cardiac Rehab Program", "Pulmonary Rehab", "Substance Abuse Rehab", "TBI Rehab", "Spinal Cord Rehab", "Pediatric Rehab", "Geriatric Rehab", "Sports Injury Rehab", "Amputee Rehab"], prices: [45000, 35000, 40000, 55000, 50000, 80000, 120000, 100000, 30000, 35000, 25000, 65000] },
+  Procedures: { icon: <Ico.HeartIcon size={18} />, items: ["Endoscopy", "Colonoscopy", "Bone Marrow Biopsy", "Lumbar Puncture", "Liver Biopsy", "Bronchoscopy", "Cystoscopy", "Circumcision", "Dental Extraction", "Vasectomy", "Colposcopy", "Hysteroscopy"], prices: [55000, 60000, 75000, 35000, 80000, 65000, 50000, 15000, 12000, 20000, 30000, 45000] },
 };
 
 const HEALTH_TIPS = [
-  { icon: "💧", color: "#0ea5e9", title: "Stay Hydrated", body: "Drink 8-12 glasses of water daily. Dehydration is a leading cause of hospital visits in Nigeria's hot climate." },
-  { icon: "🩸", color: "#ef4444", title: "Know Your Genotype", body: "Confirm genotype before marriage. SS children suffer sickle cell disease — entirely preventable with proper planning." },
-  { icon: "🍎", color: "#22c55e", title: "Eat Local Vegetables", body: "Ugwu, garden egg, and bitter leaf are rich in iron and vitamins. Include them in every meal." },
-  { icon: "🏃", color: "#b17700", title: "Exercise Daily", body: "30 minutes of walking daily reduces diabetes and hypertension risk by up to 35%." },
-  { icon: "🩺", color: "#8b5cf6", title: "Annual Check-ups", body: "Silent killers — hypertension, diabetes, cancer — show no early symptoms. A yearly check saves lives." },
-  { icon: "🌙", color: "#6366f1", title: "Sleep 7-9 Hours", body: "Poor sleep raises blood pressure and weakens immunity. Sleep at the same time each night." },
-  { icon: "🧴", color: "#14b8a6", title: "Wash Your Hands", body: "20 seconds with soap prevents diarrhoea, typhoid, and cholera — top causes of illness in West Africa." },
-  { icon: "💉", color: "#f97316", title: "Vaccinate Children", body: "Routine vaccines protect against polio, measles, yellow fever. Visit your nearest PHC." },
+  { icon: <Ico.DropIcon size={28} color="#0ea5e9" />, color: "#0ea5e9", title: "Stay Hydrated", body: "Drink 8-12 glasses of water daily. Dehydration is a leading cause of hospital visits in Nigeria's hot climate." },
+  { icon: <Ico.DropIcon size={28} color="#ef4444" />, color: "#ef4444", title: "Know Your Genotype", body: "Confirm genotype before marriage. SS children suffer sickle cell disease — entirely preventable with proper planning." },
+  { icon: <Ico.AppleIcon size={28} color="#22c55e" />, color: "#22c55e", title: "Eat Local Vegetables", body: "Ugwu, garden egg, and bitter leaf are rich in iron and vitamins. Include them in every meal." },
+  { icon: <Ico.RunIcon size={28} color="#b17700" />, color: "#b17700", title: "Exercise Daily", body: "30 minutes of walking daily reduces diabetes and hypertension risk by up to 35%." },
+  { icon: <Ico.StethoscopeIcon size={28} color="#8b5cf6" />, color: "#8b5cf6", title: "Annual Check-ups", body: "Silent killers — hypertension, diabetes, cancer — show no early symptoms. A yearly check saves lives." },
+  { icon: <Ico.MoonIcon size={28} color="#6366f1" />, color: "#6366f1", title: "Sleep 7-9 Hours", body: "Poor sleep raises blood pressure and weakens immunity. Sleep at the same time each night." },
+  { icon: <Ico.DropIcon size={28} color="#14b8a6" />, color: "#14b8a6", title: "Wash Your Hands", body: "20 seconds with soap prevents diarrhoea, typhoid, and cholera — top causes of illness in West Africa." },
+  { icon: <Ico.VaccineIcon size={28} color="#f97316" />, color: "#f97316", title: "Vaccinate Children", body: "Routine vaccines protect against polio, measles, yellow fever. Visit your nearest PHC." },
 ];
 
 const NEWS = [
@@ -174,6 +174,64 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
+// ─── Inline SVG Icons (no emoji) ───────────────────────────────────────────────
+function Ico({ svg, size = 20, color = "currentColor" }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: size, height: size }}>
+      <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        {svg}
+      </svg>
+    </span>
+  );
+}
+Ico.Bolt = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>);
+Ico.Shield = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>);
+Ico.LinkIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>);
+Ico.CardIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>);
+Ico.Globe = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>);
+Ico.HomeIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>);
+Ico.ClockIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>);
+Ico.UserIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
+Ico.MailIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>);
+Ico.SearchIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>);
+Ico.MapPin = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>);
+Ico.CheckIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2.5}><polyline points="20 6 9 17 4 12"/></svg>);
+Ico.ArrowRight = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>);
+Ico.ArrowUp = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>);
+Ico.ArrowDown = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>);
+Ico.ShareIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>);
+Ico.DownloadIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>);
+Ico.RefreshIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>);
+Ico.CloseIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>);
+Ico.MenuIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>);
+Ico.ChevronRight = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><polyline points="9 18 15 12 9 6"/></svg>);
+Ico.ChevronDown = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><polyline points="6 9 12 15 18 9"/></svg>);
+Ico.FolderIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>);
+Ico.BrainIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 2a4 4 0 014 4c0 1-.3 1.8-.9 2.5 1.5.7 2.5 2.2 2.5 3.9 0 1.6-.9 3.1-2.3 3.8.6 1 1 2.1 1 3.3a4 4 0 01-4 4"/><path d="M12 2a4 4 0 00-4 4c0 1 .3 1.8.9 2.5-1.5.7-2.5 2.2-2.5 3.9 0 1.6.9 3.1 2.3 3.8-.6 1-1 2.1-1 3.3a4 4 0 004 4"/><path d="M12 17v-7"/><line x1="9" y1="12" x2="15" y2="12"/></svg>);
+Ico.HeartIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>);
+Ico.PlusIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2.5}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>);
+Ico.CrossMark = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>);
+Ico.DropIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>);
+Ico.ActivityIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>);
+Ico.VaccineIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 22a10 10 0 100-20 10 10 0 000 20z"/><path d="M12 6v6l4 2"/></svg>);
+Ico.StoreIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>);
+Ico.MicroscopeIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M2 22h12"/><path d="M8 22V8"/><path d="M8 8c-3.3 0-6 2.7-6 6v4"/><circle cx="16" cy="16" r="6"/><path d="M16 10v12"/></svg>);
+Ico.PillIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><rect x="4" y="4" width="16" height="16" rx="8"/></svg>);
+Ico.ToothIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 22c-6 0-7-3-7-6V6c0-2 1-4 4-4 2 0 3 1 3 1s1-1 3-1c3 0 4 2 4 4v10c0 3-1 6-7 6z"/></svg>);
+Ico.WheelchairIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="16" cy="20" r="3"/><circle cx="6" cy="14" r="3"/><path d="M6 14V4h6l4 4"/><path d="M9 14v6l6-2v3"/></svg>);
+Ico.ScalpelIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 22"/></svg>);
+Ico.RunIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="13" cy="4" r="2"/><path d="M11 16l-1 5 3-3-1-5"/><path d="M7 11l3 4 2-2 4-8"/><path d="M5 22l2-4"/></svg>);
+Ico.MoonIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>);
+Ico.BroomIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M4 20l14-14"/><path d="M18 4l4 4"/><path d="M12 10l2 2"/><path d="M6 16l2 2"/></svg>);
+Ico.StethoscopeIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M4.8 2.3A.3.3 0 105 2"/><path d="M2 8V5a3 3 0 013-3h1"/><path d="M6 2h5"/><path d="M6 6h5"/><circle cx="5" cy="13" r="3"/><path d="M5 16v0a4 4 0 004-4V8"/><path d="M5 10H2v2"/></svg>);
+Ico.AppleIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 7.5C11.5 6.5 10.5 6 9.5 6s-2 .5-2.5 1.5"/><path d="M12 7.5c.5-1 1.5-1.5 2.5-1.5s2 .5 2.5 1.5"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>);
+Ico.SwapIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>);
+Ico.NGFlag = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20}><rect width="8" height="24" x="0" fill="#008751"/><rect width="8" height="24" x="16" fill="#008751"/><rect width="8" height="24" x="8" fill="#fff"/></svg>);
+Ico.ChatBubble = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>);
+Ico.ExternalLink = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>);
+Ico.Bubbles = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||18} height={size||18} fill={color||"currentColor"}><circle cx="7" cy="7" r="3" opacity=".6"/><circle cx="17" cy="9" r="2.5" opacity=".35"/><circle cx="12" cy="4" r="2" opacity=".5"/><circle cx="5" cy="16" r="2.5" opacity=".4"/><circle cx="14" cy="18" r="2" opacity=".3"/></svg>);
+
+
 export default function MediPay() {
   const [screen, setScreen] = useState("landing");
   const [hospital, setHospital] = useState(null);
@@ -328,7 +386,7 @@ export default function MediPay() {
     else { copyReceiptText(rec); toast_("Receipt copied to clipboard!"); }
   };
 
-  const NAV = [["home", "🏠", "Home"], ["pay", "💳", "Pay"], ["history", "📋", "History"], ["profile", "👤", "Profile"]];
+  const NAV = [["home", <Ico.HomeIcon size={18} />, "Home"], ["pay", <Ico.CardIcon size={18} />, "Pay"], ["history", <Ico.ClockIcon size={18} />, "History"], ["profile", <Ico.UserIcon size={18} />, "Profile"]];
   const switchTab = t => { setTab(t); setMenuOpen(false); };
   const shellProps = { isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast };
 
@@ -340,9 +398,9 @@ export default function MediPay() {
         <div style={s.landingGrid}>
           <div style={{ ...s.heroCopy, position: "relative", zIndex: 1 }}>
             <div style={s.heroPills}>
-              <span style={s.heroPill}>⚡ Instant settlements</span>
-              <span style={s.heroPill}>🏥 12 hospitals</span>
-              <span style={s.heroPill}>🔗 Share a payment link</span>
+              <span style={s.heroPill}><Ico.Bolt size={14} /> Instant settlements</span>
+              <span style={s.heroPill}><Ico.HeartIcon size={14} /> 12 hospitals</span>
+              <span style={s.heroPill}><Ico.LinkIcon size={14} /> Share a payment link</span>
             </div>
             <div style={s.landLogo}><span style={{ fontSize: 32, fontWeight: 700, color: "#fff" }}>M</span></div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
@@ -352,10 +410,10 @@ export default function MediPay() {
             <p style={{ fontSize: 13, color: palette.muted, marginBottom: 18 }}>Powered by Circle USDC on ARC Testnet</p>
             <h1 style={s.landH1}>Healthcare payments,<br /><span style={{ color: palette.brandDeep }}>finally simple.</span></h1>
             <p style={s.landSub}>Register once. Pay anywhere in Nigeria and beyond.<br />Your Circle Programmable Wallet goes with you.</p>
-            <button style={s.landCTA} onClick={() => setScreen("hospitals")}><span>Get Started</span><span style={{ fontSize: 18 }}>→</span></button>
+            <button style={s.landCTA} onClick={() => setScreen("hospitals")}><span>Get Started</span><Ico.ArrowRight size={18} /></button>
             <div style={s.landFeatures}>
-              {[["🔒", "MPC Secured"], ["⚡", "< 1s Settlement"], ["🇳🇬", "12 Hospitals"], ["💸", "USDC Native"]].map(([ic, lb]) => (
-                <div key={lb} style={s.landFeat}><span style={{ fontSize: 20 }}>{ic}</span><span style={{ fontSize: 12, color: palette.textSoft, marginTop: 4 }}>{lb}</span></div>
+              {[[<Ico.Shield size={20} />, "MPC Secured"], [<Ico.Bolt size={20} />, "< 1s Settlement"], [<Ico.NGFlag size={20} />, "12 Hospitals"], [<Ico.ActivityIcon size={20} />, "USDC Native"]].map(([ic, lb]) => (
+                <div key={lb} style={s.landFeat}>{ic}<span style={{ fontSize: 12, color: palette.textSoft, marginTop: 4 }}>{lb}</span></div>
               ))}
             </div>
             <div style={s.landStats}>
@@ -369,33 +427,53 @@ export default function MediPay() {
           </div>
 
           <div style={s.heroVisual}>
-            <div style={s.previewShell}>
-              <div style={s.previewTop}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: palette.textSoft }}>Live app preview</div>
-                <div style={s.previewChip}>Secure</div>
-              </div>
-              <div style={s.previewCard}>
-                <div style={s.previewRow}>
-                  <div>
-                    <div style={{ fontSize: 11, color: palette.muted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>Circle wallet</div>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: palette.text }}>N 0.00</div>
-                    <div style={{ fontSize: 12, color: palette.textSoft, marginTop: 4 }}>Ready for hospital payment</div>
-                  </div>
-                  <div style={s.previewAvatar}>🫧</div>
-                </div>
-                <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.7 }}>
-                  Send a payment link via WhatsApp or SMS — the patient pays instantly with Circle USDC. No app download needed, no bank delays.
-                </div>
-                <div style={s.miniStatGrid}>
-                  {[["12", "Hospitals"], ["<1s", "Settlement"], ["0", "Fees"], ["MPC", "Secured"]].map(([v, l]) => (
-                    <div key={l} style={s.miniStat}>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: palette.brandDeep }}>{v}</div>
-                      <div style={{ fontSize: 11, color: palette.muted }}>{l}</div>
+            <div style={s.phoneFrameOuter}>
+              <div style={s.phoneNotch} />
+              <div style={s.phoneScreen}>
+                <img src="/hero.png" alt="MediPay" style={s.heroImg} />
+                <div style={s.phoneOverlay} />
+                <div style={s.phoneUI}>
+                  <div style={s.phoneTopBar}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#fff" }}>9:41</span>
+                    <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                      <Ico.Bolt size={10} color="#fff" />
+                      <Ico.Bubbles size={8} color="#fff" />
                     </div>
-                  ))}
+                  </div>
+                  <div style={s.phoneContent}>
+                    <div style={s.phonePill}>
+                      <Ico.Shield size={12} color={palette.brandDeep} />
+                      <span>Circle MPC</span>
+                    </div>
+                    <div style={s.phoneAmt}>N 15,200</div>
+                    <div style={s.phoneLabel}>Wallet Balance</div>
+                    <div style={s.phoneActions}>
+                      <div style={s.phoneActBtn}>
+                        <Ico.CardIcon size={16} color={palette.text} />
+                        <span>Pay</span>
+                      </div>
+                      <div style={s.phoneActBtn}>
+                        <Ico.LinkIcon size={16} color={palette.text} />
+                        <span>Share</span>
+                      </div>
+                      <div style={s.phoneActBtn}>
+                        <Ico.ClockIcon size={16} color={palette.text} />
+                        <span>History</span>
+                      </div>
+                    </div>
+                    <div style={s.phoneHosp}>
+                      <Ico.MapPin size={12} color={palette.muted} />
+                      <span>LUTH · Lagos</span>
+                    </div>
+                    <div style={s.phoneDotGrid}>
+                      <div style={s.phoneDot} /><div style={s.phoneDot} /><div style={s.phoneDot} />
+                    </div>
+                  </div>
                 </div>
               </div>
+              <div style={s.phoneHomeBtn} />
             </div>
+            <div style={s.phoneGlow} />
           </div>
         </div>
 
@@ -405,12 +483,12 @@ export default function MediPay() {
           <div style={s.sectionLead}>MediPay replaces cash and bank transfers at hospitals with instant USDC settlement through a Circle Programmable Wallet — created automatically for every patient, no crypto knowledge needed.</div>
           <div style={s.sectionGrid}>
             {[
-              ["🔗", "Share a payment link", "Generate a one-tap payment link and send via WhatsApp or SMS. The payer clicks and settles in seconds — no app download required."],
-              ["💳", "Instant Circle Wallet", "A Circle Programmable Wallet is created on registration. MPC-secured, no seed phrase, and auto-funded with 10 USDC testnet on signup."],
-              ["🗂", "File number travels with you", "Register once at any MediPay hospital. Your file number, records, and wallet follow you across all 12 hospitals in 36 states."]
+              [<Ico.LinkIcon size={22} />, "Share a payment link", "Generate a one-tap payment link and send via WhatsApp or SMS. The payer clicks and settles in seconds — no app download required."],
+              [<Ico.CardIcon size={22} />, "Instant Circle Wallet", "A Circle Programmable Wallet is created on registration. MPC-secured, no seed phrase, and auto-funded with 10 USDC testnet on signup."],
+              [<Ico.FolderIcon size={22} />, "File number travels with you", "Register once at any MediPay hospital. Your file number, records, and wallet follow you across all 12 hospitals in 36 states."]
             ].map(([ic, t, d]) => (
               <div key={t} style={s.stepCard}>
-                <div style={{ ...s.stepNo, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.65)", width: 52, height: 52, borderRadius: 18, fontSize: 22 }}>{ic}</div>
+                <div style={{ ...s.stepNo, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.65)", width: 52, height: 52, borderRadius: 18 }}>{ic}</div>
                 <div style={{ fontSize: 17, fontWeight: 700, color: palette.text, marginBottom: 6 }}>{t}</div>
                 <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.8 }}>{d}</div>
               </div>
@@ -423,13 +501,13 @@ export default function MediPay() {
           <div style={s.sectionH2}>Instant settlement. No bank delays. No app download for the payer.</div>
           <div style={s.trustGrid}>
             {[
-              ["⚡", "< 1 second settlement", "Powered by Circle Nanopayments on ARC Testnet. No bank queues, no transfer delays."],
-              ["🔒", "MPC-secured wallets", "Multi-Party Computation means no seed phrase to lose. Your wallet is safe and recoverable."],
-              ["🇳🇬", "12 hospitals + growing", "UDUTH, LUTH, UCH, ABUTH, and 8 more across Nigeria. Expanding to Ghana and Kenya."],
-              ["📱", "Shareable payment links", "Anyone can pay a link — no app, no crypto wallet, no registration. Just tap and settle."]
+              [<Ico.Bolt size={32} />, "< 1 second settlement", "Powered by Circle Nanopayments on ARC Testnet. No bank queues, no transfer delays."],
+              [<Ico.Shield size={32} />, "MPC-secured wallets", "Multi-Party Computation means no seed phrase to lose. Your wallet is safe and recoverable."],
+              [<Ico.NGFlag size={32} />, "12 hospitals + growing", "UDUTH, LUTH, UCH, ABUTH, and 8 more across Nigeria. Expanding to Ghana and Kenya."],
+              [<Ico.LinkIcon size={32} />, "Shareable payment links", "Anyone can pay a link — no app, no crypto wallet, no registration. Just tap and settle."]
             ].map(([ic, t, d]) => (
               <div key={t} style={s.trustCard}>
-                <div style={{ fontSize: 32, width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "rgba(255,255,255,0.5)", borderRadius: 20, border: "1px solid rgba(255,255,255,0.65)", backdropFilter: "blur(8px)" }}>{ic}</div>
+                <div style={{ width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "rgba(255,255,255,0.5)", borderRadius: 20, border: "1px solid rgba(255,255,255,0.65)", backdropFilter: "blur(8px)" }}>{ic}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 16, fontWeight: 700, color: palette.text, marginBottom: 6 }}>{t}</div>
                   <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.7 }}>{d}</div>
@@ -463,7 +541,7 @@ export default function MediPay() {
               <div style={s.sectionH2}>Choose your hospital and register in under 2 minutes.</div>
               <div style={s.sectionLead}>A Circle wallet is created automatically. You get 10 USDC testnet, a portable file number, and access to instant medical payments across Nigeria.</div>
             </div>
-            <button style={{ ...s.landCTA, marginBottom: 0 }} onClick={() => setScreen("hospitals")}><span>Find your hospital</span><span style={{ fontSize: 18 }}>→</span></button>
+            <button style={{ ...s.landCTA, marginBottom: 0 }} onClick={() => setScreen("hospitals")}><span>Find your hospital</span><Ico.ArrowRight size={18} /></button>
           </div>
         </div>
       </div>
@@ -476,7 +554,7 @@ export default function MediPay() {
       <div style={s.pg}>
         <p style={s.sub}>Choose the hospital you are currently visiting.</p>
         <div style={s.searchWrap}>
-          <span style={{ fontSize: 16, color: palette.muted }}>🔍</span>
+          <Ico.SearchIcon size={16} color={palette.muted} />
           <input style={s.searchInp} placeholder="Search hospital or state..." value={searchH} onChange={e => setSearchH(e.target.value)} autoComplete="off" />
         </div>
         <div style={s.hGrid}>
@@ -484,7 +562,7 @@ export default function MediPay() {
             <button key={h.id} style={s.hCard} onClick={() => handleHospSelect(h)}>
               <div style={s.hIdBadge}>{h.id}</div>
               <div style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.4, margin: "8px 0 4px" }}>{h.full}</div>
-              <div style={{ fontSize: 11, color: palette.muted }}>📍 {h.state} State</div>
+              <div style={{ fontSize: 11, color: palette.muted, display: "flex", alignItems: "center", gap: 4 }}><Ico.MapPin size={12} color={palette.muted} /> {h.state} State</div>
             </button>
           ))}
         </div>
@@ -499,7 +577,7 @@ export default function MediPay() {
         <div style={s.hospBanner}>
           <div style={{ fontSize: 26, fontWeight: 800, color: palette.brandDeep }}>{hospital?.id}</div>
           <div style={{ fontSize: 13, color: palette.textSoft }}>{hospital?.full}</div>
-          <div style={{ fontSize: 11, color: palette.muted, marginTop: 4 }}>📍 {hospital?.state} State</div>
+          <div style={{ fontSize: 11, color: palette.muted, marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}><Ico.MapPin size={12} color={palette.muted} /> {hospital?.state} State</div>
         </div>
         <p style={s.sub}>No crypto experience needed. A Circle Programmable Wallet is created for you automatically — secured by MPC, no seed phrase.</p>
         <div style={s.authTabs}>
@@ -521,8 +599,8 @@ export default function MediPay() {
             <L t="Email address" />
             <input style={s.inp} placeholder="you@example.com" type="email" value={femail} onChange={e => setFemail(e.target.value)} autoComplete="off" />
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
-              <button style={s.socialBtn} onClick={handleAuth}>📧  Continue with Email</button>
-              <button style={s.socialBtn} onClick={handleAuth}>🇬  Continue with Google</button>
+              <button style={s.socialBtn} onClick={handleAuth}><Ico.MailIcon size={16} />  Continue with Email</button>
+              <button style={s.socialBtn} onClick={handleAuth}><Ico.Globe size={16} />  Continue with Google</button>
             </div>
             <p style={{ fontSize: 11, color: palette.muted, textAlign: "center" }}>Circle MPC-secured — no seed phrase exposed.</p>
           </div>
@@ -563,7 +641,7 @@ export default function MediPay() {
     <Shell {...shellProps}>
       <div style={s.pg}>
         <div style={s.fileCard}>
-          <div style={s.fileCheck}>✓</div>
+          <div style={s.fileCheck}><Ico.CheckIcon size={28} color="#25364b" /></div>
           <div style={{ fontSize: 13, color: palette.textSoft, marginBottom: 8 }}>Registration Successful</div>
           <div style={{ fontSize: 10, color: palette.muted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>Your MediPay File Number</div>
           <div style={s.fileNo}>{fileNo}</div>
@@ -573,7 +651,7 @@ export default function MediPay() {
             <div style={{ fontSize: 11, fontFamily: "monospace", color: palette.brandDeep, wordBreak: "break-all", marginBottom: 8 }}>{walletAddr}</div>
             {faucetSent && (
               <div style={s.faucetBadge}>
-                🎉 10 USDC auto-sent from Circle faucet!
+                <Ico.CheckIcon size={14} color={palette.brandDeep} /> 10 USDC auto-sent from Circle faucet!
                 <a href={"https://faucet.circle.com"} target="_blank" rel="noreferrer"
                   style={{ display: "block", fontSize: 11, color: palette.brandDeep, marginTop: 4, textDecoration: "underline" }}>
                   Balance not showing? Claim manually here →
@@ -598,7 +676,7 @@ export default function MediPay() {
           <div style={s.rcpHeader}>
             <div style={s.logoMk}><span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>M</span></div>
             <div style={{ fontSize: 18, fontWeight: 800, color: palette.text }}>MediPay</div>
-            <div style={{ fontSize: 13, color: palette.brandDeep, marginTop: 2 }}>✓ Payment Confirmed · ARC Testnet</div>
+            <div style={{ fontSize: 13, color: palette.brandDeep, marginTop: 2 }}><Ico.CheckIcon size={14} color={palette.brandDeep} /> Payment Confirmed · ARC Testnet</div>
           </div>
           <div style={s.rcpDash} />
           {[["Patient", receipt?.patient], ["File Number", receipt?.fileNo], ["Hospital", receipt?.hospital], ["Category", receipt?.category], ["Service", receipt?.item], ["Note", receipt?.note || "--"], ["Amount (NGN)", fmt(receipt?.amount)], ["Amount (USDC)", receipt?.usdc + " USDC"], ["Network", "ARC-TESTNET"], ["Settlement", "< 1 second (Circle MPC)"], ["Date", receipt?.date]].map(([k, v]) => v && (
@@ -611,8 +689,8 @@ export default function MediPay() {
           <p style={{ fontSize: 10, color: palette.muted, textAlign: "center", wordBreak: "break-all" }}>Tx: {receipt?.id}</p>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <button style={s.outlineBtn} onClick={() => openShareReceipt(receipt)}>⬆ Share</button>
-          <button style={s.outlineBtn} onClick={() => downloadReceiptImage(receipt)}>⬇ Save as Image</button>
+          <button style={s.outlineBtn} onClick={() => openShareReceipt(receipt)}><Ico.ShareIcon size={14} /> Share</button>
+          <button style={s.outlineBtn} onClick={() => downloadReceiptImage(receipt)}><Ico.DownloadIcon size={14} /> Save as Image</button>
           <GBtn xstyle={{ flex: 2 }} onClick={() => { setPaycat(""); setPayitem(""); setPaynote(""); setPayprice(0); setTab("pay"); setScreen("dashboard"); }}>New Payment →</GBtn>
         </div>
       </div>
@@ -644,12 +722,12 @@ export default function MediPay() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
             <button style={s.qaCard} onClick={() => switchTab("pay")}>
-              <div style={{ ...s.qaIcon, background: "linear-gradient(135deg,#dff7ef,#ecfbf6)", border: "1px solid rgba(63,183,163,0.22)" }}>💳</div>
+              <div style={{ ...s.qaIcon, background: "linear-gradient(135deg,#dff7ef,#ecfbf6)", border: "1px solid rgba(63,183,163,0.22)" }}><Ico.CardIcon size={20} /></div>
               <div style={{ fontSize: 14, fontWeight: 700, color: palette.text }}>Make Payment</div>
               <div style={{ fontSize: 12, color: palette.textSoft }}>Tests, drugs, surgery</div>
             </button>
             <button style={s.qaCard} onClick={() => switchTab("history")}>
-              <div style={{ ...s.qaIcon, background: "linear-gradient(135deg,#e8f5ff,#f0f1ff)", border: "1px solid #cde9ff" }}>📋</div>
+              <div style={{ ...s.qaIcon, background: "linear-gradient(135deg,#e8f5ff,#f0f1ff)", border: "1px solid #cde9ff" }}><Ico.ClockIcon size={20} /></div>
               <div style={{ fontSize: 14, fontWeight: 700, color: palette.text }}>History</div>
               <div style={{ fontSize: 12, color: palette.textSoft }}>{history.length} transaction{history.length !== 1 ? "s" : ""}</div>
             </button>
@@ -662,7 +740,7 @@ export default function MediPay() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: palette.text }}>{h.id}</div>
                   <div style={{ fontSize: 11, color: palette.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.full}</div>
-                  <div style={{ fontSize: 10, color: palette.muted }}>📍 {h.state} State</div>
+                  <div style={{ fontSize: 10, color: palette.muted, display: "flex", alignItems: "center", gap: 4 }}><Ico.MapPin size={10} color={palette.muted} />{h.state} State</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
                   <div style={{ width: 7, height: 7, borderRadius: "50%", background: palette.brand }} />
@@ -676,13 +754,13 @@ export default function MediPay() {
             <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <span style={{ fontSize: 22 }}>🌍</span><span style={{ fontSize: 16, fontWeight: 800, color: palette.text }}>Global MediPay</span>
+                  <Ico.Globe size={22} color={palette.text} /><span style={{ fontSize: 16, fontWeight: 800, color: palette.text }}>Global MediPay</span>
                   <span style={s.comingSoonBadge}>Coming Soon</span>
                 </div>
                 <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, maxWidth: 400 }}>Once registered in Nigeria, use MediPay in Ghana, Kenya, South Africa, UK and beyond.</p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {["🇬🇭 Ghana","🇰🇪 Kenya","🇿🇦 South Africa","🇬🇧 UK"].map(c => (
+                {["GH Ghana","KE Kenya","ZA South Africa","GB UK"].map(c => (
                   <div key={c} style={{ fontSize: 12, color: palette.textSoft, display: "flex", alignItems: "center", gap: 8 }}>
                     <div style={{ width: 6, height: 6, borderRadius: "50%", background: palette.lineStrong }} />{c} <span style={{ fontSize: 10, color: palette.muted }}>Q4 2026</span>
                   </div>
@@ -707,7 +785,7 @@ export default function MediPay() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 12, marginBottom: 24 }}>
             {HEALTH_TIPS.map((t, i) => (
               <div key={i} style={{ ...s.tipCard, borderTop: "3px solid " + t.color }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>{t.icon}</div>
+                <div style={{ marginBottom: 8 }}>{t.icon}</div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: palette.text, marginBottom: 6 }}>{t.title}</div>
                 <div style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.6 }}>{t.body}</div>
               </div>
@@ -735,7 +813,7 @@ export default function MediPay() {
               <div style={s.payBal}>
                 <span style={{ fontSize: 10, color: palette.muted }}>Balance</span>
                 <span style={{ fontSize: 15, fontWeight: 800, color: palette.brandDeep }}>{usdcBal} USDC</span>
-                <button style={{ background: "none", border: "none", color: palette.brandDeep, cursor: "pointer", fontSize: 14 }} onClick={() => refreshBalance()}>↻</button>
+                <button style={{ background: "none", border: "none", color: palette.brandDeep, cursor: "pointer", fontSize: 14 }} onClick={() => refreshBalance()}><Ico.RefreshIcon size={14} /></button>
               </div>
             )}
           </div>
@@ -743,7 +821,7 @@ export default function MediPay() {
           <div style={{ position: "relative", marginBottom: 14 }}>
             <button style={s.dropBtn} onClick={() => { setShowCat(!showCat); setShowItem(false); }}>
               <span style={{ flex: 1, textAlign: "left" }}>{paycat ? CATS[paycat].icon + "  " + paycat : "Select category..."}</span>
-              <span style={{ color: palette.muted }}>▾</span>
+              <Ico.ChevronDown size={14} color={palette.muted} />
             </button>
             {showCat && (
               <div style={s.dropMenu}>
@@ -761,7 +839,7 @@ export default function MediPay() {
               <L t={"Select " + paycat + " type"} />
               <div style={{ position: "relative", marginBottom: 14 }}>
                 <button style={s.dropBtn} onClick={() => { setShowItem(!showItem); setShowCat(false); }}>
-                  <span style={{ flex: 1, textAlign: "left" }}>{payitem || "Choose " + paycat + "..."}</span><span style={{ color: palette.muted }}>▾</span>
+                  <span style={{ flex: 1, textAlign: "left" }}>{payitem || "Choose " + paycat + "..."}</span><Ico.ChevronDown size={14} color={palette.muted} />
                 </button>
                 {showItem && (
                   <div style={s.dropMenu}>
@@ -788,7 +866,7 @@ export default function MediPay() {
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12, marginBottom: 8 }}>
             <GBtn disabled={!payitem || loading} onClick={handlePay}>{loading ? "Processing on ARC..." : payitem ? "Pay " + fmt(payprice) : "Pay"}</GBtn>
             <button style={{ ...s.outlineBtn, flexDirection: "column", gap: 2, padding: "14px 10px", opacity: !payitem ? 0.5 : 1 }} disabled={!payitem} onClick={generatePayLink}>
-              <span style={{ fontSize: 18 }}>🔗</span><span style={{ fontSize: 11, fontWeight: 600 }}>Share Link</span>
+              <Ico.LinkIcon size={18} /><span style={{ fontSize: 11, fontWeight: 600 }}>Share Link</span>
             </button>
           </div>
           <p style={{ fontSize: 11, color: palette.muted, textAlign: "center", lineHeight: 1.6 }}>Use Share Link to send a payment request to a family member.</p>
@@ -800,7 +878,7 @@ export default function MediPay() {
           <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 4 }}>Transaction History</div>
           <div style={{ fontSize: 12, color: palette.textSoft, marginBottom: 20 }}>{history.length} total · {history.filter(h => h.status === "pending").length} pending</div>
           {history.length === 0 ? (
-            <div style={s.empty}><div style={{ fontSize: 40, marginBottom: 12 }}>📋</div><div style={{ fontSize: 15, fontWeight: 600, color: palette.textSoft, marginBottom: 6 }}>No transactions yet</div><div style={{ fontSize: 13, color: palette.muted }}>Make your first payment from the Pay tab</div></div>
+            <div style={s.empty}><Ico.ClockIcon size={36} color={palette.muted} /><div style={{ marginBottom: 6 }}></div><div style={{ fontSize: 15, fontWeight: 600, color: palette.textSoft, marginBottom: 6 }}>No transactions yet</div><div style={{ fontSize: 13, color: palette.muted }}>Make your first payment from the Pay tab</div></div>
           ) : history.map(r => (
             <div key={r.id} style={{ ...s.histCard, ...(r.status === "pending" ? { borderLeft: "4px solid #f5c85b" } : { borderLeft: "4px solid #3fb7a3" }) }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
@@ -808,8 +886,8 @@ export default function MediPay() {
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                     <span style={{ fontSize: 16 }}>{CATS[r.category]?.icon}</span>
                     <span style={{ fontSize: 13, fontWeight: 700, color: palette.text }}>{r.category}</span>
-                    <span style={{ ...s.statusBadge, ...(r.status === "pending" ? s.statusPending : s.statusDone) }}>{r.status === "pending" ? "⏳ Pending" : "✓ Confirmed"}</span>
-                    {r.type === "payment_link" && <span style={s.linkBadge}>🔗 Link</span>}
+                    <span style={{ ...s.statusBadge, ...(r.status === "pending" ? s.statusPending : s.statusDone) }}>{r.status === "pending" ? "Pending" : <span><Ico.CheckIcon size={11} /> Confirmed</span>}</span>
+                    {r.type === "payment_link" && <span style={s.linkBadge}><Ico.LinkIcon size={11} /> Link</span>}
                   </div>
                   <div style={{ fontSize: 12, color: palette.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.item}</div>
                   <div style={{ fontSize: 11, color: palette.muted, marginTop: 4 }}>{r.date}</div>
@@ -821,7 +899,7 @@ export default function MediPay() {
                   <div style={{ fontSize: 15, fontWeight: 800, color: r.status === "pending" ? "#b17700" : palette.brandDeep }}>{fmt(r.amount)}</div>
                   <div style={{ fontSize: 11, color: palette.muted }}>{r.usdc} USDC</div>
                   {r.status === "confirmed" && (
-                    <button style={{ fontSize: 11, color: palette.textSoft, background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 6, textDecoration: "underline" }} onClick={() => openShareReceipt(r)}>Share ⬆</button>
+                    <button style={{ fontSize: 11, color: palette.textSoft, background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 6, textDecoration: "underline" }} onClick={() => openShareReceipt(r)}><Ico.ShareIcon size={14} /> Share</button>
                   )}
                 </div>
               </div>
@@ -860,11 +938,11 @@ export default function MediPay() {
                   <span style={{ fontSize: 13, color: palette.muted }}>USDC</span>
                 </div>
               </div>
-              <button style={s.refBtn} onClick={() => refreshBalance()}>↻ Refresh</button>
+              <button style={s.refBtn} onClick={() => refreshBalance()}><Ico.RefreshIcon size={14} /> Refresh</button>
             </div>
             {faucetSent && (
               <div style={s.faucetBadge}>
-                🎉 10 USDC auto-sent from Circle faucet on registration
+                <Ico.CheckIcon size={14} color={palette.brandDeep} /> 10 USDC auto-sent from Circle faucet on registration
                 <a href={"https://faucet.circle.com"} target="_blank" rel="noreferrer"
                   style={{ display: "block", fontSize: 11, color: palette.brandDeep, marginTop: 4, textDecoration: "underline" }}>
                   Balance still 0? Claim manually here →
@@ -876,7 +954,7 @@ export default function MediPay() {
                 style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700,
                   color: palette.brandDeep, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)",
                   borderRadius: 8, padding: "7px 14px", textDecoration: "none" }}>
-                💧 Get Free Test USDC (Public Faucet)
+                <Ico.DropIcon size={14} /> Get Free Test USDC (Public Faucet)
               </a>
               <span style={{ fontSize: 11, color: palette.muted }}>Paste your wallet address above at the faucet</span>
             </div>
@@ -893,7 +971,7 @@ export default function MediPay() {
             <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 14 }}>Moved to a new state? Link your records to another hospital. Your file number and Circle wallet remain unchanged.</p>
             <button style={s.transferBtn} onClick={() => { setShowTrf(true); setTrfDone(false); setTrfTarget(""); }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🔗</div>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", display: "flex", alignItems: "center", justifyContent: "center" }}><Ico.LinkIcon size={18} /></div>
                 <div><div style={{ fontSize: 15, fontWeight: 700, color: palette.text }}>Link to Another Hospital</div><div style={{ fontSize: 12, color: palette.textSoft, marginTop: 2 }}>Currently linked to {linked.length} hospital{linked.length !== 1 ? "s" : ""}</div></div>
               </div>
               <span style={{ color: palette.brandDeep, fontSize: 22 }}>›</span>
@@ -903,7 +981,7 @@ export default function MediPay() {
             <div style={s.globalGlow} />
             <div style={{ position: "relative", zIndex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <span style={{ fontSize: 22 }}>🌍</span><span style={{ fontSize: 15, fontWeight: 700, color: palette.text }}>International Use</span><span style={s.comingSoonBadge}>Coming Soon</span>
+                <Ico.Globe size={22} color={palette.text} /><span style={{ fontSize: 15, fontWeight: 700, color: palette.text }}>International Use</span><span style={s.comingSoonBadge}>Coming Soon</span>
               </div>
               <p style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.6 }}>Your MediPay wallet will work in Ghana, Kenya, South Africa and beyond.</p>
             </div>
@@ -919,12 +997,12 @@ export default function MediPay() {
               <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 6 }}>Link Records to New Hospital</div>
               <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 14 }}>Your file <strong style={{ color: palette.brandDeep }}>{fileNo}</strong> and payment history will be accessible at the new hospital.</p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
-                {linked.map(h => <span key={h.id} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, fontWeight: 600 }}>✓ {h.id}</span>)}
+                {linked.map(h => <span key={h.id} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, fontWeight: 600 }}><Ico.CheckIcon size={10} color={palette.brandDeep} /> {h.id}</span>)}
               </div>
               <L t="Select hospital to link" />
               <div style={{ position: "relative", marginBottom: 16 }}>
                 <button style={s.dropBtn} onClick={() => setTrfDrop(!trfDrop)}>
-                  <span style={{ flex: 1, textAlign: "left" }}>{trfTarget ? HOSPITALS.find(h => h.id === trfTarget)?.full : "Choose hospital..."}</span><span>▾</span>
+                  <span style={{ flex: 1, textAlign: "left" }}>{trfTarget ? HOSPITALS.find(h => h.id === trfTarget)?.full : "Choose hospital..."}</span><Ico.ChevronDown size={14} />
                 </button>
                 {trfDrop && (
                   <div style={s.dropMenu}>
@@ -944,10 +1022,10 @@ export default function MediPay() {
             </div>
           ) : (
             <div style={{ textAlign: "center", padding: "12px 0" }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+              <div style={{ fontSize: 48, marginBottom: 12 }}><Ico.CheckIcon size={40} color={palette.brandDeep} /></div>
               <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 8 }}>Records Linked!</div>
               <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 20 }}>Records now accessible at <strong style={{ color: palette.brandDeep }}>{HOSPITALS.find(h => h.id === trfTarget)?.id}</strong>. Quote file <strong style={{ color: palette.brandDeep }}>{fileNo}</strong>.</p>
-              <GBtn onClick={() => setShowTrf(false)}>Done ✓</GBtn>
+              <GBtn onClick={() => setShowTrf(false)}><Ico.CheckIcon size={14} /> Done</GBtn>
             </div>
           )}
         </Mdl>
@@ -955,7 +1033,7 @@ export default function MediPay() {
 
       {showPayLink && (
         <Mdl onClose={() => setShowPayLink(false)}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 6 }}>🔗 Payment Link Created</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}><Ico.LinkIcon size={20} /> Payment Link Created</div>
           <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 16 }}>Share this with a family member. It appears in your History as Pending until payment is completed.</p>
           <div style={{ background: "#f5fbfd", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
             <div style={{ fontSize: 12, color: palette.muted, marginBottom: 6 }}>Payment details</div>
@@ -966,10 +1044,10 @@ export default function MediPay() {
           </div>
           <div style={{ background: "#f5fbfd", border: "1px solid " + palette.lineStrong, borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 11, fontFamily: "monospace", color: palette.textSoft, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{payLink}</span>
-            <button style={s.refBtn} onClick={copyPayLink}>{payLinkCopied ? "✓ Copied" : "Copy"}</button>
+            <button style={s.refBtn} onClick={copyPayLink}>{payLinkCopied ? "Copied" : "Copy"}</button>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <button style={{ ...s.greenBtn }} onClick={sharePayLink}>💬 Share via WhatsApp / SMS</button>
+            <button style={{ ...s.greenBtn }} onClick={sharePayLink}><Ico.ChatBubble size={16} /> Share via WhatsApp / SMS</button>
             <button style={s.outlineBtn} onClick={() => setShowPayLink(false)}>Close</button>
           </div>
         </Mdl>
@@ -989,7 +1067,7 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
       <HealthObjects dense={showNav} />
       <div style={s.topbar}>
         <div style={s.tbL}>
-          {showNav && isMobile && <button style={s.burger} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "✕" : "☰"}</button>}
+          {showNav && isMobile && <button style={s.burger} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <Ico.CloseIcon size={16} /> : <Ico.MenuIcon size={16} />}</button>}
           <div style={s.logoMk}><span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>M</span></div>
           <div><span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.5px", color: palette.text }}>MediPay</span>{DEMO_MODE && <span style={s.demoBadge}>Demo</span>}</div>
         </div>
@@ -1047,10 +1125,10 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
 
 const HealthObjects = ({ dense }) => (
   <div style={s.bioLayer} aria-hidden="true">
-    <div style={{ ...s.bioBlob, ...s.bioBlobMint, top: dense ? 96 : 122, left: dense ? 250 : "8%", transform: "rotate(-18deg)", filter: dense ? "blur(1.5px)" : "blur(.4px)", opacity: dense ? 0.28 : 0.58 }}>✚</div>
-    <div style={{ ...s.bioBlob, ...s.bioBlobBlue, top: dense ? 168 : "18%", right: dense ? "7%" : "10%", transform: "rotate(22deg)", filter: dense ? "blur(6px)" : "blur(1px)", opacity: dense ? 0.22 : 0.46 }}>🫧</div>
-    <div style={{ ...s.bioBlob, ...s.bioBlobPeach, bottom: dense ? "18%" : "13%", left: dense ? "7%" : "16%", transform: "rotate(14deg)", filter: dense ? "blur(7px)" : "blur(2px)", opacity: dense ? 0.20 : 0.42 }}>💊</div>
-    <div style={{ ...s.bioBlob, ...s.bioBlobLav, bottom: dense ? "10%" : "18%", right: dense ? "14%" : "18%", transform: "rotate(-28deg)", filter: dense ? "blur(9px)" : "blur(3px)", opacity: dense ? 0.18 : 0.34 }}>🧬</div>
+    <div style={{ ...s.bioBlob, ...s.bioBlobMint, top: dense ? 96 : 122, left: dense ? 250 : "8%", transform: "rotate(-18deg)", filter: dense ? "blur(1.5px)" : "blur(.4px)", opacity: dense ? 0.28 : 0.58 }}><Ico.PlusIcon size={24} /></div>
+    <div style={{ ...s.bioBlob, ...s.bioBlobBlue, top: dense ? 168 : "18%", right: dense ? "7%" : "10%", transform: "rotate(22deg)", filter: dense ? "blur(6px)" : "blur(1px)", opacity: dense ? 0.22 : 0.46 }}><Ico.Bubbles size={22} /></div>
+    <div style={{ ...s.bioBlob, ...s.bioBlobPeach, bottom: dense ? "18%" : "13%", left: dense ? "7%" : "16%", transform: "rotate(14deg)", filter: dense ? "blur(7px)" : "blur(2px)", opacity: dense ? 0.20 : 0.42 }}><Ico.PillIcon size={24} /></div>
+    <div style={{ ...s.bioBlob, ...s.bioBlobLav, bottom: dense ? "10%" : "18%", right: dense ? "14%" : "18%", transform: "rotate(-28deg)", filter: dense ? "blur(9px)" : "blur(3px)", opacity: dense ? 0.18 : 0.34 }}><Ico.BrainIcon size={24} /></div>
     <div style={{ ...s.bioOrb, top: dense ? "44%" : "36%", left: dense ? "78%" : "72%", background: "linear-gradient(145deg,#ffffff,#dff7ef 52%,#93e0d0)" }} />
     <div style={{ ...s.bioOrb, width: 42, height: 42, bottom: dense ? "30%" : "26%", left: dense ? "28%" : "10%", background: "linear-gradient(145deg,#ffffff,#e8f5ff 55%,#9acdf3)", filter: "blur(1.5px)", opacity: dense ? .22 : .36 }} />
   </div>
@@ -1061,13 +1139,13 @@ const CopyBtn = ({ text }) => {
   const copy = () => { if (!text) return; navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); };
   return (
     <button onClick={copy} style={{ flexShrink: 0, background: copied ? palette.mint : "#fff", border: "1px solid " + (copied ? "rgba(63,183,163,0.30)" : palette.lineStrong), borderRadius: 12, padding: "8px 12px", fontSize: 12, color: copied ? palette.brandDeep : palette.textSoft, cursor: "pointer", fontFamily: "inherit", fontWeight: 600, whiteSpace: "nowrap", transition: "all .2s" }}>
-      {copied ? "✓ Copied" : "Copy"}
+      {copied ? "Copied" : "Copy"}
     </button>
   );
 };
 const PBar = ({ title, onBack }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: "1px solid " + palette.line, position: "sticky", top: 0, background: "#f5fbfd", zIndex: 20 }}>
-    <button style={{ background: "none", color: palette.textSoft, fontSize: 13, cursor: "pointer", padding: "6px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6, border: "1px solid " + palette.lineStrong }} onClick={onBack}>← Back</button>
+    <button style={{ background: "none", color: palette.textSoft, fontSize: 13, cursor: "pointer", padding: "6px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6, border: "1px solid " + palette.lineStrong }} onClick={onBack}><Ico.ChevronRight size={14} style={{ transform: "rotate(180deg)" }} /> Back</button>
     <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: palette.text }}>{title}</span>
   </div>
 );
@@ -1081,9 +1159,9 @@ const ShareModal = ({ rec, copied, onCopy, onNative, onDownload, onClose }) => (
       {["== MEDIPAY RECEIPT ==","Patient:  "+rec.patient,"File No:  "+rec.fileNo,"Hospital: "+(rec.hospital||""),"Category: "+rec.category,"Service:  "+rec.item,rec.note?"Note:     "+rec.note:null,"Amount:   "+("N"+Number(rec.amount).toLocaleString()),"USDC:     "+rec.usdc+" USDC","Network:  ARC-TESTNET","Date:     "+rec.date,"Tx ID:    "+rec.id,"========================","Powered by Circle on ARC Testnet"].filter(Boolean).join("\n")}
     </div>
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <button style={{ background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onCopy(rec)}>{copied ? "✓ Copied to clipboard!" : "📋 Copy Receipt Text"}</button>
-      <button style={{ background: "linear-gradient(135deg,#78bff0,#5aa9e6)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onNative(rec)}>📤 Share via WhatsApp / SMS</button>
-      <button style={{ background: "linear-gradient(135deg,#aaaef4,#8f93ea)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onDownload(rec)}>⬇ Save as Image (PNG)</button>
+      <button style={{ background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onCopy(rec)}>{copied ? <span><Ico.CheckIcon size={14} /> Copied to clipboard!</span> : <span><Ico.FolderIcon size={16} /> Copy Receipt Text</span>}</button>
+      <button style={{ background: "linear-gradient(135deg,#78bff0,#5aa9e6)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onNative(rec)}><Ico.ExternalLink size={16} /> Share via WhatsApp / SMS</button>
+      <button style={{ background: "linear-gradient(135deg,#aaaef4,#8f93ea)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onDownload(rec)}><Ico.DownloadIcon size={14} /> Save as Image (PNG)</button>
       <button style={{ background: "none", border: "1px solid " + palette.lineStrong, color: palette.textSoft, borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 600, cursor: "pointer" }} onClick={onClose}>Close</button>
     </div>
   </Mdl>
@@ -1170,7 +1248,104 @@ const s = {
   landFeatures: { display: "flex", gap: 14, marginBottom: 30, flexWrap: "wrap", justifyContent: "center" },
   landFeat: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.5)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 18, padding: "12px 14px", minWidth: 92, boxShadow: "0 10px 24px rgba(89,118,148,0.08)" },
   landStats: { display: "flex", gap: 24, padding: "18px 26px", background: "rgba(255,255,255,0.5)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 28, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 18px 40px rgba(80,110,140,0.08)" },
-  landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 22px" },
+  
+  phoneFrameOuter: {
+    width: 280, height: 560, borderRadius: 48, padding: 8,
+    background: "linear-gradient(180deg,rgba(180,200,220,0.18),rgba(255,255,255,0.5))",
+    backdropFilter: "blur(32px)", WebkitBackdropFilter: "blur(32px)",
+    border: "1px solid rgba(255,255,255,0.7)",
+    boxShadow: "0 32px 72px rgba(80,110,140,0.18), inset 0 1px 0 rgba(255,255,255,0.8)",
+    position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
+  },
+  phoneNotch: {
+    position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)",
+    width: 100, height: 22, borderRadius: 999,
+    background: "rgba(37,54,75,0.75)",
+    zIndex: 25, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+    backdropFilter: "blur(4px)",
+  },
+  phoneScreen: {
+    width: "100%", height: "100%", borderRadius: 40,
+    position: "relative", overflow: "hidden",
+    background: "#f7fbff",
+  },
+  heroImg: {
+    position: "absolute", inset: 0, width: "100%", height: "100%",
+    objectFit: "cover", opacity: 0.18,
+  },
+  phoneOverlay: {
+    position: "absolute", inset: 0,
+    background: "linear-gradient(180deg,rgba(255,255,255,0.65) 0%,rgba(255,255,255,0.35) 50%,rgba(247,251,255,0.7) 100%)",
+    zIndex: 1,
+  },
+  phoneUI: {
+    position: "relative", zIndex: 2, height: "100%",
+    display: "flex", flexDirection: "column", padding: "32px 16px 16px",
+    fontFamily: fontStack,
+  },
+  phoneTopBar: {
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    padding: "0 6px", marginBottom: 16,
+  },
+  phoneContent: {
+    flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
+    justifyContent: "center", gap: 8,
+  },
+  phonePill: {
+    display: "flex", alignItems: "center", gap: 6,
+    fontSize: 11, fontWeight: 600, color: palette.brandDeep,
+    background: "rgba(255,255,255,0.72)", backdropFilter: "blur(8px)",
+    padding: "6px 12px", borderRadius: 999,
+    border: "1px solid rgba(255,255,255,0.8)",
+  },
+  phoneAmt: {
+    fontSize: 36, fontWeight: 700, color: palette.text,
+    letterSpacing: "-1px",
+  },
+  phoneLabel: {
+    fontSize: 12, color: palette.textSoft,
+    marginBottom: 12,
+  },
+  phoneActions: {
+    display: "flex", gap: 10,
+    marginBottom: 8,
+  },
+  phoneActBtn: {
+    display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
+    width: 60, padding: "10px 0",
+    background: "rgba(255,255,255,0.6)", backdropFilter: "blur(8px)",
+    border: "1px solid rgba(255,255,255,0.72)",
+    borderRadius: 18, fontSize: 11, fontWeight: 600, color: palette.textGray,
+    cursor: "default",
+  },
+  phoneHosp: {
+    display: "flex", alignItems: "center", gap: 4,
+    fontSize: 12, color: palette.textSoft,
+    background: "rgba(255,255,255,0.5)", backdropFilter: "blur(6px)",
+    padding: "8px 14px", borderRadius: 999,
+    border: "1px solid rgba(255,255,255,0.6)",
+    marginTop: 4,
+  },
+  phoneDotGrid: {
+    display: "flex", gap: 6, marginTop: 10,
+  },
+  phoneDot: {
+    width: 6, height: 6, borderRadius: "50%",
+    background: palette.brand, opacity: 0.5,
+  },
+  phoneHomeBtn: {
+    position: "absolute", bottom: 12, left: "50%", transform: "translateX(-50%)",
+    width: 100, height: 4, borderRadius: 2,
+    background: "rgba(255,255,255,0.5)", zIndex: 25,
+  },
+  phoneGlow: {
+    position: "absolute", top: "8%", left: "50%", transform: "translateX(-50%)",
+    width: 400, height: 400,
+    background: "radial-gradient(circle,rgba(122,219,199,0.21),transparent 62%)",
+    pointerEvents: "none", zIndex: -1,
+  },
+
+  landSection: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
   landSectionNarrow: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
   sectionTitle: { fontSize: 11, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 10 },
   sectionH2: { fontFamily: "'Isotonic Trial', system-ui, -apple-system, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700, letterSpacing: "-0.6px" },
@@ -1191,9 +1366,9 @@ const s = {
   sectionGrid: { display: "flex", flexDirection: "column", gap: 14, marginTop: 20, maxWidth: 720, margin: "20px auto 0" },
   stepCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 24, padding: 18, boxShadow: softShadow },
   stepNo: { width: 36, height: 36, borderRadius: 14, background: palette.mint, color: palette.brandDeep, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: 12, border: "1px solid rgba(63,183,163,0.18)" },
-  trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginTop: 20 },
+  trustGrid: { display: "flex", flexDirection: "column", gap: 14, marginTop: 20, maxWidth: 720, margin: "20px auto 0" },
   trustCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: 16, textAlign: "center", boxShadow: softShadow },
-  newsGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14, marginTop: 20 },
+  newsGrid: { display: "flex", flexDirection: "column", gap: 14, marginTop: 20, maxWidth: 720, margin: "20px auto 0" },
   ctaPanel: { background: "rgba(255,255,255,0.45)", backdropFilter: "blur(18px)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 32, padding: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", boxShadow: "0 18px 40px rgba(80,110,140,0.08)" },
   sub: { fontSize: 14, color: palette.textSoft, lineHeight: 1.7, margin: "8px 0 18px" }, hint: { fontSize: 13, color: palette.muted, lineHeight: 1.7, marginBottom: 16 },
   searchWrap: { display: "flex", alignItems: "center", gap: 10, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 18, padding: "0 16px", marginBottom: 18, boxShadow: softShadow },
