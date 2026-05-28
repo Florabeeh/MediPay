@@ -427,10 +427,7 @@ export default function MediPay() {
           </div>
 
           <div style={s.heroVisual}>
-            <div style={s.heroBgSection}>
-              <img src="/hero.png" alt="" style={s.heroBgImg} />
-              <div style={s.heroBgOverlay} />
-            </div>
+
             <div style={s.iphoneFrame}>
               <div style={s.iphoneBezel}>
                 <div style={s.iphoneDynamicIsland} />
@@ -442,38 +439,41 @@ export default function MediPay() {
                     </div>
                   </div>
                   <div style={s.iphoneContent}>
-                    <div style={s.iphoneHdr}>
-                      <div>
-                        <div style={{ fontSize: 11, color: "#5f7188", marginBottom: 2 }}>Balance</div>
-                        <div style={{ fontSize: 28, fontWeight: 800, color: "#25364b", letterSpacing: "-1px" }}>N 0.00</div>
+                    <div style={s.iphoneBalanceCard}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                        <div>
+                          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>USDC Balance</div>
+                          <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-1px" }}>$0.00</div>
+                        </div>
+                        <div style={{ width: 30, height: 30, borderRadius: 10, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 14, color: "#fff" }}>M</div>
                       </div>
-                      <div style={s.iphoneLogo}>M</div>
+                      <div style={{ height: 4, background: "rgba(255,255,255,0.15)", borderRadius: 2, marginBottom: 4 }}>
+                        <div style={{ width: "68%", height: "100%", background: "rgba(255,255,255,0.5)", borderRadius: 2 }} />
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "rgba(255,255,255,0.5)" }}>
+                        <span>ARC Testnet</span>
+                        <span>Circle MPC</span>
+                      </div>
                     </div>
-                    <div style={s.iphoneQuickActions}>
-                      <div style={s.iphoneQaBtn}><Ico.CardIcon size={16} color="#198f82" /><span>Pay</span></div>
-                      <div style={s.iphoneQaBtn}><Ico.LinkIcon size={16} color="#198f82" /><span>Link</span></div>
-                      <div style={s.iphoneQaBtn}><Ico.ClockIcon size={16} color="#198f82" /><span>History</span></div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {[["Pay", <Ico.CardIcon size={12} />], ["Link", <Ico.LinkIcon size={12} />], ["History", <Ico.ClockIcon size={12} />]].map(([lb, ic]) => (
+                        <div key={lb} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "8px 0", background: "rgba(255,255,255,0.7)", backdropFilter: "blur(8px)", borderRadius: 12, fontSize: 9, fontWeight: 600, color: "#25364b" }}>{ic}{lb}</div>
+                      ))}
                     </div>
-                    <div style={s.iphoneActive}>
-                      <div style={{ fontSize: 11, color: "#fff", opacity: 0.7 }}>LUTH · Lagos</div>
-                      <Ico.ArrowRight size={14} color="#fff" />
-                    </div>
-                    <div style={s.iphoneHospitalList}>
-                      <div style={s.iphoneHospItem}>
-                        <Ico.HeartIcon size={12} color="#198f82" />
-                        <span>UDUTH</span>
-                        <Ico.CheckIcon size={10} color="#198f82" />
-                      </div>
-                      <div style={s.iphoneHospItem}>
-                        <Ico.HeartIcon size={12} color="#198f82" />
-                        <span>LUTH</span>
-                        <Ico.CheckIcon size={10} color="#198f82" />
-                      </div>
-                      <div style={s.iphoneHospItem}>
-                        <Ico.HeartIcon size={12} color="#198f82" />
-                        <span>UCH</span>
-                        <Ico.CheckIcon size={10} color="#198f82" />
-                      </div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#25364b", marginBottom: 2 }}>Quick transactions</div>
+                    <div style={s.iphoneTxList}>
+                      {[["LUTH", "N4,500", "12:30pm"], ["UDUTH", "N8,200", "10:15am"], ["ABUTH", "N2,000", "Yesterday"]].map(([h, amt, t]) => (
+                        <div key={h+t} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", background: "rgba(255,255,255,0.55)", borderRadius: 10, borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#3fb7a3" }} />
+                            <span style={{ fontSize: 10, fontWeight: 600, color: "#25364b" }}>{h}</span>
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            <div style={{ fontSize: 10, fontWeight: 700, color: "#198f82" }}>{amt}</div>
+                            <div style={{ fontSize: 8, color: "#8da0b5" }}>{t}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                     <div style={s.iphoneNav}>
                       <div style={s.iphoneNavDotO} />
@@ -1119,16 +1119,16 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
           <div style={s.logoMk}><span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>M</span></div>
           <div><span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.5px", color: palette.text }}>MediPay</span>{DEMO_MODE && <span style={s.demoBadge}>Demo</span>}</div>
         </div>
+        {isLanding && !isMobile && (
+          <div style={s.tbC}>
+            {["Features", "Hospitals", "About"].map((lb) => (
+              <button key={lb} style={s.topBtn} onClick={() => lb === "Hospitals" && setScreen("hospitals")}>{lb}</button>
+            ))}
+          </div>
+        )}
         {isLanding ? (
           <div style={s.tbR}>
-            {!isMobile && [
-              ["Features", () => {}],
-              ["Hospitals", () => setScreen("hospitals")],
-              ["About", () => {}]
-            ].map(([lb, fn]) => (
-              <button key={lb} style={s.topBtn} onClick={fn}>{lb}</button>
-            ))}
-            <button style={s.landNavCta} onClick={() => setScreen("hospitals")}>Get Started <Ico.ArrowRight size={14} /></button>
+            {!isMobile && <button style={s.landNavCta} onClick={() => setScreen("hospitals")}>Get Started <Ico.ArrowRight size={14} /></button>}
           </div>
         ) : showNav && (
           <div style={s.tbR}>
@@ -1283,7 +1283,7 @@ const s = {
   bioBlobLav: { background: "linear-gradient(145deg,#ffffff,#f0f1ff 58%,#b6b9ff)", color: "#8f93ea" },
   bioOrb: { position: "absolute", width: 58, height: 58, borderRadius: "50%", boxShadow: "inset 8px 10px 18px rgba(255,255,255,.85), inset -10px -12px 18px rgba(89,118,148,.13), 0 20px 42px rgba(89,118,148,.10)", opacity: .32 },
   topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: 64, borderBottom: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, background: "rgba(255,255,255,0.75)", backdropFilter: "blur(22px) saturate(150%)", WebkitBackdropFilter: "blur(22px) saturate(150%)", zIndex: 30, gap: 12 },
-  tbL: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 }, tbR: { display: "flex", alignItems: "center", gap: 8 },
+  tbL: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 }, tbC: { display: "flex", alignItems: "center", gap: 6, position: "absolute", left: "50%", transform: "translateX(-50%)" }, tbR: { display: "flex", alignItems: "center", gap: 8 },
   burger: { background: palette.surfaceSoft, border: "1px solid " + palette.line, color: palette.textSoft, fontSize: 19, cursor: "pointer", padding: "6px 10px", lineHeight: 1, borderRadius: 12, boxShadow: "0 6px 16px rgba(89,118,148,0.10)" },
   logoMk: { width: 40, height: 40, borderRadius: 14, background: "linear-gradient(135deg,#79dbc7,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 12px 26px rgba(63,183,163,0.30)", color: palette.text },
   demoBadge: { fontSize: 10, padding: "3px 9px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, marginLeft: 6, fontWeight: 800 },
@@ -1298,7 +1298,7 @@ const s = {
   sideBtnOn: { background: palette.mint, color: palette.brandDeep, boxShadow: "0 10px 22px rgba(63,183,163,0.13)" }, sidefoot: { padding: "16px 14px", borderTop: "1px solid " + palette.line },
   pg: { padding: "22px 24px 80px", maxWidth: 900, margin: "0 auto" },
   landGridPat: { position: "absolute", inset: 0, pointerEvents: "none", backgroundImage: "radial-gradient(circle, rgba(63,183,163,0.08) 1px, transparent 1px)", backgroundSize: "48px 48px", maskImage: "radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%)", zIndex: 0 },
-  landWrap: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 66px)", padding: "60px 22px 100px", textAlign: "center", position: "relative", overflow: "hidden" },
+  landWrap: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 66px)", padding: "80px 22px 120px", textAlign: "center", position: "relative", overflow: "hidden" },
   landGlow1: { position: "absolute", top: "4%", left: "2%", width: 560, height: 480, borderRadius: "50%", background: "radial-gradient(circle,rgba(122,219,199,0.25),transparent 68%)", pointerEvents: "none", filter: "blur(40px)" },
   landGlow2: { position: "absolute", bottom: "6%", right: "2%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(90,169,230,0.20),transparent 70%)", pointerEvents: "none", filter: "blur(40px)" },
   landLogo: { width: 78, height: 78, borderRadius: 24, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, boxShadow: "0 18px 38px rgba(63,183,163,0.28)" },
@@ -1309,20 +1309,7 @@ const s = {
   landFeat: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(14px) saturate(150%)", border: "1px solid rgba(63,183,163,0.12)", borderRadius: 18, padding: "14px 16px", minWidth: 96, boxShadow: "inset 0 1px rgba(255,255,255,.8), 0 0 0 1px rgba(63,183,163,.06), 0 8px 24px rgba(80,110,140,.06)" },
   landStats: { display: "flex", gap: 24, padding: "18px 26px", background: "rgba(255,255,255,0.5)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 28, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 18px 40px rgba(80,110,140,0.08)" },
   
-  heroBgSection: {
-    position: "absolute", inset: 0, overflow: "hidden",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    zIndex: 0, pointerEvents: "none",
-  },
-  heroBgImg: {
-    width: "160%", maxWidth: 900, height: "auto",
-    objectFit: "contain", opacity: 0.22,
-    filter: "blur(2px)",
-  },
-  heroBgOverlay: {
-    position: "absolute", inset: 0,
-    background: "radial-gradient(ellipse at 50% 60%, transparent 30%, #f7fbff 80%)",
-  },
+
   iphoneFrame: {
     position: "relative", zIndex: 2,
     width: 290, height: 580,
@@ -1361,48 +1348,17 @@ const s = {
     flex: 1, padding: "0 16px 16px",
     display: "flex", flexDirection: "column", gap: 8,
   },
-  iphoneHdr: {
-    display: "flex", alignItems: "flex-start", justifyContent: "space-between",
-    marginBottom: 4,
+
+    iphoneBalanceCard: {
+    background: "linear-gradient(135deg,#55c9b6,#2eaa99,#198f82)",
+    borderRadius: 16, padding: "14px 14px 10px",
+    boxShadow: "0 8px 24px rgba(63,183,163,0.30)",
+    marginBottom: 6,
   },
-  iphoneLogo: {
-    width: 36, height: 36, borderRadius: 12,
-    background: "linear-gradient(135deg,#79dbc7,#3fb7a3)",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    fontWeight: 800, fontSize: 18, color: "#fff",
-    boxShadow: "0 8px 18px rgba(63,183,163,0.25)",
-  },
-  iphoneQuickActions: {
-    display: "flex", gap: 8, marginBottom: 4,
-  },
-  iphoneQaBtn: {
-    flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-    padding: "10px 0",
-    background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)",
-    border: "1px solid rgba(255,255,255,0.75)",
-    borderRadius: 16,
-    fontSize: 11, fontWeight: 600, color: palette.text,
-  },
-  iphoneActive: {
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    padding: "10px 14px",
-    background: "linear-gradient(135deg,#55c9b6,#2eaa99)",
-    borderRadius: 14,
-    marginBottom: 4,
-  },
-  iphoneHospitalList: {
-    display: "flex", flexDirection: "column", gap: 6,
-    flex: 1,
-  },
-  iphoneHospItem: {
-    display: "flex", alignItems: "center", gap: 8,
-    padding: "8px 12px",
-    background: "rgba(255,255,255,0.6)", backdropFilter: "blur(8px)",
-    border: "1px solid rgba(255,255,255,0.65)",
-    borderRadius: 14,
-    fontSize: 12, fontWeight: 600, color: palette.text,
-  },
-  iphoneNav: {
+  iphoneTxList: {
+    display: "flex", flexDirection: "column", gap: 4,
+    flex: 1, marginBottom: 4,
+  },  iphoneNav: {
     display: "flex", justifyContent: "center", gap: 6,
     padding: "8px 0",
   },
@@ -1468,12 +1424,12 @@ const s = {
     fontFamily: "inherit", whiteSpace: "nowrap",
     boxShadow: "0 8px 20px rgba(63,183,163,0.22)",
   },
-  landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 80px" },
+  landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 96px" },
   landSectionNarrow: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
   sectionTitle: { fontSize: 12, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 12 },
   sectionH2: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700, letterSpacing: "-0.6px" },
   sectionLead: { fontSize: 15, color: palette.textSoft, lineHeight: 1.8, maxWidth: 720 },
-  landingGrid: { width: "100%", maxWidth: 1120, margin: "0 auto 60px", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 60, alignItems: "center", position: "relative", zIndex: 1 },
+  landingGrid: { width: "100%", maxWidth: 1120, margin: "0 auto 80px", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 72, alignItems: "center", position: "relative", zIndex: 1 },
   heroCopy: { textAlign: "left", alignItems: "flex-start" },
   heroPills: { display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-start", margin: "0 0 18px" },
   heroPill: { fontSize: 12, fontWeight: 600, color: palette.brandDeep, background: "rgba(63,183,163,0.08)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 999, padding: "8px 14px", boxShadow: "none" },
