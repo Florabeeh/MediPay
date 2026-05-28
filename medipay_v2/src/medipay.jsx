@@ -402,7 +402,6 @@ export default function MediPay() {
               <span style={s.heroPill}><Ico.HeartIcon size={14} /> 12 hospitals</span>
               <span style={s.heroPill}><Ico.LinkIcon size={14} /> Share a payment link</span>
             </div>
-            <div style={s.landLogo}><span style={{ fontSize: 32, fontWeight: 700, color: "#fff" }}>M</span></div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
               <span style={{ fontSize: 40, fontWeight: 700, letterSpacing: "-1.5px", color: palette.text }}>MediPay</span>
               {DEMO_MODE && <span style={s.demoBadge}>Demo</span>}
@@ -495,6 +494,7 @@ export default function MediPay() {
           <div style={s.sectionTitle}>What MediPay does</div>
           <div style={s.sectionH2}>Medical payments across Nigeria, powered by Circle USDC.</div>
           <div style={s.sectionLead}>MediPay replaces cash and bank transfers at hospitals with instant USDC settlement through a Circle Programmable Wallet — created automatically for every patient, no crypto knowledge needed.</div>
+          <div style={{ height: 8 }} />
           <div style={s.sectionGrid}>
             {[
               [<Ico.LinkIcon size={22} />, "Share a payment link", "Generate a one-tap payment link and send via WhatsApp or SMS. The payer clicks and settles in seconds — no app download required."],
@@ -1426,9 +1426,9 @@ const s = {
   },
   landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 96px" },
   landSectionNarrow: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
-  sectionTitle: { fontSize: 12, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 12 },
+  sectionTitle: { fontSize: 12, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 14 },
   sectionH2: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700, letterSpacing: "-0.6px" },
-  sectionLead: { fontSize: 15, color: palette.textSoft, lineHeight: 1.8, maxWidth: 720 },
+  sectionLead: { fontSize: 15, color: palette.textSoft, lineHeight: 1.8, maxWidth: 720, margin: "0 auto" },
   landingGrid: { width: "100%", maxWidth: 1120, margin: "0 auto 80px", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 72, alignItems: "center", position: "relative", zIndex: 1 },
   heroCopy: { textAlign: "left", alignItems: "flex-start" },
   heroPills: { display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-start", margin: "0 0 18px" },
@@ -1442,12 +1442,12 @@ const s = {
   previewAvatar: { width: 58, height: 58, borderRadius: 20, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900, color: palette.text, boxShadow: "0 14px 28px rgba(63,183,163,0.24)" },
   miniStatGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginTop: 14 },
   miniStat: { background: "rgba(255,255,255,0.88)", border: "1px solid " + palette.line, borderRadius: 18, padding: "12px 10px", textAlign: "center" },
-  sectionGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 28, marginTop: 36 },
-  stepCard: { background: "linear-gradient(145deg,#ffffff 0%,#eefbf6 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 28, padding: 28, boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
+  sectionGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 32, marginTop: 40 },
+  stepCard: { background: "linear-gradient(145deg,#ffffff 0%,#eefbf6 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 28, padding: 32, boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
   stepNo: { width: 36, height: 36, borderRadius: 14, background: palette.mint, color: palette.brandDeep, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: 12, border: "1px solid rgba(63,183,163,0.18)" },
-  trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 24, marginTop: 36 },
-  trustCard: { background: "linear-gradient(145deg,#ffffff 0%,#edf9f5 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 24, padding: 24, textAlign: "center", boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
-  newsGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 24, marginTop: 36 },
+  trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 28, marginTop: 40 },
+  trustCard: { background: "linear-gradient(145deg,#ffffff 0%,#edf9f5 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 24, padding: 28, textAlign: "center", boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
+  newsGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 28, marginTop: 40 },
   ctaPanel: { background: "linear-gradient(135deg,rgba(255,255,255,0.55),rgba(223,247,239,0.35))", backdropFilter: "blur(18px) saturate(150%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 32, padding: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap", boxShadow: "inset 0 1px rgba(255,255,255,.8), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
   sub: { fontSize: 14, color: palette.textSoft, lineHeight: 1.7, margin: "8px 0 18px" }, hint: { fontSize: 13, color: palette.muted, lineHeight: 1.7, marginBottom: 16 },
   searchWrap: { display: "flex", alignItems: "center", gap: 10, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 18, padding: "0 16px", marginBottom: 18, boxShadow: softShadow },
