@@ -577,13 +577,13 @@ export default function MediPay() {
           <div style={s.sectionH2}>Instant settlement. No bank delays. No app download for the payer.</div>
           <div style={s.trustGrid}>
             {[
-              [<Ico.Bolt size={32} />, "< 1 second settlement", "Powered by Circle Nanopayments on ARC Testnet. No bank queues, no transfer delays."],
-              [<Ico.Shield size={32} />, "MPC-secured wallets", "Multi-Party Computation means no seed phrase to lose. Your wallet is safe and recoverable."],
-              [<Ico.NGFlag size={32} />, "12 hospitals + growing", "UDUTH, LUTH, UCH, ABUTH, and 8 more across Nigeria. Expanding to Ghana and Kenya."],
-              [<Ico.LinkIcon size={32} />, "Shareable payment links", "Anyone can pay a link — no app, no crypto wallet, no registration. Just tap and settle."]
+              [<Ico.Bolt size={22} />, "< 1 second settlement", "Powered by Circle Nanopayments on ARC Testnet. No bank queues, no transfer delays."],
+              [<Ico.Shield size={22} />, "MPC-secured wallets", "Multi-Party Computation means no seed phrase to lose. Your wallet is safe and recoverable."],
+              [<Ico.NGFlag size={22} />, "12 hospitals + growing", "UDUTH, LUTH, UCH, ABUTH, and 8 more across Nigeria. Expanding to Ghana and Kenya."],
+              [<Ico.LinkIcon size={22} />, "Shareable payment links", "Anyone can pay a link — no app, no crypto wallet, no registration. Just tap and settle."]
             ].map(([ic, t, d]) => (
               <div key={t} style={s.trustCard}>
-                <div style={{ width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "rgba(255,255,255,0.5)", borderRadius: 20, border: "1px solid rgba(255,255,255,0.65)", backdropFilter: "blur(8px)" }}>{ic}</div>
+                <div style={{ width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 18 }}>{ic}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 16, fontWeight: 700, color: palette.text, marginBottom: 6 }}>{t}</div>
                   <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.7 }}>{d}</div>
@@ -1596,8 +1596,8 @@ const s = {
   sectionGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 32, marginTop: 40 },
   stepCard: { background: "linear-gradient(145deg,#ffffff 0%,#eefbf6 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 28, padding: 32, boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
   stepNo: { width: 36, height: 36, borderRadius: 14, background: palette.mint, color: palette.brandDeep, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: 12, border: "1px solid rgba(63,183,163,0.18)" },
-  trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 28, marginTop: 40 },
-  trustCard: { background: "linear-gradient(145deg,#ffffff 0%,#edf9f5 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 24, padding: 28, textAlign: "center", boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
+  trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 32, marginTop: 40 },
+  trustCard: { background: "linear-gradient(145deg,#ffffff 0%,#eefbf6 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 28, padding: 32, textAlign: "center", boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
   newsGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 28, marginTop: 40 },
   ctaPanel: { background: "linear-gradient(135deg,rgba(255,255,255,0.55),rgba(223,247,239,0.35))", backdropFilter: "blur(18px) saturate(150%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 32, padding: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap", boxShadow: "inset 0 1px rgba(255,255,255,.8), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
   sub: { fontSize: 14, color: palette.textSoft, lineHeight: 1.7, margin: "8px 0 18px" }, hint: { fontSize: 13, color: palette.muted, lineHeight: 1.7, marginBottom: 16 },
