@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { auth, signInWithGoogle, signInEmail, signUpEmail, getPatientRecord } from "./firebase";
+import { auth, signInWithGoogle, signInEmail, signUpEmail, getPatientRecord, savePatientRecord, logOut } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 // ─── Circle API ───────────────────────────────────────────────────────────────
@@ -306,6 +306,33 @@ export default function MediPay() {
     setBalLoading(false);
   };
 
+  // Save the complete patient record to Firestore after wallet/profile changes.
+  const persistRecord = async (overrides = {}) => {
+    if (!fbUser) return;
+    const rec = {
+      uid: fbUser.uid,
+      email: fbUser.email || femail || user?.email || "",
+      name: form.name || user?.name || "",
+      fileNo,
+      walletId,
+      walletAddress: walletAddr,
+      hospitalId: hospital?.id || "",
+      linkedHospitals: linked.map(h => h.id),
+      faucetSent,
+      history,
+      dob: form.dob || user?.dob || "",
+      phone: form.phone || user?.phone || "",
+      gender: form.gender || user?.gender || "",
+      bloodGroup: form.bloodGroup || user?.bloodGroup || "",
+      genotype: form.genotype || user?.genotype || "",
+      state: form.state || user?.state || "",
+      address: form.address || user?.address || "",
+      updatedAt: new Date().toISOString(),
+      ...overrides,
+    };
+    await savePatientRecord(fbUser.uid, rec);
+  };
+
   const setupWallet = async (refId) => {
     setStep("Creating your Circle Programmable Wallet on ARC Testnet...");
     const cw = await createCircleWallet(API_KEY, "demo-set", refId);
@@ -359,8 +386,20 @@ export default function MediPay() {
     if (!form.name || !form.dob || !form.phone) { toast_("Fill all required fields", "err"); return; }
     setLoading(true);
     const fn = genFN(hospital.id); setFileNo(fn);
-    await setupWallet(fn);
-    setLinked([hospital]); setUser({ ...form });
+    const cw = await setupWallet(fn);
+    const profile = { ...form };
+    setLinked([hospital]); setUser(profile);
+    await persistRecord({
+      ...profile,
+      fileNo: fn,
+      walletId: cw.id,
+      walletAddress: cw.address,
+      hospitalId: hospital.id,
+      linkedHospitals: [hospital.id],
+      faucetSent: true,
+      history: [],
+      createdAt: new Date().toISOString(),
+    });
     setLoading(false); setScreen("fileno");
   };
 
@@ -381,8 +420,10 @@ export default function MediPay() {
         date: new Date().toLocaleString("en-NG", { dateStyle: "full", timeStyle: "short" }),
         status: "confirmed",
       };
-      setReceipt(rec); setHistory(h => [rec, ...h]);
+      const newHistory = [rec, ...history];
+      setReceipt(rec); setHistory(newHistory);
       setPendingLinks(pl => pl.map(p => p.item === payitem && p.hospitalId === hospital?.id ? { ...p, status: "confirmed" } : p));
+      await savePatientRecord(fbUser.uid, { history: newHistory });
       setLoading(false); setStep(""); setScreen("receipt");
     } catch (e) { toast_("Payment failed: " + e.message, "err"); setLoading(false); setStep(""); }
   };
@@ -391,7 +432,10 @@ export default function MediPay() {
     if (!trfTarget) { toast_("Select a hospital", "err"); return; }
     setLoading(true);
     await new Promise(r => setTimeout(r, 1400));
-    setLinked(p => [...p, HOSPITALS.find(h => h.id === trfTarget)]);
+    const newH = HOSPITALS.find(h => h.id === trfTarget);
+    const newLinked = [...linked, newH].filter(Boolean);
+    setLinked(newLinked);
+    await savePatientRecord(fbUser.uid, { linkedHospitals: newLinked.map(h => h.id) });
     setLoading(false); setTrfDone(true);
     toast_("Records linked to " + trfTarget);
   };
@@ -410,8 +454,10 @@ export default function MediPay() {
       date: new Date().toLocaleString("en-NG", { dateStyle: "full", timeStyle: "short" }),
       status: "pending", link,
     };
-    setHistory(h => [pendingEntry, ...h]);
+    const newHistory = [pendingEntry, ...history];
+    setHistory(newHistory);
     setPendingLinks(p => [pendingEntry, ...p]);
+    savePatientRecord(fbUser?.uid, { history: newHistory });
     setPayLinkCopied(false); setShowPayLink(true);
   };
 
@@ -1063,7 +1109,7 @@ export default function MediPay() {
               <p style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.6 }}>Your MediPay wallet will work in Ghana, Kenya, South Africa and beyond.</p>
             </div>
           </div>
-          <button style={s.signOutBtn} onClick={() => { setUser(null); resetForm(); setFileNo(""); setWalletId(""); setWalletAddr(""); setUsdcBal(null); setFaucetSent(false); setHistory([]); setLinked([]); setScreen("landing"); }}>Sign Out</button>
+          <button style={s.signOutBtn} onClick={() => { logOut().catch(() => {}); setUser(null); resetForm(); setFileNo(""); setWalletId(""); setWalletAddr(""); setUsdcBal(null); setFaucetSent(false); setHistory([]); setLinked([]); setScreen("landing"); }}>Sign Out</button>
         </div>
       )}
 
