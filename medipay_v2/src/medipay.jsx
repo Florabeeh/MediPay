@@ -110,21 +110,21 @@ const CATS = {
 };
 
 const HEALTH_TIPS = [
-  { icon: <Ico.DropIcon size={28} color="#0ea5e9" />, color: "#0ea5e9", title: "Stay Hydrated", body: "Drink 8-12 glasses of water daily. Dehydration is a leading cause of hospital visits in Nigeria's hot climate." },
-  { icon: <Ico.DropIcon size={28} color="#ef4444" />, color: "#ef4444", title: "Know Your Genotype", body: "Confirm genotype before marriage. SS children suffer sickle cell disease — entirely preventable with proper planning." },
-  { icon: <Ico.AppleIcon size={28} color="#22c55e" />, color: "#22c55e", title: "Eat Local Vegetables", body: "Ugwu, garden egg, and bitter leaf are rich in iron and vitamins. Include them in every meal." },
+  { icon: <Ico.DropIcon size={28} color="#3fb7a3" />, color: "#3fb7a3", title: "Stay Hydrated", body: "Drink 8-12 glasses of water daily. Dehydration is a leading cause of hospital visits in Nigeria's hot climate." },
+  { icon: <Ico.DropIcon size={28} color="#ef6b73" />, color: "#ef6b73", title: "Know Your Genotype", body: "Confirm genotype before marriage. SS children suffer sickle cell disease — entirely preventable with proper planning." },
+  { icon: <Ico.AppleIcon size={28} color="#55c9b6" />, color: "#55c9b6", title: "Eat Local Vegetables", body: "Ugwu, garden egg, and bitter leaf are rich in iron and vitamins. Include them in every meal." },
   { icon: <Ico.RunIcon size={28} color="#b17700" />, color: "#b17700", title: "Exercise Daily", body: "30 minutes of walking daily reduces diabetes and hypertension risk by up to 35%." },
-  { icon: <Ico.StethoscopeIcon size={28} color="#8b5cf6" />, color: "#8b5cf6", title: "Annual Check-ups", body: "Silent killers — hypertension, diabetes, cancer — show no early symptoms. A yearly check saves lives." },
-  { icon: <Ico.MoonIcon size={28} color="#6366f1" />, color: "#6366f1", title: "Sleep 7-9 Hours", body: "Poor sleep raises blood pressure and weakens immunity. Sleep at the same time each night." },
-  { icon: <Ico.DropIcon size={28} color="#14b8a6" />, color: "#14b8a6", title: "Wash Your Hands", body: "20 seconds with soap prevents diarrhoea, typhoid, and cholera — top causes of illness in West Africa." },
-  { icon: <Ico.VaccineIcon size={28} color="#f97316" />, color: "#f97316", title: "Vaccinate Children", body: "Routine vaccines protect against polio, measles, yellow fever. Visit your nearest PHC." },
+  { icon: <Ico.StethoscopeIcon size={28} color="#5aa9e6" />, color: "#5aa9e6", title: "Annual Check-ups", body: "Silent killers — hypertension, diabetes, cancer — show no early symptoms. A yearly check saves lives." },
+  { icon: <Ico.MoonIcon size={28} color="#8f93ea" />, color: "#8f93ea", title: "Sleep 7-9 Hours", body: "Poor sleep raises blood pressure and weakens immunity. Sleep at the same time each night." },
+  { icon: <Ico.DropIcon size={28} color="#198f82" />, color: "#198f82", title: "Wash Your Hands", body: "20 seconds with soap prevents diarrhoea, typhoid, and cholera — top causes of illness in West Africa." },
+  { icon: <Ico.VaccineIcon size={28} color="#f5c85b" />, color: "#f5c85b", title: "Vaccinate Children", body: "Routine vaccines protect against polio, measles, yellow fever. Visit your nearest PHC." },
 ];
 
 const NEWS = [
-  { tag: "Launch", tagColor: "#22c55e", title: "MediPay live across 12 Nigerian hospitals", body: "Register once at UDUTH, LUTH, UCH, ABUTH and 8 others with a single Circle Programmable Wallet.", date: "May 2026" },
-  { tag: "Feature", tagColor: "#3b82f6", title: "Transfer records across states instantly", body: "Moving from Sokoto to Lagos? Your history travels with you. Just enter your file number at any MediPay hospital.", date: "May 2026" },
-  { tag: "Technology", tagColor: "#8b5cf6", title: "Powered by Circle on ARC Testnet", body: "Every payment settles in under 1 second using Circle Nanopayments. No bank delays, no transfer fees.", date: "May 2026" },
-  { tag: "Vision", tagColor: "#f59e0b", title: "Expanding to Ghana and Kenya by Q4 2026", body: "After Nigeria pilot, MediPay partners with Korle-Bu Teaching Hospital Ghana and Kenyatta National Hospital Kenya.", date: "April 2026" },
+  { tag: "Launch", tagColor: "#3fb7a3", title: "MediPay live across 12 Nigerian hospitals", body: "Register once at UDUTH, LUTH, UCH, ABUTH and 8 others with a single Circle Programmable Wallet.", date: "May 2026" },
+  { tag: "Feature", tagColor: "#5aa9e6", title: "Transfer records across states instantly", body: "Moving from Sokoto to Lagos? Your history travels with you. Just enter your file number at any MediPay hospital.", date: "May 2026" },
+  { tag: "Technology", tagColor: "#8f93ea", title: "Powered by Circle on ARC Testnet", body: "Every payment settles in under 1 second using Circle Nanopayments. No bank delays, no transfer fees.", date: "May 2026" },
+  { tag: "Vision", tagColor: "#f5c85b", title: "Expanding to Ghana and Kenya by Q4 2026", body: "After Nigeria pilot, MediPay partners with Korle-Bu Teaching Hospital Ghana and Kenyatta National Hospital Kenya.", date: "April 2026" },
 ];
 
 const NGN_USDC = 1650;
@@ -133,21 +133,22 @@ const fmt = n => "N" + Number(n).toLocaleString();
 const genFN = id => id + "-" + Date.now().toString().slice(-6) + "-" + Math.floor(Math.random() * 9000 + 1000);
 const genTx = () => "0x" + [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
 
-// ─── Receipt Image Generator ──────────────────────────────────────────────────
+// ─── Receipt Image Generator (LATI light theme) ──────────────────────────────
 function downloadReceiptImage(rec) {
   const canvas = document.createElement("canvas");
   canvas.width = 600; canvas.height = 820;
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#0d1117"; ctx.fillRect(0, 0, 600, 820);
-  ctx.fillStyle = "#1a9e5f"; ctx.fillRect(0, 0, 600, 8);
+  // White background with brand accent top/bottom bars
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 600, 820);
+  ctx.fillStyle = "#3fb7a3"; ctx.fillRect(0, 0, 600, 8);
   ctx.beginPath(); ctx.arc(300, 70, 36, 0, Math.PI * 2);
   const grad = ctx.createRadialGradient(300, 70, 0, 300, 70, 36);
-  grad.addColorStop(0, "#1a9e5f"); grad.addColorStop(1, "#0d7a47");
+  grad.addColorStop(0, "#55c9b6"); grad.addColorStop(1, "#2eaa99");
   ctx.fillStyle = grad; ctx.fill();
-  ctx.fillStyle = "#ffffff"; ctx.font = "bold 28px system-ui"; ctx.textAlign = "center"; ctx.fillText("M", 300, 80);
-  ctx.fillStyle = "#e6edf3"; ctx.font = "bold 26px system-ui"; ctx.fillText("MediPay", 300, 128);
-  ctx.fillStyle = "#1a9e5f"; ctx.font = "14px system-ui"; ctx.fillText("Payment Confirmed  ARC Testnet", 300, 152);
-  ctx.setLineDash([6, 4]); ctx.strokeStyle = "#30363d"; ctx.lineWidth = 1;
+  ctx.fillStyle = "#ffffff"; ctx.font = "bold 28px 'Borgen', system-ui, sans-serif"; ctx.textAlign = "center"; ctx.fillText("M", 300, 80);
+  ctx.fillStyle = "#25364b"; ctx.font = "bold 26px 'Borgen', system-ui, sans-serif"; ctx.fillText("MediPay", 300, 128);
+  ctx.fillStyle = "#198f82"; ctx.font = "14px system-ui"; ctx.fillText("Payment Confirmed · ARC Testnet", 300, 152);
+  ctx.setLineDash([6, 4]); ctx.strokeStyle = "#d8e5ee"; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(40, 172); ctx.lineTo(560, 172); ctx.stroke(); ctx.setLineDash([]);
   const rows = [
     ["Patient", rec.patient], ["File Number", rec.fileNo], ["Hospital", rec.hospital || ""],
@@ -158,21 +159,25 @@ function downloadReceiptImage(rec) {
   ].filter(Boolean);
   let y = 200;
   rows.forEach(([k, v]) => {
-    ctx.fillStyle = "#8b949e"; ctx.font = "13px system-ui"; ctx.textAlign = "left"; ctx.fillText(k, 50, y);
-    ctx.fillStyle = "#e6edf3"; ctx.font = "13px system-ui"; ctx.textAlign = "right";
+    ctx.fillStyle = "#8da0b5"; ctx.font = "13px system-ui"; ctx.textAlign = "left"; ctx.fillText(k, 50, y);
+    ctx.fillStyle = "#25364b"; ctx.font = "13px system-ui"; ctx.textAlign = "right";
     ctx.fillText(String(v).length > 38 ? String(v).slice(0, 38) + "..." : String(v), 550, y);
-    ctx.strokeStyle = "#21262d"; ctx.lineWidth = 0.5;
+    ctx.strokeStyle = "#eef3f7"; ctx.lineWidth = 0.5;
     ctx.beginPath(); ctx.moveTo(50, y + 10); ctx.lineTo(550, y + 10); ctx.stroke();
     y += 36;
   });
-  y += 10; ctx.fillStyle = "#0d2b1a";
+  y += 10;
+  // Total amount card - light green background with border
+  ctx.fillStyle = "#f0faf6";
   roundRect(ctx, 40, y, 520, 80, 12);
-  ctx.fillStyle = "#1a9e5f"; ctx.font = "bold 32px system-ui"; ctx.textAlign = "center"; ctx.fillText(fmt(rec.amount), 300, y + 42);
-  ctx.fillStyle = "#484f58"; ctx.font = "13px system-ui"; ctx.fillText(rec.usdc + " USDC  Circle ARC Testnet", 300, y + 64);
-  y += 100; ctx.fillStyle = "#21262d"; ctx.font = "8px monospace"; ctx.textAlign = "center";
+  ctx.strokeStyle = "rgba(63,183,163,0.20)"; ctx.lineWidth = 1;
+  roundRectStroke(ctx, 40, y, 520, 80, 12);
+  ctx.fillStyle = "#198f82"; ctx.font = "bold 32px system-ui"; ctx.textAlign = "center"; ctx.fillText(fmt(rec.amount), 300, y + 42);
+  ctx.fillStyle = "#8da0b5"; ctx.font = "13px system-ui"; ctx.fillText(rec.usdc + " USDC · Circle ARC Testnet", 300, y + 64);
+  y += 100; ctx.fillStyle = "#d8e5ee"; ctx.font = "8px monospace"; ctx.textAlign = "center";
   ctx.fillText("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||", 300, y);
-  ctx.fillStyle = "#484f58"; ctx.font = "11px system-ui"; ctx.fillText("Powered by Circle on ARC Testnet  medipay.circle.arc", 300, y + 20);
-  ctx.fillStyle = "#1a9e5f"; ctx.fillRect(0, 812, 600, 8);
+  ctx.fillStyle = "#8da0b5"; ctx.font = "11px system-ui"; ctx.fillText("Powered by Circle on ARC Testnet · medipay.circle.arc", 300, y + 20);
+  ctx.fillStyle = "#3fb7a3"; ctx.fillRect(0, 812, 600, 8);
   const link = document.createElement("a");
   link.download = "medipay-receipt-" + (rec.fileNo || "receipt") + ".png";
   link.href = canvas.toDataURL("image/png"); link.click();
@@ -184,6 +189,14 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
   ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
   ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath(); ctx.fill();
+}
+
+function roundRectStroke(ctx, x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath(); ctx.stroke();
 }
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
@@ -620,20 +633,20 @@ export default function MediPay() {
             <div>
               <div style={s.footerTitle}>Product</div>
               <button style={s.footerLink} onClick={requireAuth}>Find a Hospital</button>
-              <div style={s.footerLink}>How it Works</div>
-              <div style={s.footerLink}>Pricing</div>
+              <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 2.2, background: "none", border: "none", padding: 0, fontFamily: "inherit", textAlign: "left", display: "block" }}>How it Works</div>
+              <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 2.2, background: "none", border: "none", padding: 0, fontFamily: "inherit", textAlign: "left", display: "block" }}>Pricing</div>
             </div>
             <div>
               <div style={s.footerTitle}>Network</div>
-              <div style={s.footerLink}>12 Hospitals</div>
-              <div style={s.footerLink}>36 States</div>
-              <div style={s.footerLink}>Circle Network</div>
+              <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 2.2, background: "none", border: "none", padding: 0, fontFamily: "inherit", textAlign: "left", display: "block" }}>12 Hospitals</div>
+              <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 2.2, background: "none", border: "none", padding: 0, fontFamily: "inherit", textAlign: "left", display: "block" }}>36 States</div>
+              <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 2.2, background: "none", border: "none", padding: 0, fontFamily: "inherit", textAlign: "left", display: "block" }}>Circle Network</div>
             </div>
             <div>
               <div style={s.footerTitle}>Company</div>
-              <div style={s.footerLink}>About</div>
-              <div style={s.footerLink}>Blog</div>
-              <div style={s.footerLink}>Contact</div>
+              <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 2.2, background: "none", border: "none", padding: 0, fontFamily: "inherit", textAlign: "left", display: "block" }}>About</div>
+              <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 2.2, background: "none", border: "none", padding: 0, fontFamily: "inherit", textAlign: "left", display: "block" }}>Blog</div>
+              <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 2.2, background: "none", border: "none", padding: 0, fontFamily: "inherit", textAlign: "left", display: "block" }}>Contact</div>
             </div>
           </div>
           <div style={s.footerBottom}>
@@ -1282,8 +1295,8 @@ const ShareModal = ({ rec, copied, onCopy, onNative, onDownload, onClose }) => (
     </div>
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <button style={{ background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onCopy(rec)}>{copied ? <span><Ico.CheckIcon size={14} /> Copied to clipboard!</span> : <span><Ico.FolderIcon size={16} /> Copy Receipt Text</span>}</button>
-      <button style={{ background: "linear-gradient(135deg,#78bff0,#5aa9e6)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onNative(rec)}><Ico.ExternalLink size={16} /> Share via WhatsApp / SMS</button>
-      <button style={{ background: "linear-gradient(135deg,#aaaef4,#8f93ea)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onDownload(rec)}><Ico.DownloadIcon size={14} /> Save as Image (PNG)</button>
+      <button style={{ background: "linear-gradient(135deg,#78bff0," + palette.blue + ")", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onNative(rec)}><Ico.ExternalLink size={16} /> Share via WhatsApp / SMS</button>
+      <button style={{ background: "linear-gradient(135deg,#b6b9ff," + palette.lavender + ")", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onDownload(rec)}><Ico.DownloadIcon size={14} /> Save as Image (PNG)</button>
       <button style={{ background: "none", border: "1px solid " + palette.lineStrong, color: palette.textSoft, borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 600, cursor: "pointer" }} onClick={onClose}>Close</button>
     </div>
   </Mdl>
@@ -1522,7 +1535,6 @@ const s = {
   landWrap: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 66px)", padding: "80px 22px 120px", textAlign: "center", position: "relative", overflow: "hidden" },
   landGlow1: { position: "absolute", top: "4%", left: "2%", width: 560, height: 480, borderRadius: "50%", background: "radial-gradient(circle,rgba(122,219,199,0.25),transparent 68%)", pointerEvents: "none", filter: "blur(40px)" },
   landGlow2: { position: "absolute", bottom: "6%", right: "2%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(90,169,230,0.20),transparent 70%)", pointerEvents: "none", filter: "blur(40px)" },
-  landLogo: { width: 78, height: 78, borderRadius: 24, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, boxShadow: "0 18px 38px rgba(63,183,163,0.28)" },
   landH1: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(34px,6vw,64px)", fontWeight: 700, lineHeight: 1.04, marginBottom: 18, letterSpacing: "-1.2px", color: palette.text },
   landSub: { fontSize: 16, color: palette.textSoft, lineHeight: 1.8, marginBottom: 34, maxWidth: 520 },
   landCTA: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff", border: "none", borderRadius: 999, padding: "14px 32px", fontSize: 15, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 34, boxShadow: btnShadow, transition: "all .2s ease", lineHeight: 1.33 },
@@ -1541,7 +1553,6 @@ const s = {
     width: "100%", height: "auto",
   },
 
-  landingFooterDeco: { position: "absolute", top: -1, left: "10%", right: "10%", height: 1, background: "linear-gradient(90deg,transparent,rgba(63,183,163,0.30),transparent)", pointerEvents: "none" },
   landingFooter: {
     width: "100%", maxWidth: 1120, margin: "0 auto", padding: "64px 0 24px",
     borderTop: "1px solid " + palette.line,
@@ -1574,7 +1585,6 @@ const s = {
     boxShadow: "0 8px 20px rgba(63,183,163,0.22)",
   },
   landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 96px" },
-  landSectionNarrow: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
   sectionTitle: { fontSize: 12, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 14 },
   sectionH2: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700, letterSpacing: "-0.6px" },
   sectionLead: { fontSize: 15, color: palette.textSoft, lineHeight: 1.8, maxWidth: 720, margin: "0 auto" },
@@ -1583,14 +1593,6 @@ const s = {
   heroPills: { display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-start", margin: "0 0 18px" },
   heroPill: { fontSize: 12, fontWeight: 600, color: palette.brandDeep, background: "rgba(63,183,163,0.08)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 999, padding: "8px 14px", boxShadow: "none" },
   heroVisual: { width: "100%", display: "flex", justifyContent: "center" },
-  previewShell: { width: "100%", maxWidth: 420, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(18px)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 36, padding: 16, boxShadow: "0 28px 60px rgba(80,110,140,0.12), inset 0 1px 2px rgba(255,255,255,.72)" },
-  previewTop: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 },
-  previewChip: { fontSize: 11, padding: "6px 10px", borderRadius: 999, background: palette.mint, color: palette.brandDeep, fontWeight: 700 },
-  previewCard: { background: "rgba(255,255,255,0.5)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 28, padding: 18, textAlign: "left", boxShadow: "0 14px 30px rgba(80,110,140,0.08)" },
-  previewRow: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12 },
-  previewAvatar: { width: 58, height: 58, borderRadius: 20, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900, color: palette.text, boxShadow: "0 14px 28px rgba(63,183,163,0.24)" },
-  miniStatGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginTop: 14 },
-  miniStat: { background: "rgba(255,255,255,0.88)", border: "1px solid " + palette.line, borderRadius: 18, padding: "12px 10px", textAlign: "center" },
   sectionGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 32, marginTop: 40 },
   stepCard: { background: "linear-gradient(145deg,#ffffff 0%,#eefbf6 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 28, padding: 32, boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
   stepNo: { width: 36, height: 36, borderRadius: 14, background: palette.mint, color: palette.brandDeep, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: 12, border: "1px solid rgba(63,183,163,0.18)" },
@@ -1659,5 +1661,5 @@ const s = {
   outlineBtn: { background: "#fff", color: palette.textSoft, border: "1px solid " + palette.lineStrong, borderRadius: 18, padding: "13px 16px", fontSize: 13, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "0 8px 18px rgba(89,118,148,0.07)" },
   signOutBtn: { width: "100%", marginTop: 22, padding: "14px", background: "#fff", border: "1px solid #ffd4d8", color: palette.danger, borderRadius: 18, fontSize: 14, fontWeight: 800, cursor: "pointer", boxShadow: softShadow },
   empty: { textAlign: "center", color: palette.muted, padding: "60px 0", lineHeight: 1.8 },
-  toast: { position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: palette.brand, color: palette.text, padding: "12px 24px", borderRadius: 100, fontSize: 13, fontWeight: 800, zIndex: 600, whiteSpace: "nowrap", boxShadow: "0 12px 32px rgba(63,183,163,0.28)" },
+  toast: { position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: palette.brand, color: "#fff", padding: "12px 24px", borderRadius: 100, fontSize: 13, fontWeight: 800, zIndex: 600, whiteSpace: "nowrap", boxShadow: "0 12px 32px rgba(63,183,163,0.28)" },
 };
