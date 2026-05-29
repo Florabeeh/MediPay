@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { auth, db, signInWithGoogle, signInEmail, signUpEmail, logOut, getPatientRecord, savePatientRecord } from "./firebase";
+import { auth, signInWithGoogle, signInEmail, signUpEmail, getPatientRecord, savePatientRecord, logOut } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 // ─── Circle API ───────────────────────────────────────────────────────────────
 const DEMO_MODE = process.env.REACT_APP_DEMO_MODE !== "false";
-const API_KEY   = process.env.REACT_APP_CIRCLE_API_KEY || "";
+const API_KEY = process.env.REACT_APP_CIRCLE_API_KEY || "";
 const CIRCLE_API = "/circle-api";
 
 async function circlePost(path, body, apiKey) {
@@ -21,182 +21,280 @@ async function circleGet(path, apiKey) {
   if (!res.ok) throw new Error(data?.message || "Circle API " + res.status);
   return data;
 }
+
+// ── Server-side ciphertext — Node crypto is fully compatible with Circle API ──
 async function getCiphertext() {
   const res = await fetch("/get-ciphertext");
   const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "Failed to get ciphertext");
+  if (!res.ok) throw new Error(data?.error || "Failed to get ciphertext from server");
   return data.ciphertext;
 }
-async function createCircleWallet(refId) {
+
+
+async function createCircleWallet(apiKey, _unused, refId) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 1400)); return { id: "wlt_" + Math.random().toString(36).slice(2, 14), address: "0x" + [...Array(20)].map(() => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join(""), blockchain: "ARC-TESTNET", state: "LIVE", accountType: "SCA" }; }
-  const res = await fetch("/create-wallet", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ refId }) });
+  // Server-side wallet creation — avoids all proxy/timeout/ciphertext issues
+  const res = await fetch("/create-wallet", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refId }),
+  });
   const data = await res.json();
   if (!res.ok) throw new Error(data?.error || data?.message || "Wallet creation failed " + res.status);
   return data.wallet;
 }
-async function faucetDrip(address) {
-  if (DEMO_MODE) { await new Promise(r => setTimeout(r, 1000)); return { amount: "10.00", status: "ok" }; }
+async function faucetDrip(apiKey, address) {
+  if (DEMO_MODE) { await new Promise(r => setTimeout(r, 1000)); return { amount: "10.00", status: "pending" }; }
   try {
-    const res = await fetch("/fund-wallet", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ address }) });
+    const res = await fetch("/fund-wallet", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address })
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data?.message || "Faucet " + res.status);
     return data;
-  } catch(e) { console.warn("Faucet skipped:", e.message); return { status: "skipped" }; }
+  } catch(e) {
+    console.warn("Faucet skipped:", e.message);
+    return { amount: "0", status: "skipped" };
+  }
 }
-async function getWalletBalance(walletId) {
+async function getWalletBalance(apiKey, walletId) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 600)); return (Math.random() * 18 + 2).toFixed(2); }
-  const data = await circleGet("/v1/w3s/wallets/" + walletId + "/balances", API_KEY);
+  const data = await circleGet("/v1/w3s/wallets/" + walletId + "/balances", apiKey);
   return data?.data?.tokenBalances?.find(t => t.token?.symbol === "USDC")?.amount || "0.00";
 }
-async function sendPayment(fromWalletId, toAddress, amount) {
+async function sendPayment(apiKey, fromWalletId, toAddress, amount) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 2000)); return { id: "txn_" + Math.random().toString(36).slice(2, 14), txHash: "0x" + [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join(""), state: "COMPLETE" }; }
-  // Server-side payment — avoids proxy timeout issues
+
   const res = await fetch("/send-payment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fromWalletId, toAddress, amount }),
+    body: JSON.stringify({ fromWalletId, toAddress, amount, blockchain: "ARC-TESTNET" }),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.message || data?.error || "Payment failed " + res.status);
-  return data?.data?.transaction;
+  const data = await res.json().catch(() => ({}));
+  if (res.ok) return data?.data?.transaction;
+  if (res.status !== 404 && res.status !== 405) throw new Error(data?.message || data?.error || "Payment failed " + res.status);
+
+  // Fallback for environments that only expose the generic Circle proxy.
+  const entitySecretCiphertext = await getCiphertext();
+  const fallback = await circlePost("/v1/w3s/developer/transactions/transfer", { idempotencyKey: crypto.randomUUID(), walletId: fromWalletId, blockchain: "ARC-TESTNET", tokenAddress: "0x3600000000000000000000000000000000000000", destinationAddress: toAddress, amounts: [String(amount)], feeLevel: "MEDIUM", entitySecretCiphertext }, apiKey);
+  return fallback?.data?.transaction;
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const HOSPITALS = [
   { id: "UDUTH", full: "Usmanu Danfodiyo University Teaching Hospital", state: "Sokoto" },
-  { id: "LUTH",  full: "Lagos University Teaching Hospital",            state: "Lagos" },
-  { id: "UCH",   full: "University College Hospital",                   state: "Oyo" },
-  { id: "ABUTH", full: "Ahmadu Bello University Teaching Hospital",     state: "Kaduna" },
-  { id: "UNTH",  full: "University of Nigeria Teaching Hospital",       state: "Enugu" },
-  { id: "OAUTH", full: "Obafemi Awolowo University Teaching Hospital",  state: "Osun" },
-  { id: "UATH",  full: "University of Abuja Teaching Hospital",         state: "FCT" },
-  { id: "BMSH",  full: "Benin Medical & Surgical Hospital",             state: "Edo" },
-  { id: "GESTH", full: "General Hospital Enugu (State)",                state: "Enugu" },
-  { id: "NKST",  full: "NKST Hospital Mkar",                           state: "Benue" },
-  { id: "FMCB",  full: "Federal Medical Centre Birnin Kebbi",          state: "Kebbi" },
-  { id: "FMCA",  full: "Federal Medical Centre Abeokuta",              state: "Ogun" },
+  { id: "LUTH", full: "Lagos University Teaching Hospital", state: "Lagos" },
+  { id: "UCH", full: "University College Hospital", state: "Oyo" },
+  { id: "ABUTH", full: "Ahmadu Bello University Teaching Hospital", state: "Kaduna" },
+  { id: "UNTH", full: "University of Nigeria Teaching Hospital", state: "Enugu" },
+  { id: "OAUTH", full: "Obafemi Awolowo University Teaching Hospital", state: "Osun" },
+  { id: "UATH", full: "University of Abuja Teaching Hospital", state: "FCT" },
+  { id: "BMSH", full: "Benin Medical & Surgical Hospital", state: "Edo" },
+  { id: "GESTH", full: "General Hospital Enugu (State)", state: "Enugu" },
+  { id: "NKST", full: "NKST Hospital Mkar", state: "Benue" },
+  { id: "FMCB", full: "Federal Medical Centre Birnin Kebbi", state: "Kebbi" },
+  { id: "FMCA", full: "Federal Medical Centre Abeokuta", state: "Ogun" },
 ];
+
 const CATS = {
-  Surgery:        { icon: "🔪", items: ["Brain Surgery","Open Heart Surgery","Kidney Transplant","Liver Transplant","Appendectomy","Caesarean Section","Spinal Surgery","Hip Replacement","Knee Replacement","Eye Surgery (Cataract)","Hernia Repair","Thyroidectomy"], prices: [950000,1200000,2500000,3800000,180000,250000,750000,900000,850000,320000,150000,420000] },
-  Investigations: { icon: "🧪", items: ["Full Blood Count","Liver Function Test","Kidney Function Test","Malaria RDT","HIV Screening","Hepatitis B&C Panel","Blood Culture","Thyroid Function Test","Widal Test","Stool MCS","Urinalysis","Coagulation Profile"], prices: [3500,5500,6000,2000,4500,9000,15000,12000,2500,3000,1500,18000] },
-  Radiology:      { icon: "🩻", items: ["Chest X-Ray","Abdominal Ultrasound","CT Scan (Head)","MRI Brain","Echocardiogram","Pelvic Ultrasound","Mammogram","Bone Density Scan","Barium Meal","Fluoroscopy","Nuclear Medicine Scan","PET Scan"], prices: [8000,15000,85000,180000,55000,12000,25000,30000,20000,35000,200000,450000] },
-  Medication:     { icon: "💊", items: ["Antimalarial Course","Antibiotic Course","Antihypertensive (1mo)","Diabetic Medication (1mo)","Chemotherapy Round","ARV (1 month)","Painkillers","IV Fluids (per bag)","Insulin (per vial)","Anticoagulants","Immunosuppressants","Vitamins"], prices: [4500,6000,8500,12000,350000,18000,3500,2500,15000,25000,45000,4000] },
-  Therapy:        { icon: "🧠", items: ["Physiotherapy Session","Occupational Therapy","Speech Therapy","Dialysis Session","Chemotherapy Session","Radiation Therapy","Cardiac Rehab","Wound Dressing","Blood Transfusion","IV Infusion Therapy","Respiratory Therapy","Hydrotherapy"], prices: [8000,9500,10000,85000,150000,200000,25000,5000,45000,15000,18000,12000] },
-  Pharmacy:       { icon: "🏪", items: ["Prescription Dispensing","Over-the-Counter Meds","Medical Consumables","Surgical Supplies","Formulary Drugs","Vaccination Package","Nebulizer Medication","Ophthalmic Drops","Topical Creams","Ear/Nasal Drops","ORS","Asthma Inhaler"], prices: [2000,3500,5000,8000,12000,25000,7000,4500,2500,3000,1500,18000] },
-  Rehabilitation: { icon: "🦽", items: ["Post-Stroke Rehab","Post-Surgery Recovery","Orthopedic Rehab","Cardiac Rehab Program","Pulmonary Rehab","Substance Abuse Rehab","TBI Rehab","Spinal Cord Rehab","Pediatric Rehab","Geriatric Rehab","Sports Injury Rehab","Amputee Rehab"], prices: [45000,35000,40000,55000,50000,80000,120000,100000,30000,35000,25000,65000] },
-  Procedures:     { icon: "⚕️", items: ["Endoscopy","Colonoscopy","Bone Marrow Biopsy","Lumbar Puncture","Liver Biopsy","Bronchoscopy","Cystoscopy","Circumcision","Dental Extraction","Vasectomy","Colposcopy","Hysteroscopy"], prices: [55000,60000,75000,35000,80000,65000,50000,15000,12000,20000,30000,45000] },
+  Surgery: { icon: <Ico.ScalpelIcon size={18} />, items: ["Brain Surgery", "Open Heart Surgery", "Kidney Transplant", "Liver Transplant", "Appendectomy", "Caesarean Section", "Spinal Surgery", "Hip Replacement", "Knee Replacement", "Eye Surgery (Cataract)", "Hernia Repair", "Thyroidectomy"], prices: [950000, 1200000, 2500000, 3800000, 180000, 250000, 750000, 900000, 850000, 320000, 150000, 420000] },
+  Investigations: { icon: <Ico.MicroscopeIcon size={18} />, items: ["Full Blood Count", "Liver Function Test", "Kidney Function Test", "Malaria RDT", "HIV Screening", "Hepatitis B&C Panel", "Blood Culture", "Thyroid Function Test", "Widal Test", "Stool MCS", "Urinalysis", "Coagulation Profile"], prices: [3500, 5500, 6000, 2000, 4500, 9000, 15000, 12000, 2500, 3000, 1500, 18000] },
+  Radiology: { icon: <Ico.ActivityIcon size={18} />, items: ["Chest X-Ray", "Abdominal Ultrasound", "CT Scan (Head)", "MRI Brain", "Echocardiogram", "Pelvic Ultrasound", "Mammogram", "Bone Density Scan", "Barium Meal", "Fluoroscopy", "Nuclear Medicine Scan", "PET Scan"], prices: [8000, 15000, 85000, 180000, 55000, 12000, 25000, 30000, 20000, 35000, 200000, 450000] },
+  Medication: { icon: <Ico.PillIcon size={18} />, items: ["Antimalarial Course", "Antibiotic Course", "Antihypertensive (1mo)", "Diabetic Medication (1mo)", "Chemotherapy Round", "ARV (1 month)", "Painkillers", "IV Fluids (per bag)", "Insulin (per vial)", "Anticoagulants", "Immunosuppressants", "Vitamins"], prices: [4500, 6000, 8500, 12000, 350000, 18000, 3500, 2500, 15000, 25000, 45000, 4000] },
+  Therapy: { icon: <Ico.BrainIcon size={18} />, items: ["Physiotherapy Session", "Occupational Therapy", "Speech Therapy", "Dialysis Session", "Chemotherapy Session", "Radiation Therapy", "Cardiac Rehab", "Wound Dressing", "Blood Transfusion", "IV Infusion Therapy", "Respiratory Therapy", "Hydrotherapy"], prices: [8000, 9500, 10000, 85000, 150000, 200000, 25000, 5000, 45000, 15000, 18000, 12000] },
+  Pharmacy: { icon: <Ico.StoreIcon size={18} />, items: ["Prescription Dispensing", "Over-the-Counter Meds", "Medical Consumables", "Surgical Supplies", "Formulary Drugs", "Vaccination Package", "Nebulizer Medication", "Ophthalmic Drops", "Topical Creams", "Ear/Nasal Drops", "ORS", "Asthma Inhaler"], prices: [2000, 3500, 5000, 8000, 12000, 25000, 7000, 4500, 2500, 3000, 1500, 18000] },
+  Rehabilitation: { icon: <Ico.WheelchairIcon size={18} />, items: ["Post-Stroke Rehab", "Post-Surgery Recovery", "Orthopedic Rehab", "Cardiac Rehab Program", "Pulmonary Rehab", "Substance Abuse Rehab", "TBI Rehab", "Spinal Cord Rehab", "Pediatric Rehab", "Geriatric Rehab", "Sports Injury Rehab", "Amputee Rehab"], prices: [45000, 35000, 40000, 55000, 50000, 80000, 120000, 100000, 30000, 35000, 25000, 65000] },
+  Procedures: { icon: <Ico.HeartIcon size={18} />, items: ["Endoscopy", "Colonoscopy", "Bone Marrow Biopsy", "Lumbar Puncture", "Liver Biopsy", "Bronchoscopy", "Cystoscopy", "Circumcision", "Dental Extraction", "Vasectomy", "Colposcopy", "Hysteroscopy"], prices: [55000, 60000, 75000, 35000, 80000, 65000, 50000, 15000, 12000, 20000, 30000, 45000] },
 };
+
 const HEALTH_TIPS = [
-  { icon: "💧", color: "#0ea5e9", title: "Stay Hydrated",       body: "Drink 8-12 glasses of water daily. Dehydration is a leading cause of hospital visits in Nigeria's hot climate." },
-  { icon: "🩸", color: "#ef4444", title: "Know Your Genotype",  body: "Confirm genotype before marriage. SS children suffer sickle cell disease — entirely preventable with proper planning." },
-  { icon: "🍎", color: "#22c55e", title: "Eat Local Vegetables",body: "Ugwu, garden egg, and bitter leaf are rich in iron and vitamins. Include them in every meal." },
-  { icon: "🏃", color: "#f59e0b", title: "Exercise Daily",      body: "30 minutes of walking daily reduces diabetes and hypertension risk by up to 35%." },
-  { icon: "🩺", color: "#8b5cf6", title: "Annual Check-ups",    body: "Silent killers — hypertension, diabetes, cancer — show no early symptoms. A yearly check saves lives." },
-  { icon: "🌙", color: "#6366f1", title: "Sleep 7-9 Hours",     body: "Poor sleep raises blood pressure and weakens immunity. Sleep at the same time each night." },
-  { icon: "🧴", color: "#14b8a6", title: "Wash Your Hands",     body: "20 seconds with soap prevents diarrhoea, typhoid, and cholera — top causes of illness in West Africa." },
-  { icon: "💉", color: "#f97316", title: "Vaccinate Children",  body: "Routine vaccines protect against polio, measles, yellow fever. Visit your nearest PHC." },
+  { icon: <Ico.DropIcon size={28} color="#0ea5e9" />, color: "#0ea5e9", title: "Stay Hydrated", body: "Drink 8-12 glasses of water daily. Dehydration is a leading cause of hospital visits in Nigeria's hot climate." },
+  { icon: <Ico.DropIcon size={28} color="#ef4444" />, color: "#ef4444", title: "Know Your Genotype", body: "Confirm genotype before marriage. SS children suffer sickle cell disease — entirely preventable with proper planning." },
+  { icon: <Ico.AppleIcon size={28} color="#22c55e" />, color: "#22c55e", title: "Eat Local Vegetables", body: "Ugwu, garden egg, and bitter leaf are rich in iron and vitamins. Include them in every meal." },
+  { icon: <Ico.RunIcon size={28} color="#b17700" />, color: "#b17700", title: "Exercise Daily", body: "30 minutes of walking daily reduces diabetes and hypertension risk by up to 35%." },
+  { icon: <Ico.StethoscopeIcon size={28} color="#8b5cf6" />, color: "#8b5cf6", title: "Annual Check-ups", body: "Silent killers — hypertension, diabetes, cancer — show no early symptoms. A yearly check saves lives." },
+  { icon: <Ico.MoonIcon size={28} color="#6366f1" />, color: "#6366f1", title: "Sleep 7-9 Hours", body: "Poor sleep raises blood pressure and weakens immunity. Sleep at the same time each night." },
+  { icon: <Ico.DropIcon size={28} color="#14b8a6" />, color: "#14b8a6", title: "Wash Your Hands", body: "20 seconds with soap prevents diarrhoea, typhoid, and cholera — top causes of illness in West Africa." },
+  { icon: <Ico.VaccineIcon size={28} color="#f97316" />, color: "#f97316", title: "Vaccinate Children", body: "Routine vaccines protect against polio, measles, yellow fever. Visit your nearest PHC." },
 ];
+
 const NEWS = [
-  { tag: "Launch",     tagColor: "#22c55e", title: "MediPay live across 12 Nigerian hospitals",    body: "Register once at UDUTH, LUTH, UCH, ABUTH and 8 others with a single Circle Programmable Wallet.", date: "May 2026" },
-  { tag: "Feature",    tagColor: "#3b82f6", title: "Transfer records across states instantly",      body: "Moving from Sokoto to Lagos? Your history travels with you. Just enter your file number at any MediPay hospital.", date: "May 2026" },
-  { tag: "Technology", tagColor: "#8b5cf6", title: "Powered by Circle on ARC Testnet",             body: "Every payment settles in under 1 second using Circle Nanopayments. No bank delays, no transfer fees.", date: "May 2026" },
-  { tag: "Vision",     tagColor: "#f59e0b", title: "Expanding to Ghana and Kenya by Q4 2026",      body: "After Nigeria pilot, MediPay partners with Korle-Bu Teaching Hospital Ghana and Kenyatta National Hospital Kenya.", date: "April 2026" },
+  { tag: "Launch", tagColor: "#22c55e", title: "MediPay live across 12 Nigerian hospitals", body: "Register once at UDUTH, LUTH, UCH, ABUTH and 8 others with a single Circle Programmable Wallet.", date: "May 2026" },
+  { tag: "Feature", tagColor: "#3b82f6", title: "Transfer records across states instantly", body: "Moving from Sokoto to Lagos? Your history travels with you. Just enter your file number at any MediPay hospital.", date: "May 2026" },
+  { tag: "Technology", tagColor: "#8b5cf6", title: "Powered by Circle on ARC Testnet", body: "Every payment settles in under 1 second using Circle Nanopayments. No bank delays, no transfer fees.", date: "May 2026" },
+  { tag: "Vision", tagColor: "#f59e0b", title: "Expanding to Ghana and Kenya by Q4 2026", body: "After Nigeria pilot, MediPay partners with Korle-Bu Teaching Hospital Ghana and Kenyatta National Hospital Kenya.", date: "April 2026" },
 ];
-const NGN_USDC  = 1650;
+
+const NGN_USDC = 1650;
 const HOSP_ADDR = "0x742d35Cc6634C0532925a3b8D4C9b4AA12b5e6f4";
-const fmt   = n  => "N" + Number(n).toLocaleString();
+const fmt = n => "N" + Number(n).toLocaleString();
 const genFN = id => id + "-" + Date.now().toString().slice(-6) + "-" + Math.floor(Math.random() * 9000 + 1000);
 const genTx = () => "0x" + [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
 
-// ─── Receipt canvas ───────────────────────────────────────────────────────────
+// ─── Receipt Image Generator ──────────────────────────────────────────────────
 function downloadReceiptImage(rec) {
-  const canvas = document.createElement("canvas"); canvas.width = 600; canvas.height = 820;
+  const canvas = document.createElement("canvas");
+  canvas.width = 600; canvas.height = 820;
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = "#0d1117"; ctx.fillRect(0, 0, 600, 820);
   ctx.fillStyle = "#1a9e5f"; ctx.fillRect(0, 0, 600, 8);
   ctx.beginPath(); ctx.arc(300, 70, 36, 0, Math.PI * 2);
-  const g = ctx.createRadialGradient(300,70,0,300,70,36); g.addColorStop(0,"#1a9e5f"); g.addColorStop(1,"#0d7a47");
-  ctx.fillStyle = g; ctx.fill();
-  ctx.fillStyle="#fff"; ctx.font="bold 28px system-ui"; ctx.textAlign="center"; ctx.fillText("M",300,80);
-  ctx.fillStyle="#e6edf3"; ctx.font="bold 26px system-ui"; ctx.fillText("MediPay",300,128);
-  ctx.fillStyle="#1a9e5f"; ctx.font="14px system-ui"; ctx.fillText("Payment Confirmed  ARC Testnet",300,152);
-  ctx.setLineDash([6,4]); ctx.strokeStyle="#30363d"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(40,172); ctx.lineTo(560,172); ctx.stroke(); ctx.setLineDash([]);
-  const rows=[["Patient",rec.patient],["File Number",rec.fileNo],["Hospital",rec.hospital||""],["Category",rec.category],["Service",rec.item],rec.note?["Note",rec.note]:null,["Amount (NGN)",fmt(rec.amount)],["Amount (USDC)",rec.usdc+" USDC"],["Network","ARC-TESTNET"],["Settlement","< 1 second (Circle MPC)"],["Date",rec.date],["Tx ID",rec.id?rec.id.slice(0,28)+"...":""]].filter(Boolean);
-  let y=200; rows.forEach(([k,v])=>{ ctx.fillStyle="#8b949e"; ctx.font="13px system-ui"; ctx.textAlign="left"; ctx.fillText(k,50,y); ctx.fillStyle="#e6edf3"; ctx.font="13px system-ui"; ctx.textAlign="right"; ctx.fillText(String(v).length>38?String(v).slice(0,38)+"...":String(v),550,y); ctx.strokeStyle="#21262d"; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(50,y+10); ctx.lineTo(550,y+10); ctx.stroke(); y+=36; });
-  y+=10; ctx.fillStyle="#0d2b1a"; roundRect(ctx,40,y,520,80,12); ctx.fillStyle="#1a9e5f"; ctx.font="bold 32px system-ui"; ctx.textAlign="center"; ctx.fillText(fmt(rec.amount),300,y+42); ctx.fillStyle="#484f58"; ctx.font="13px system-ui"; ctx.fillText(rec.usdc+" USDC  Circle ARC Testnet",300,y+64);
-  y+=100; ctx.fillStyle="#21262d"; ctx.font="8px monospace"; ctx.fillText("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||",300,y); ctx.fillStyle="#484f58"; ctx.font="11px system-ui"; ctx.fillText("Powered by Circle on ARC Testnet  medipay.circle.arc",300,y+20);
-  ctx.fillStyle="#1a9e5f"; ctx.fillRect(0,812,600,8);
-  const link=document.createElement("a"); link.download="medipay-receipt-"+(rec.fileNo||"receipt")+".png"; link.href=canvas.toDataURL("image/png"); link.click();
+  const grad = ctx.createRadialGradient(300, 70, 0, 300, 70, 36);
+  grad.addColorStop(0, "#1a9e5f"); grad.addColorStop(1, "#0d7a47");
+  ctx.fillStyle = grad; ctx.fill();
+  ctx.fillStyle = "#ffffff"; ctx.font = "bold 28px system-ui"; ctx.textAlign = "center"; ctx.fillText("M", 300, 80);
+  ctx.fillStyle = "#e6edf3"; ctx.font = "bold 26px system-ui"; ctx.fillText("MediPay", 300, 128);
+  ctx.fillStyle = "#1a9e5f"; ctx.font = "14px system-ui"; ctx.fillText("Payment Confirmed  ARC Testnet", 300, 152);
+  ctx.setLineDash([6, 4]); ctx.strokeStyle = "#30363d"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40, 172); ctx.lineTo(560, 172); ctx.stroke(); ctx.setLineDash([]);
+  const rows = [
+    ["Patient", rec.patient], ["File Number", rec.fileNo], ["Hospital", rec.hospital || ""],
+    ["Category", rec.category], ["Service", rec.item], rec.note ? ["Note", rec.note] : null,
+    ["Amount (NGN)", fmt(rec.amount)], ["Amount (USDC)", rec.usdc + " USDC"],
+    ["Network", "ARC-TESTNET"], ["Settlement", "< 1 second (Circle MPC)"], ["Date", rec.date],
+    ["Transaction ID", rec.id ? rec.id.slice(0, 28) + "..." : ""],
+  ].filter(Boolean);
+  let y = 200;
+  rows.forEach(([k, v]) => {
+    ctx.fillStyle = "#8b949e"; ctx.font = "13px system-ui"; ctx.textAlign = "left"; ctx.fillText(k, 50, y);
+    ctx.fillStyle = "#e6edf3"; ctx.font = "13px system-ui"; ctx.textAlign = "right";
+    ctx.fillText(String(v).length > 38 ? String(v).slice(0, 38) + "..." : String(v), 550, y);
+    ctx.strokeStyle = "#21262d"; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(50, y + 10); ctx.lineTo(550, y + 10); ctx.stroke();
+    y += 36;
+  });
+  y += 10; ctx.fillStyle = "#0d2b1a";
+  roundRect(ctx, 40, y, 520, 80, 12);
+  ctx.fillStyle = "#1a9e5f"; ctx.font = "bold 32px system-ui"; ctx.textAlign = "center"; ctx.fillText(fmt(rec.amount), 300, y + 42);
+  ctx.fillStyle = "#484f58"; ctx.font = "13px system-ui"; ctx.fillText(rec.usdc + " USDC  Circle ARC Testnet", 300, y + 64);
+  y += 100; ctx.fillStyle = "#21262d"; ctx.font = "8px monospace"; ctx.textAlign = "center";
+  ctx.fillText("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||", 300, y);
+  ctx.fillStyle = "#484f58"; ctx.font = "11px system-ui"; ctx.fillText("Powered by Circle on ARC Testnet  medipay.circle.arc", 300, y + 20);
+  ctx.fillStyle = "#1a9e5f"; ctx.fillRect(0, 812, 600, 8);
+  const link = document.createElement("a");
+  link.download = "medipay-receipt-" + (rec.fileNo || "receipt") + ".png";
+  link.href = canvas.toDataURL("image/png"); link.click();
 }
-function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fill();}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath(); ctx.fill();
+}
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
+// ─── Inline SVG Icons (no emoji) ───────────────────────────────────────────────
+function Ico({ svg, size = 20, color = "currentColor" }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: size, height: size }}>
+      <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        {svg}
+      </svg>
+    </span>
+  );
+}
+Ico.Bolt = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>);
+Ico.Shield = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>);
+Ico.LinkIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>);
+Ico.CardIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>);
+Ico.Globe = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>);
+Ico.HomeIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>);
+Ico.ClockIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>);
+Ico.UserIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
+Ico.MailIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>);
+Ico.SearchIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>);
+Ico.MapPin = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>);
+Ico.CheckIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2.5}><polyline points="20 6 9 17 4 12"/></svg>);
+Ico.ArrowRight = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>);
+Ico.ArrowUp = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>);
+Ico.ArrowDown = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>);
+Ico.ShareIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>);
+Ico.DownloadIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>);
+Ico.RefreshIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>);
+Ico.CloseIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>);
+Ico.MenuIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>);
+Ico.ChevronRight = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><polyline points="9 18 15 12 9 6"/></svg>);
+Ico.ChevronDown = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><polyline points="6 9 12 15 18 9"/></svg>);
+Ico.FolderIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>);
+Ico.BrainIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 2a4 4 0 014 4c0 1-.3 1.8-.9 2.5 1.5.7 2.5 2.2 2.5 3.9 0 1.6-.9 3.1-2.3 3.8.6 1 1 2.1 1 3.3a4 4 0 01-4 4"/><path d="M12 2a4 4 0 00-4 4c0 1 .3 1.8.9 2.5-1.5.7-2.5 2.2-2.5 3.9 0 1.6.9 3.1 2.3 3.8-.6 1-1 2.1-1 3.3a4 4 0 004 4"/><path d="M12 17v-7"/><line x1="9" y1="12" x2="15" y2="12"/></svg>);
+Ico.HeartIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>);
+Ico.PlusIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2.5}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>);
+Ico.CrossMark = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>);
+Ico.DropIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>);
+Ico.ActivityIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>);
+Ico.VaccineIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 22a10 10 0 100-20 10 10 0 000 20z"/><path d="M12 6v6l4 2"/></svg>);
+Ico.StoreIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>);
+Ico.MicroscopeIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M2 22h12"/><path d="M8 22V8"/><path d="M8 8c-3.3 0-6 2.7-6 6v4"/><circle cx="16" cy="16" r="6"/><path d="M16 10v12"/></svg>);
+Ico.PillIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><rect x="4" y="4" width="16" height="16" rx="8"/></svg>);
+Ico.ToothIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 22c-6 0-7-3-7-6V6c0-2 1-4 4-4 2 0 3 1 3 1s1-1 3-1c3 0 4 2 4 4v10c0 3-1 6-7 6z"/></svg>);
+Ico.WheelchairIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="16" cy="20" r="3"/><circle cx="6" cy="14" r="3"/><path d="M6 14V4h6l4 4"/><path d="M9 14v6l6-2v3"/></svg>);
+Ico.ScalpelIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 22"/></svg>);
+Ico.RunIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><circle cx="13" cy="4" r="2"/><path d="M11 16l-1 5 3-3-1-5"/><path d="M7 11l3 4 2-2 4-8"/><path d="M5 22l2-4"/></svg>);
+Ico.MoonIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>);
+Ico.BroomIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M4 20l14-14"/><path d="M18 4l4 4"/><path d="M12 10l2 2"/><path d="M6 16l2 2"/></svg>);
+Ico.StethoscopeIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M4.8 2.3A.3.3 0 105 2"/><path d="M2 8V5a3 3 0 013-3h1"/><path d="M6 2h5"/><path d="M6 6h5"/><circle cx="5" cy="13" r="3"/><path d="M5 16v0a4 4 0 004-4V8"/><path d="M5 10H2v2"/></svg>);
+Ico.AppleIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M12 7.5C11.5 6.5 10.5 6 9.5 6s-2 .5-2.5 1.5"/><path d="M12 7.5c.5-1 1.5-1.5 2.5-1.5s2 .5 2.5 1.5"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>);
+Ico.SwapIcon = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>);
+Ico.NGFlag = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20}><rect width="8" height="24" x="0" fill="#008751"/><rect width="8" height="24" x="16" fill="#008751"/><rect width="8" height="24" x="8" fill="#fff"/></svg>);
+Ico.ChatBubble = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>);
+Ico.ExternalLink = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||20} height={size||20} fill="none" stroke={color||"currentColor"} strokeWidth={2}><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>);
+Ico.Bubbles = ({ size, color }) => (<svg viewBox="0 0 24 24" width={size||18} height={size||18} fill={color||"currentColor"}><circle cx="7" cy="7" r="3" opacity=".6"/><circle cx="17" cy="9" r="2.5" opacity=".35"/><circle cx="12" cy="4" r="2" opacity=".5"/><circle cx="5" cy="16" r="2.5" opacity=".4"/><circle cx="14" cy="18" r="2" opacity=".3"/></svg>);
+
+
 export default function MediPay() {
-  const [fbUser,  setFbUser]  = useState(undefined); // undefined = loading, null = logged out
-  const [screen,  setScreen]  = useState("landing");
-  const [hospital,setHospital]= useState(null);
-  const [user,    setUser]    = useState(null);
+  const [screen, setScreen] = useState("landing");
+  const [fbUser, setFbUser] = useState(undefined); // undefined=loading, null=logged out
+  const [authEmail, setAuthEmail] = useState(""); const [authPw, setAuthPw] = useState(""); const [authErr, setAuthErr] = useState("");
+  const [showAuth, setShowAuth] = useState(false);
+  const [hospital, setHospital] = useState(null);
+  const [authMode, setAuthMode] = useState("signup");
+  const [user, setUser] = useState(null);
   const [fname, setFname] = useState(""); const [fdob, setFdob] = useState(""); const [fgender, setFgender] = useState("");
   const [fphone, setFphone] = useState(""); const [femail, setFemail] = useState(""); const [faddress, setFaddress] = useState("");
   const [fstate, setFstate] = useState(""); const [fbloodGroup, setFbloodGroup] = useState(""); const [fgenotype, setFgenotype] = useState("");
-  const form = { name:fname,dob:fdob,gender:fgender,phone:fphone,email:femail,address:faddress,state:fstate,bloodGroup:fbloodGroup,genotype:fgenotype };
-  const resetForm = () => { setFname("");setFdob("");setFgender("");setFphone("");setFemail("");setFaddress("");setFstate("");setFbloodGroup("");setFgenotype(""); };
-  const [fileNo,    setFileNo]    = useState("");
-  const [walletId,  setWalletId]  = useState("");
-  const [walletAddr,setWalletAddr]= useState("");
-  const [usdcBal,   setUsdcBal]   = useState(null);
-  const [balLoading,setBalLoading]= useState(false);
-  const [faucetSent,setFaucetSent]= useState(false);
-  const [linked,    setLinked]    = useState([]);
-  const [tab,       setTab]       = useState("home");
-  const [paycat,    setPaycat]    = useState(""); const [payitem, setPayitem] = useState(""); const [payprice, setPayprice] = useState(0); const [paynote, setPaynote] = useState("");
-  const [receipt,   setReceipt]   = useState(null);
-  const [history,   setHistory]   = useState([]);
-  const [loading,   setLoading]   = useState(false);
-  const [step,      setStep]      = useState("");
-  const [toast,     setToast]     = useState({ msg: "", type: "ok" });
-  const [searchH,   setSearchH]   = useState("");
-  const [showCat,   setShowCat]   = useState(false); const [showItem, setShowItem] = useState(false);
-  const [showTrf,   setShowTrf]   = useState(false); const [trfTarget, setTrfTarget] = useState(""); const [trfDrop, setTrfDrop] = useState(false); const [trfDone, setTrfDone] = useState(false);
-  const [menuOpen,  setMenuOpen]  = useState(false);
-  const [isMobile,  setIsMobile]  = useState(window.innerWidth < 900);
-  const [showPayLink,   setShowPayLink]   = useState(false); const [payLink, setPayLink] = useState(""); const [payLinkCopied, setPayLinkCopied] = useState(false);
-  const [showShareModal,setShowShareModal]= useState(false); const [shareReceipt, setShareReceipt] = useState(null); const [rcpCopied, setRcpCopied] = useState(false);
-  const [pendingLinks,  setPendingLinks]  = useState([]);
-  // Email auth form
-  const [authEmail, setAuthEmail] = useState(""); const [authPw, setAuthPw] = useState(""); const [authMode, setAuthMode] = useState("login"); const [authErr, setAuthErr] = useState("");
+  const form = { name:fname, dob:fdob, gender:fgender, phone:fphone, email:femail, address:faddress, state:fstate, bloodGroup:fbloodGroup, genotype:fgenotype };
+  const resetForm = () => { setFname(""); setFdob(""); setFgender(""); setFphone(""); setFemail(""); setFaddress(""); setFstate(""); setFbloodGroup(""); setFgenotype(""); };
+  const [fileNo, setFileNo] = useState(""); const [walletId, setWalletId] = useState(""); const [walletAddr, setWalletAddr] = useState("");
+  const [usdcBal, setUsdcBal] = useState(null); const [balLoading, setBalLoading] = useState(false); const [faucetSent, setFaucetSent] = useState(false);
+  const [linked, setLinked] = useState([]); const [tab, setTab] = useState("home");
+  const [paycat, setPaycat] = useState(""); const [payitem, setPayitem] = useState(""); const [payprice, setPayprice] = useState(0); const [paynote, setPaynote] = useState("");
+  const [receipt, setReceipt] = useState(null); const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(false); const [step, setStep] = useState("");
+  const [toast, setToast] = useState({ msg: "", type: "ok" });
+  const [searchH, setSearchH] = useState(""); const [showCat, setShowCat] = useState(false); const [showItem, setShowItem] = useState(false);
+  const [showTrf, setShowTrf] = useState(false); const [trfTarget, setTrfTarget] = useState(""); const [trfDrop, setTrfDrop] = useState(false); const [trfDone, setTrfDone] = useState(false);
+  const [existFN, setExistFN] = useState(""); const [menuOpen, setMenuOpen] = useState(false); const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
+  const [showPayLink, setShowPayLink] = useState(false); const [payLink, setPayLink] = useState(""); const [payLinkCopied, setPayLinkCopied] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false); const [shareReceipt, setShareReceipt] = useState(null); const [rcpCopied, setRcpCopied] = useState(false);
+  // eslint-disable-next-line
+  const [, setPendingLinks] = useState([]);
 
-  useEffect(() => { const h = () => setIsMobile(window.innerWidth < 900); window.addEventListener("resize", h); return () => window.removeEventListener("resize", h); }, []);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 900);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
 
   // ── Firebase auth listener ──────────────────────────────────────────────────
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (fbU) => {
       setFbUser(fbU);
       if (!fbU) { setScreen("landing"); return; }
-      // Logged in — try to load existing record
       try {
         const rec = await getPatientRecord(fbU.uid);
-        if (rec && rec.walletId) {
-          // Returning patient — restore state
-          setFileNo(rec.fileNo || "");
-          setWalletId(rec.walletId);
-          setWalletAddr(rec.walletAddress || "");
-          setUser({ name: rec.name, email: rec.email || fbU.email, ...rec });
-          setLinked((rec.linkedHospitals || []).map(id => HOSPITALS.find(h => h.id === id)).filter(Boolean));
-          const hosp = HOSPITALS.find(h => h.id === rec.hospitalId);
-          if (hosp) setHospital(hosp);
-          setHistory(rec.history || []);
-          setFaucetSent(rec.faucetSent || false);
+        if (rec) {
+          setUser({ name: rec.name || "", dob: rec.dob || "", gender: rec.gender || "", phone: rec.phone || "", email: rec.email || "", address: rec.address || "", state: rec.state || "", bloodGroup: rec.bloodGroup || "", genotype: rec.genotype || "" });
+          setFileNo(rec.fileNo || ""); setWalletId(rec.walletId || ""); setWalletAddr(rec.walletAddress || "");
+          setLinked(rec.linkedHospitals?.map(id => ({ id, ...(HOSPITALS.find(h => h.id === id) || {}) })) || []);
+          setFaucetSent(rec.faucetSent || false); setHistory(rec.history || []);
           setTab("home"); setScreen("dashboard");
-          // Auto-load balance on login
-          if (rec.walletId) {
-            setBalLoading(true);
-            getWalletBalance(rec.walletId).then(bal => { setUsdcBal(bal); setBalLoading(false); }).catch(() => setBalLoading(false));
-          }
+          if (rec.walletId) refreshBalance(rec.walletId);
         } else {
-          // New user — go to onboarding
           if (fbU.email) setFemail(fbU.email);
-          if (fbU.displayName) setFname(fbU.displayName);
           setScreen("hospitals");
         }
       } catch(e) {
@@ -205,6 +303,7 @@ export default function MediPay() {
       }
     });
     return unsub;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toast_ = (msg, type) => { setToast({ msg, type: type || "ok" }); setTimeout(() => setToast({ msg: "", type: "ok" }), 3200); };
@@ -214,20 +313,24 @@ export default function MediPay() {
   const refreshBalance = async (wId) => {
     const id = wId || walletId; if (!id) return;
     setBalLoading(true);
-    try { setUsdcBal(await getWalletBalance(id)); } catch(e) { setUsdcBal("--"); }
+    try { setUsdcBal(await getWalletBalance(API_KEY, id)); } catch (e) { setUsdcBal("--"); }
     setBalLoading(false);
   };
 
-  // Save full record to Firestore
+  // Save the complete patient record to Firestore after wallet/profile changes.
   const persistRecord = async (overrides = {}) => {
     if (!fbUser) return;
     const rec = {
-      uid: fbUser.uid, email: fbUser.email || femail,
+      uid: fbUser.uid,
+      email: fbUser.email || femail || user?.email || "",
       name: form.name || user?.name || "",
-      fileNo, walletId, walletAddress: walletAddr,
+      fileNo,
+      walletId,
+      walletAddress: walletAddr,
       hospitalId: hospital?.id || "",
       linkedHospitals: linked.map(h => h.id),
-      faucetSent, history,
+      faucetSent,
+      history,
       dob: form.dob || user?.dob || "",
       phone: form.phone || user?.phone || "",
       gender: form.gender || user?.gender || "",
@@ -243,39 +346,69 @@ export default function MediPay() {
 
   const setupWallet = async (refId) => {
     setStep("Creating your Circle Programmable Wallet on ARC Testnet...");
-    const w = await createCircleWallet(refId);
-    setWalletId(w.id); setWalletAddr(w.address);
+    const cw = await createCircleWallet(API_KEY, "demo-set", refId);
+    setWalletId(cw.id); setWalletAddr(cw.address);
     try {
       setStep("Requesting 10 USDC from Circle faucet...");
-      await faucetDrip(w.address);
+      await faucetDrip(API_KEY, cw.address);
       setFaucetSent(true);
     } catch(e) { console.warn("Faucet skipped:", e.message); setFaucetSent(false); }
     try {
       setStep("Loading balance...");
-      setUsdcBal(await getWalletBalance(w.id));
-    } catch(e) { setUsdcBal("0.00"); }
-    setStep(""); return w;
+      setUsdcBal(await getWalletBalance(API_KEY, cw.id));
+    } catch(e) { console.warn("Balance check skipped:", e.message); setUsdcBal("0.00"); }
+    setStep(""); return cw;
   };
 
-  const handleHospSelect = h => { setHospital(h); setScreen("profile"); };
+  const handleHospSelect = h => { setHospital(h); setScreen("auth"); };
+
+  const requireAuth = () => {
+    if (fbUser) { setScreen("hospitals"); }
+    else { setShowAuth(true); }
+  };
+
+  const handleFirebaseAuth = async (mode) => {
+    if (!authEmail || !authPw) { setAuthErr("Enter email and password"); return; }
+    setAuthErr(""); setLoading(true);
+    try {
+      if (mode === "login") await signInEmail(authEmail, authPw);
+      else await signUpEmail(authEmail, authPw);
+      setShowAuth(false);
+    } catch(e) { setAuthErr(e.message); }
+    setLoading(false);
+  };
+
+  const handleAuth = async () => {
+    setLoading(true);
+    if (authMode === "existing") {
+      const fn = existFN.trim().toUpperCase();
+      if (!fn) { toast_("Enter your file number", "err"); setLoading(false); return; }
+      await setupWallet(fn);
+      const prefix = fn.split("-")[0];
+      const homeH = HOSPITALS.find(h => h.id === prefix) || hospital;
+      setLinked([homeH, hospital].filter(Boolean).filter((v, i, a) => a.findIndex(x => x.id === v.id) === i));
+      setFileNo(fn); setUser({ name: "Returning Patient", email: "" });
+      toast_("Records found — welcome back");
+      setLoading(false); setTab("home"); setScreen("dashboard");
+    } else { setLoading(false); setScreen("profile"); }
+  };
 
   const handleProfileSubmit = async () => {
     if (!form.name || !form.dob || !form.phone) { toast_("Fill all required fields", "err"); return; }
     setLoading(true);
     const fn = genFN(hospital.id); setFileNo(fn);
-    const w = await setupWallet(fbUser?.uid || fn);
-    setLinked([hospital]); setUser({ ...form });
-    // Save to Firestore
-    await savePatientRecord(fbUser.uid, {
-      uid: fbUser.uid, email: fbUser.email || form.email,
-      name: form.name, fileNo: fn,
-      walletId: w.id, walletAddress: w.address,
+    const cw = await setupWallet(fn);
+    const profile = { ...form };
+    setLinked([hospital]); setUser(profile);
+    await persistRecord({
+      ...profile,
+      fileNo: fn,
+      walletId: cw.id,
+      walletAddress: cw.address,
       hospitalId: hospital.id,
       linkedHospitals: [hospital.id],
-      faucetSent: true, history: [],
-      dob: form.dob, phone: form.phone,
-      gender: form.gender, bloodGroup: form.bloodGroup,
-      genotype: form.genotype, state: form.state, address: form.address,
+      faucetSent: true,
+      history: [],
       createdAt: new Date().toISOString(),
     });
     setLoading(false); setScreen("fileno");
@@ -288,7 +421,7 @@ export default function MediPay() {
       const idx = CATS[paycat].items.indexOf(payitem);
       const amount = CATS[paycat].prices[idx];
       const usdc = (amount / NGN_USDC).toFixed(4);
-      const tx = await sendPayment(walletId, HOSP_ADDR, usdc);
+      const tx = await sendPayment(API_KEY, walletId, HOSP_ADDR, usdc);
       if (usdcBal && usdcBal !== "--") setUsdcBal(Math.max(0, parseFloat(usdcBal) - parseFloat(usdc)).toFixed(2));
       const rec = {
         id: tx?.txHash || tx?.id || genTx(), type: "payment",
@@ -300,10 +433,10 @@ export default function MediPay() {
       };
       const newHistory = [rec, ...history];
       setReceipt(rec); setHistory(newHistory);
-      // Persist updated history
+      setPendingLinks(pl => pl.map(p => p.item === payitem && p.hospitalId === hospital?.id ? { ...p, status: "confirmed" } : p));
       await savePatientRecord(fbUser.uid, { history: newHistory });
       setLoading(false); setStep(""); setScreen("receipt");
-    } catch(e) { toast_("Payment failed: " + e.message, "err"); setLoading(false); setStep(""); }
+    } catch (e) { toast_("Payment failed: " + e.message, "err"); setLoading(false); setStep(""); }
   };
 
   const handleTransfer = async () => {
@@ -311,7 +444,7 @@ export default function MediPay() {
     setLoading(true);
     await new Promise(r => setTimeout(r, 1400));
     const newH = HOSPITALS.find(h => h.id === trfTarget);
-    const newLinked = [...linked, newH];
+    const newLinked = [...linked, newH].filter(Boolean);
     setLinked(newLinked);
     await savePatientRecord(fbUser.uid, { linkedHospitals: newLinked.map(h => h.id) });
     setLoading(false); setTrfDone(true);
@@ -325,7 +458,13 @@ export default function MediPay() {
     const payload = btoa(JSON.stringify({ fn: fileNo, h: hospital?.id, cat: paycat, item: payitem, amt: amount, note: paynote, ts: Date.now() }));
     const link = "https://medipay.app/pay?ref=" + payload;
     setPayLink(link);
-    const pendingEntry = { id: genTx(), type: "payment_link", hospital: hospital?.full, hospitalId: hospital?.id, patient: user?.name || form.name, fileNo, category: paycat, item: payitem, amount, usdc: (amount / NGN_USDC).toFixed(4), note: paynote, date: new Date().toLocaleString("en-NG", { dateStyle: "full", timeStyle: "short" }), status: "pending", link };
+    const pendingEntry = {
+      id: genTx(), type: "payment_link", hospital: hospital?.full, hospitalId: hospital?.id,
+      patient: user?.name || form.name, fileNo, category: paycat, item: payitem,
+      amount, usdc: (amount / NGN_USDC).toFixed(4), note: paynote,
+      date: new Date().toLocaleString("en-NG", { dateStyle: "full", timeStyle: "short" }),
+      status: "pending", link,
+    };
     const newHistory = [pendingEntry, ...history];
     setHistory(newHistory);
     setPendingLinks(p => [pendingEntry, ...p]);
@@ -341,157 +480,223 @@ export default function MediPay() {
     if (navigator.share) navigator.share({ title: "MediPay Payment Request", text, url: payLink });
     else { copyPayLink(); toast_("Link copied!"); }
   };
+
   const openShareReceipt = rec => { setShareReceipt(rec); setRcpCopied(false); setShowShareModal(true); };
   const copyReceiptText = rec => {
-    const lines = ["== MEDIPAY RECEIPT ==","Patient: "+rec.patient,"File No: "+rec.fileNo,"Hospital: "+(rec.hospital||""),"Category: "+rec.category,"Service: "+rec.item,rec.note?"Note: "+rec.note:null,"Amount: "+fmt(rec.amount),"USDC: "+rec.usdc+" USDC","Network: ARC-TESTNET","Date: "+rec.date,"Tx ID: "+rec.id,"Powered by Circle on ARC Testnet"].filter(Boolean).join("\n");
+    const lines = ["== MEDIPAY RECEIPT ==", "Patient: " + rec.patient, "File No: " + rec.fileNo, "Hospital: " + (rec.hospital || ""), "Category: " + rec.category, "Service: " + rec.item, rec.note ? "Note: " + rec.note : null, "Amount: " + fmt(rec.amount), "USDC: " + rec.usdc + " USDC", "Network: ARC-TESTNET", "Date: " + rec.date, "Tx ID: " + rec.id, "Powered by Circle on ARC Testnet"].filter(Boolean).join("\n");
     navigator.clipboard.writeText(lines).then(() => { setRcpCopied(true); setTimeout(() => setRcpCopied(false), 2000); }).catch(() => toast_("Clipboard not available", "err"));
   };
-  const nativeShare = async (rec) => {
-    // Generate the same canvas image as downloadReceiptImage, then share via WhatsApp
-    const canvas = document.createElement("canvas");
-    canvas.width = 600; canvas.height = 820;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#0d1117"; ctx.fillRect(0, 0, 600, 820);
-    ctx.fillStyle = "#1a9e5f"; ctx.fillRect(0, 0, 600, 8);
-    ctx.beginPath(); ctx.arc(300, 70, 36, 0, Math.PI * 2);
-    const g = ctx.createRadialGradient(300,70,0,300,70,36);
-    g.addColorStop(0,"#1a9e5f"); g.addColorStop(1,"#0d7a47");
-    ctx.fillStyle = g; ctx.fill();
-    ctx.fillStyle="#fff"; ctx.font="bold 28px system-ui"; ctx.textAlign="center"; ctx.fillText("M",300,80);
-    ctx.fillStyle="#e6edf3"; ctx.font="bold 26px system-ui"; ctx.fillText("MediPay",300,128);
-    ctx.fillStyle="#1a9e5f"; ctx.font="14px system-ui"; ctx.fillText("Payment Confirmed  ARC Testnet",300,152);
-    ctx.setLineDash([6,4]); ctx.strokeStyle="#30363d"; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(40,172); ctx.lineTo(560,172); ctx.stroke(); ctx.setLineDash([]);
-    const rows=[["Patient",rec.patient],["File Number",rec.fileNo],["Hospital",rec.hospital||""],["Category",rec.category],["Service",rec.item],rec.note?["Note",rec.note]:null,["Amount (NGN)",fmt(rec.amount)],["Amount (USDC)",rec.usdc+" USDC"],["Network","ARC-TESTNET"],["Settlement","< 1 second (Circle MPC)"],["Date",rec.date],["Transaction ID",rec.id?rec.id.slice(0,28)+"...":""]].filter(Boolean);
-    let y=200; rows.forEach(([k,v])=>{ ctx.fillStyle="#8b949e"; ctx.font="13px system-ui"; ctx.textAlign="left"; ctx.fillText(k,50,y); ctx.fillStyle="#e6edf3"; ctx.font="13px system-ui"; ctx.textAlign="right"; ctx.fillText(String(v).length>38?String(v).slice(0,38)+"...":String(v),550,y); ctx.strokeStyle="#21262d"; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(50,y+10); ctx.lineTo(550,y+10); ctx.stroke(); y+=36; });
-    y+=10; ctx.fillStyle="#0d2b1a"; roundRect(ctx,40,y,520,80,12);
-    ctx.fillStyle="#1a9e5f"; ctx.font="bold 32px system-ui"; ctx.textAlign="center"; ctx.fillText(fmt(rec.amount),300,y+42);
-    ctx.fillStyle="#484f58"; ctx.font="13px system-ui"; ctx.fillText(rec.usdc+" USDC  Circle ARC Testnet",300,y+64);
-    y+=100; ctx.fillStyle="#21262d"; ctx.font="8px monospace"; ctx.fillText("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||",300,y);
-    ctx.fillStyle="#484f58"; ctx.font="11px system-ui"; ctx.fillText("Powered by Circle on ARC Testnet  medipay.circle.arc",300,y+20);
-    ctx.fillStyle="#1a9e5f"; ctx.fillRect(0,812,600,8);
-
-    try {
-      const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
-      const file = new File([blob], "medipay-receipt-"+(rec.fileNo||"receipt")+".png", { type:"image/png" });
-      if (navigator.canShare && navigator.canShare({ files:[file] })) {
-        // Mobile: share image directly (opens WhatsApp, etc.)
-        await navigator.share({ title:"MediPay Receipt", files:[file] });
-        return;
-      }
-    } catch(e) { console.log("File share failed:", e.message); }
-
-    // Desktop fallback: download image + open WhatsApp web
-    const link = document.createElement("a");
-    link.download = "medipay-receipt-"+(rec.fileNo||"receipt")+".png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-    // Open WhatsApp after short delay so image downloads first
-    setTimeout(() => {
-      const text = encodeURIComponent("MediPay Receipt\nPatient: "+rec.patient+"\nService: "+rec.item+"\nAmount: "+fmt(rec.amount)+"\nDate: "+rec.date+"\n\n(See downloaded image for full receipt)");
-      window.open("https://wa.me/?text="+text, "_blank");
-    }, 800);
+  const nativeShare = async rec => {
+    const lines = ["== MEDIPAY RECEIPT ==", "Patient:  " + rec.patient, "File No:  " + rec.fileNo, "Hospital: " + (rec.hospital || ""), "Category: " + rec.category, "Service:  " + rec.item, rec.note ? "Note:     " + rec.note : null, "Amount:   " + fmt(rec.amount), "USDC:     " + rec.usdc + " USDC", "Network:  ARC-TESTNET", "Date:     " + rec.date, "Tx ID:    " + rec.id, "========================", "Powered by Circle on ARC Testnet"].filter(Boolean).join("\n");
+    if (navigator.share) navigator.share({ title: "MediPay Receipt", text: lines });
+    else { copyReceiptText(rec); toast_("Receipt copied to clipboard!"); }
   };
 
-  const handleSignOut = async () => {
-    await logOut();
-    setUser(null); resetForm(); setFileNo(""); setWalletId(""); setWalletAddr("");
-    setUsdcBal(null); setFaucetSent(false); setHistory([]); setLinked([]);
-    setHospital(null); setFbUser(null); setScreen("landing");
-  };
-
-  const NAV = [["home","🏠","Home"],["pay","💳","Pay"],["history","📋","History"],["profile","👤","Profile"]];
+  const NAV = [["home", <Ico.HomeIcon size={18} />, "Home"], ["pay", <Ico.CardIcon size={18} />, "Pay"], ["history", <Ico.ClockIcon size={18} />, "History"], ["profile", <Ico.UserIcon size={18} />, "Profile"]];
   const switchTab = t => { setTab(t); setMenuOpen(false); };
-  const shellProps = { isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast };
+  const shellProps = { isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, setScreen, onRequireAuth: requireAuth };
 
-  // ── Loading spinner ─────────────────────────────────────────────────────────
-  if (fbUser === undefined) return (
-    <div style={{ minHeight:"100vh", background:"#0d1117", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }}>
-      <div style={{ width:48,height:48,borderRadius:"50%",border:"3px solid #1a9e5f33",borderTop:"3px solid #1a9e5f",animation:"spin .8s linear infinite" }} />
-      <div style={{ color:"#6b7280", fontSize:13 }}>Loading MediPay...</div>
-    </div>
-  );
-
-  // ── Landing ─────────────────────────────────────────────────────────────────
   if (screen === "landing") return (
-    <div style={{ minHeight:"100vh", background:"#0d1117", color:"#e5e7eb", fontFamily:"system-ui,-apple-system,sans-serif", display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }}>
-      <div style={{ width:"100%", maxWidth:420 }}>
-        {/* Logo */}
-        <div style={{ textAlign:"center", marginBottom:32 }}>
-          <div style={{ width:72,height:72,borderRadius:20,background:"linear-gradient(135deg,#1a9e5f,#0d7a47)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",boxShadow:"0 0 40px rgba(26,158,95,0.4)" }}>
-            <span style={{ fontSize:32,fontWeight:800,color:"#fff" }}>M</span>
+    <Shell {...shellProps} isLanding={true}>
+      <div style={s.landWrap}>
+        <div style={s.landGlow1} /><div style={s.landGlow2} /><div style={s.landGridPat} />
+
+        <div style={s.landingGrid}>
+          <div style={{ ...s.heroCopy, position: "relative", zIndex: 1 }}>
+            <div style={s.heroPills}>
+              <span style={s.heroPill}><Ico.Bolt size={14} /> Instant settlements</span>
+              <span style={s.heroPill}><Ico.HeartIcon size={14} /> 12 hospitals</span>
+              <span style={s.heroPill}><Ico.LinkIcon size={14} /> Share a payment link</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 40, fontWeight: 700, letterSpacing: "-1.5px", color: palette.text }}>MediPay</span>
+              {DEMO_MODE && <span style={s.demoBadge}>Demo</span>}
+            </div>
+            <p style={{ fontSize: 13, color: palette.muted, marginBottom: 18 }}>Powered by Circle USDC on ARC Testnet</p>
+            <h1 style={s.landH1}>Healthcare payments,<br /><span style={{ color: palette.brandDeep }}>finally simple.</span></h1>
+            <p style={s.landSub}>Register once. Pay anywhere in Nigeria and beyond.<br />Your Circle Programmable Wallet goes with you.</p>
+            <button style={s.landCTA} onClick={requireAuth}><span>Get Started</span><Ico.ArrowRight size={18} /></button>
+            <div style={s.landFeatures}>
+              {[[<Ico.Shield size={20} />, "MPC Secured"], [<Ico.Bolt size={20} />, "< 1s Settlement"], [<Ico.NGFlag size={20} />, "12 Hospitals"], [<Ico.ActivityIcon size={20} />, "USDC Native"]].map(([ic, lb]) => (
+                <div key={lb} style={s.landFeat}>{ic}<span style={{ fontSize: 12, color: palette.textSoft, marginTop: 4 }}>{lb}</span></div>
+              ))}
+            </div>
+            <div style={s.landStats}>
+              {[["12", "Hospitals"], ["< 1s", "Finality"], ["N0", "Fees"], ["36", "States"]].map(([v, l]) => (
+                <div key={l} style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: palette.brandDeep }}>{v}</div>
+                  <div style={{ fontSize: 11, color: palette.muted }}>{l}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <h1 style={{ fontSize:32,fontWeight:900,color:"#fff",margin:"0 0 6px",letterSpacing:"-1px" }}>MediPay</h1>
-          <p style={{ fontSize:13,color:"#6b7280",margin:0 }}>Healthcare payments, finally simple.</p>
-          <p style={{ fontSize:11,color:"#374151",marginTop:4 }}>Powered by Circle USDC · ARC Testnet</p>
+
+          <div style={s.heroVisual}>
+
+            <div style={s.phoneMockupWrap}>
+              <img src="/phone%20mockup.png" alt="MediPay app" style={s.phoneMockupImg} />
+            </div>
+          </div>
         </div>
 
-        {/* Auth Card */}
-        <div style={{ background:"#111827",border:"0.5px solid #1f2937",borderRadius:20,padding:"28px 24px" }}>
-          {/* Tabs */}
-          <div style={{ display:"flex",gap:4,marginBottom:24,background:"#0d1117",borderRadius:10,padding:4 }}>
-            {[["login","Sign In"],["signup","Create Account"]].map(([m,l]) => (
-              <button key={m} style={{ flex:1,padding:"9px 8px",fontSize:13,fontWeight:600,border:"none",borderRadius:7,background:authMode===m?"#1a9e5f":"none",color:authMode===m?"#fff":"#9ca3af",cursor:"pointer" }} onClick={() => { setAuthMode(m); setAuthErr(""); }}>{l}</button>
+        <div style={s.landSection}>
+          <div style={s.sectionTitle}>What MediPay does</div>
+          <div style={s.sectionH2}>Medical payments across Nigeria, powered by Circle USDC.</div>
+          <div style={s.sectionLead}>MediPay replaces cash and bank transfers at hospitals with instant USDC settlement through a Circle Programmable Wallet — created automatically for every patient, no crypto knowledge needed.</div>
+          <div style={{ height: 8 }} />
+          <div style={s.sectionGrid}>
+            {[
+              [<Ico.LinkIcon size={22} />, "Share a payment link", "Generate a one-tap payment link and send via WhatsApp or SMS. The payer clicks and settles in seconds — no app download required."],
+              [<Ico.CardIcon size={22} />, "Instant Circle Wallet", "A Circle Programmable Wallet is created on registration. MPC-secured, no seed phrase, and auto-funded with 10 USDC testnet on signup."],
+              [<Ico.FolderIcon size={22} />, "File number travels with you", "Register once at any MediPay hospital. Your file number, records, and wallet follow you across all 12 hospitals in 36 states."]
+            ].map(([ic, t, d]) => (
+              <div key={t} style={s.stepCard}>
+                <div style={{ ...s.stepNo, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.65)", width: 52, height: 52, borderRadius: 18 }}>{ic}</div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: palette.text, marginBottom: 6 }}>{t}</div>
+                <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.8 }}>{d}</div>
+              </div>
             ))}
           </div>
-
-          {/* Google button */}
-          <button onClick={async () => { setAuthErr(""); try { await signInWithGoogle(); } catch(e) { setAuthErr(e.message); } }}
-            style={{ width:"100%",background:"#fff",border:"none",borderRadius:12,padding:"13px",fontSize:14,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginBottom:14,color:"#111827" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Continue with Google
-          </button>
-
-          <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:14 }}>
-            <div style={{ flex:1,height:1,background:"#1f2937" }} />
-            <span style={{ fontSize:12,color:"#6b7280" }}>or</span>
-            <div style={{ flex:1,height:1,background:"#1f2937" }} />
-          </div>
-
-          {/* Email/Password */}
-          <input style={s.inp} placeholder="Email address" type="email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} autoComplete="email" />
-          <input style={s.inp} placeholder="Password" type="password" value={authPw} onChange={e => setAuthPw(e.target.value)} autoComplete={authMode==="login"?"current-password":"new-password"} />
-
-          {authErr && <div style={{ fontSize:12,color:"#ef4444",marginBottom:12,padding:"8px 12px",background:"#ef444418",borderRadius:8 }}>{authErr.replace("Firebase: ","").replace(/\(auth\/.*\)/,"")}</div>}
-
-          {loading && <Stp s={step} />}
-
-          <button onClick={async () => {
-            if (!authEmail || !authPw) { setAuthErr("Enter email and password"); return; }
-            setAuthErr(""); setLoading(true);
-            try {
-              if (authMode === "login") await signInEmail(authEmail, authPw);
-              else await signUpEmail(authEmail, authPw);
-            } catch(e) { setAuthErr(e.message); }
-            setLoading(false);
-          }} style={{ width:"100%",background:"linear-gradient(135deg,#1a9e5f,#0d7a47)",color:"#fff",border:"none",borderRadius:12,padding:"14px",fontSize:14,fontWeight:700,cursor:"pointer" }}>
-            {authMode === "login" ? "Sign In" : "Create Account"}
-          </button>
         </div>
 
-        <p style={{ textAlign:"center",fontSize:11,color:"#374151",marginTop:16 }}>
-          Circle MPC-secured · No seed phrase · ARC Testnet
-        </p>
+        <div style={s.landSection}>
+          <div style={s.sectionTitle}>Why MediPay</div>
+          <div style={s.sectionH2}>Instant settlement. No bank delays. No app download for the payer.</div>
+          <div style={s.trustGrid}>
+            {[
+              [<Ico.Bolt size={32} />, "< 1 second settlement", "Powered by Circle Nanopayments on ARC Testnet. No bank queues, no transfer delays."],
+              [<Ico.Shield size={32} />, "MPC-secured wallets", "Multi-Party Computation means no seed phrase to lose. Your wallet is safe and recoverable."],
+              [<Ico.NGFlag size={32} />, "12 hospitals + growing", "UDUTH, LUTH, UCH, ABUTH, and 8 more across Nigeria. Expanding to Ghana and Kenya."],
+              [<Ico.LinkIcon size={32} />, "Shareable payment links", "Anyone can pay a link — no app, no crypto wallet, no registration. Just tap and settle."]
+            ].map(([ic, t, d]) => (
+              <div key={t} style={s.trustCard}>
+                <div style={{ width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "rgba(255,255,255,0.5)", borderRadius: 20, border: "1px solid rgba(255,255,255,0.65)", backdropFilter: "blur(8px)" }}>{ic}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: palette.text, marginBottom: 6 }}>{t}</div>
+                  <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.7 }}>{d}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={s.landSection}>
+          <div style={s.sectionTitle}>Hospital network</div>
+          <div style={s.sectionH2}>Built for real hospitals, not just a demo screen.</div>
+          <div style={s.newsGrid}>
+            {NEWS.map(n => (
+              <div key={n.title} style={s.newsCard}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
+                  <span style={{ ...s.newsTagBadge, background: "rgba(63,183,163,0.10)", color: palette.brandDeep, border: "1px solid rgba(63,183,163,0.18)" }}>{n.tag}</span>
+                  <span style={{ fontSize: 11, color: palette.muted }}>{n.date}</span>
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: palette.text, lineHeight: 1.4, marginBottom: 8 }}>{n.title}</div>
+                <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.8 }}>{n.body}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={s.landSection}>
+          <div style={s.ctaPanel}>
+            <div style={{ maxWidth: 600 }}>
+              <div style={s.sectionTitle}>Ready to get started?</div>
+              <div style={s.sectionH2}>Choose your hospital and register in under 2 minutes.</div>
+              <div style={s.sectionLead}>A Circle wallet is created automatically. You get 10 USDC testnet, a portable file number, and access to instant medical payments across Nigeria.</div>
+            </div>
+            <button style={{ ...s.landCTA, marginBottom: 0 }} onClick={requireAuth}><span>Find your hospital</span><Ico.ArrowRight size={18} /></button>
+          </div>
+        </div>
+
+        <div style={s.landingFooter}>
+          <div style={s.footerGrid}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <div style={s.logoMk}><span style={{ fontSize: 16, fontWeight: 800, color: "#fff" }}>M</span></div>
+                <span style={{ fontSize: 15, fontWeight: 700, color: palette.text }}>MediPay</span>
+              </div>
+              <p style={{ fontSize: 12, color: palette.muted, lineHeight: 1.7, maxWidth: 280 }}>Nigeria&#39;s blockchain-powered medical payment platform. Powered by Circle USDC on ARC Testnet.</p>
+            </div>
+            <div>
+              <div style={s.footerTitle}>Product</div>
+              <button style={s.footerLink} onClick={requireAuth}>Find a Hospital</button>
+              <div style={s.footerLink}>How it Works</div>
+              <div style={s.footerLink}>Pricing</div>
+            </div>
+            <div>
+              <div style={s.footerTitle}>Network</div>
+              <div style={s.footerLink}>12 Hospitals</div>
+              <div style={s.footerLink}>36 States</div>
+              <div style={s.footerLink}>Circle Network</div>
+            </div>
+            <div>
+              <div style={s.footerTitle}>Company</div>
+              <div style={s.footerLink}>About</div>
+              <div style={s.footerLink}>Blog</div>
+              <div style={s.footerLink}>Contact</div>
+            </div>
+          </div>
+          <div style={s.footerBottom}>
+            <span style={{ fontSize: 11, color: palette.muted }}>&copy; 2026 MediPay. All rights reserved.</span>
+            <span style={{ fontSize: 11, color: palette.muted }}>Powered by Circle</span>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* ── Auth Modal ──────────────────────────────────────────── */}
+      {showAuth && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)", padding: 20 }} onClick={e => { if (e.target === e.currentTarget) setShowAuth(false); }}>
+          <div style={{ background: "#fff", borderRadius: 24, padding: "32px 28px", maxWidth: 400, width: "100%", boxShadow: "0 25px 60px rgba(0,0,0,0.3)" }}>
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <div style={{ width: 56, height: 56, borderRadius: 16, background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                <span style={{ fontSize: 24, fontWeight: 800, color: "#fff" }}>M</span>
+              </div>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: 0 }}>Welcome to MediPay</h2>
+              <p style={{ fontSize: 13, color: "#6b7280", marginTop: 4 }}>Sign in or create your account</p>
+            </div>
+            <div style={{ display: "flex", gap: 4, marginBottom: 20, background: "#f3f4f6", borderRadius: 10, padding: 4 }}>
+              {[["login", "Sign In"], ["signup", "Create Account"]].map(([m, l]) => (
+                <button key={m} style={{ flex: 1, padding: "9px 8px", fontSize: 13, fontWeight: 600, border: "none", borderRadius: 7, background: authMode === m ? "#1a9e5f" : "transparent", color: authMode === m ? "#fff" : "#6b7280", cursor: "pointer" }} onClick={() => { setAuthMode(m); setAuthErr(""); }}>{l}</button>
+              ))}
+            </div>
+            <button onClick={async () => { setAuthErr(""); try { await signInWithGoogle(); setShowAuth(false); } catch(e) { setAuthErr(e.message); } }}
+              style={{ width: "100%", background: "#fff", border: "1px solid #e5e7eb", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 14, color: "#111827" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              Continue with Google
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <div style={{ flex: 1, height: 1, background: "#e5e7eb" }} />
+              <span style={{ fontSize: 12, color: "#9ca3af" }}>or</span>
+              <div style={{ flex: 1, height: 1, background: "#e5e7eb" }} />
+            </div>
+            <input style={{ width: "100%", padding: "12px 14px", border: "1.5px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", marginBottom: 10, color: "#111827", background: "#f9fafb" }} placeholder="Email address" type="email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} autoComplete="email" />
+            <input style={{ width: "100%", padding: "12px 14px", border: "1.5px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", marginBottom: 12, color: "#111827", background: "#f9fafb" }} placeholder="Password" type="password" value={authPw} onChange={e => setAuthPw(e.target.value)} autoComplete={authMode === "login" ? "current-password" : "new-password"} />
+            {authErr && <div style={{ fontSize: 12, color: "#ef4444", marginBottom: 12, padding: "8px 12px", background: "#fef2f2", borderRadius: 8 }}>{authErr.replace("Firebase: ", "").replace(/\(auth\/.*\)/, "")}</div>}
+            {loading && <div style={{ fontSize: 12, color: "#1a9e5f", textAlign: "center", padding: "8px 0" }}>Processing...</div>}
+            <button onClick={() => handleFirebaseAuth(authMode)} style={{ width: "100%", background: "linear-gradient(135deg,#1a9e5f,#0d7a47)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+              {authMode === "login" ? "Sign In" : "Create Account"}
+            </button>
+          </div>
+        </div>
+      )}
+    </Shell>
   );
 
-  // ── Hospitals ───────────────────────────────────────────────────────────────
   if (screen === "hospitals") return (
     <Shell {...shellProps}>
-      <PBar title="Select Your Hospital" onBack={null} />
+      <PBar title="Select Hospital" onBack={() => setScreen("landing")} />
       <div style={s.pg}>
-        <p style={s.sub}>Welcome! Choose the hospital you are currently visiting to get started.</p>
+        <p style={s.sub}>Choose the hospital you are currently visiting.</p>
         <div style={s.searchWrap}>
-          <span style={{ fontSize:16,color:"#6b7280" }}>🔍</span>
-          <input style={s.searchInp} placeholder="Search hospital or state..." value={searchH} onChange={e => setSearchH(e.target.value)} />
+          <Ico.SearchIcon size={16} color={palette.muted} />
+          <input style={s.searchInp} placeholder="Search hospital or state..." value={searchH} onChange={e => setSearchH(e.target.value)} autoComplete="off" />
         </div>
         <div style={s.hGrid}>
           {filtered.map(h => (
             <button key={h.id} style={s.hCard} onClick={() => handleHospSelect(h)}>
               <div style={s.hIdBadge}>{h.id}</div>
-              <div style={{ fontSize:12,color:"#d1d5db",lineHeight:1.4,margin:"8px 0 4px" }}>{h.full}</div>
-              <div style={{ fontSize:11,color:"#6b7280" }}>📍 {h.state} State</div>
+              <div style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.4, margin: "8px 0 4px" }}>{h.full}</div>
+              <div style={{ fontSize: 11, color: palette.muted, display: "flex", alignItems: "center", gap: 4 }}><Ico.MapPin size={12} color={palette.muted} /> {h.state} State</div>
             </button>
           ))}
         </div>
@@ -499,28 +704,66 @@ export default function MediPay() {
     </Shell>
   );
 
-  // ── Profile Form ────────────────────────────────────────────────────────────
+  if (screen === "auth") return (
+    <Shell {...shellProps}>
+      <PBar title={hospital?.id} onBack={() => setScreen("hospitals")} />
+      <div style={s.pg}>
+        <div style={s.hospBanner}>
+          <div style={{ fontSize: 26, fontWeight: 800, color: palette.brandDeep }}>{hospital?.id}</div>
+          <div style={{ fontSize: 13, color: palette.textSoft }}>{hospital?.full}</div>
+          <div style={{ fontSize: 11, color: palette.muted, marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}><Ico.MapPin size={12} color={palette.muted} /> {hospital?.state} State</div>
+        </div>
+        <p style={s.sub}>No crypto experience needed. A Circle Programmable Wallet is created for you automatically — secured by MPC, no seed phrase.</p>
+        <div style={s.authTabs}>
+          {[["signup", "New Patient"], ["existing", "I Have a File Number"]].map(([m, l]) => (
+            <button key={m} style={{ ...s.authTab, ...(authMode === m ? s.authTabOn : {}) }} onClick={() => setAuthMode(m)}>{l}</button>
+          ))}
+        </div>
+        {authMode === "existing" ? (
+          <div>
+            <L t="Your MediPay file number" />
+            <input style={s.inp} placeholder="e.g. UDUTH-123456-4521" value={existFN} onChange={e => setExistFN(e.target.value)} autoComplete="off" spellCheck={false} />
+            <p style={s.hint}>This retrieves your records and links your wallet to <strong style={{ color: palette.text }}>{hospital?.id}</strong>.</p>
+            {loading && <Stp s={step} />}
+            <GBtn disabled={loading} onClick={handleAuth}>{loading ? "Retrieving..." : "Retrieve My Records"}</GBtn>
+          </div>
+        ) : (
+          <div>
+            <p style={s.hint}>Register at {hospital?.id} and get a Circle Programmable Wallet + 10 USDC testnet instantly.</p>
+            <L t="Email address" />
+            <input style={s.inp} placeholder="you@example.com" type="email" value={femail} onChange={e => setFemail(e.target.value)} autoComplete="off" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
+              <button style={s.socialBtn} onClick={handleAuth}><Ico.MailIcon size={16} />  Continue with Email</button>
+              <button style={s.socialBtn} onClick={handleAuth}><Ico.Globe size={16} />  Continue with Google</button>
+            </div>
+            <p style={{ fontSize: 11, color: palette.muted, textAlign: "center" }}>Circle MPC-secured — no seed phrase exposed.</p>
+          </div>
+        )}
+      </div>
+    </Shell>
+  );
+
   if (screen === "profile") return (
     <Shell {...shellProps}>
-      <PBar title="Create Your Profile" onBack={() => setScreen("hospitals")} />
+      <PBar title="Create Profile" onBack={() => setScreen("auth")} />
       <div style={s.pg}>
-        <p style={s.sub}>Fill your details to register at {hospital?.id}. Signed in as <strong style={{ color:"#1a9e5f" }}>{fbUser?.email}</strong></p>
-        <L t="Full name *" /><input style={s.inp} placeholder="First Middle Last" value={fname} onChange={e => setFname(e.target.value)} />
+        <p style={s.sub}>Fill your details to register at {hospital?.id}.</p>
+        <L t="Full name *" /><input style={s.inp} placeholder="First Middle Last" value={fname} onChange={e => setFname(e.target.value)} autoComplete="off" />
         <L t="Date of birth *" /><input style={s.inp} type="date" value={fdob} onChange={e => setFdob(e.target.value)} />
-        <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <div><L t="Gender" /><select style={s.inp} value={fgender} onChange={e => setFgender(e.target.value)}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
-          <div><L t="Blood Group" /><select style={s.inp} value={fbloodGroup} onChange={e => setFbloodGroup(e.target.value)}><option value="">Select</option>{["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(g=><option key={g}>{g}</option>)}</select></div>
+          <div><L t="Blood Group" /><select style={s.inp} value={fbloodGroup} onChange={e => setFbloodGroup(e.target.value)}><option value="">Select</option>{["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(g => <option key={g}>{g}</option>)}</select></div>
         </div>
-        <L t="Phone *" /><input style={s.inp} placeholder="+234..." type="tel" value={fphone} onChange={e => setFphone(e.target.value)} />
+        <L t="Phone *" /><input style={s.inp} placeholder="+234..." type="tel" value={fphone} onChange={e => setFphone(e.target.value)} autoComplete="off" />
         <L t="State of residence" />
         <select style={s.inp} value={fstate} onChange={e => setFstate(e.target.value)}>
           <option value="">Select state</option>
-          {["Abia","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue","Borno","Cross River","Delta","Ebonyi","Edo","Ekiti","Enugu","FCT","Gombe","Imo","Jigawa","Kaduna","Kano","Katsina","Kebbi","Kogi","Kwara","Lagos","Nasarawa","Niger","Ogun","Ondo","Osun","Oyo","Plateau","Rivers","Sokoto","Taraba","Yobe","Zamfara"].map(st=><option key={st}>{st}</option>)}
+          {["Abia","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue","Borno","Cross River","Delta","Ebonyi","Edo","Ekiti","Enugu","FCT","Gombe","Imo","Jigawa","Kaduna","Kano","Katsina","Kebbi","Kogi","Kwara","Lagos","Nasarawa","Niger","Ogun","Ondo","Osun","Oyo","Plateau","Rivers","Sokoto","Taraba","Yobe","Zamfara"].map(st => <option key={st}>{st}</option>)}
         </select>
-        <L t="Home address" /><input style={s.inp} placeholder="Street, LGA, State" value={faddress} onChange={e => setFaddress(e.target.value)} />
+        <L t="Home address" /><input style={s.inp} placeholder="Street, LGA, State" value={faddress} onChange={e => setFaddress(e.target.value)} autoComplete="off" />
         <L t="Genotype" />
         <select style={s.inp} value={fgenotype} onChange={e => setFgenotype(e.target.value)}>
-          <option value="">Select</option>{["AA","AS","SS","AC","SC"].map(g=><option key={g}>{g}</option>)}
+          <option value="">Select</option>{["AA","AS","SS","AC","SC"].map(g => <option key={g}>{g}</option>)}
         </select>
         {loading && <Stp s={step} />}
         <GBtn disabled={loading} onClick={handleProfileSubmit}>{loading ? "Setting up your account..." : "Submit & Register"}</GBtn>
@@ -528,28 +771,30 @@ export default function MediPay() {
     </Shell>
   );
 
-  // ── File Number Reveal ──────────────────────────────────────────────────────
   if (screen === "fileno") return (
     <Shell {...shellProps}>
       <div style={s.pg}>
         <div style={s.fileCard}>
-          <div style={s.fileCheck}>✓</div>
-          <div style={{ fontSize:13,color:"#9ca3af",marginBottom:8 }}>Registration Successful</div>
-          <div style={{ fontSize:10,color:"#6b7280",textTransform:"uppercase",letterSpacing:".08em",marginBottom:6 }}>Your MediPay File Number</div>
+          <div style={s.fileCheck}><Ico.CheckIcon size={28} color="#25364b" /></div>
+          <div style={{ fontSize: 13, color: palette.textSoft, marginBottom: 8 }}>Registration Successful</div>
+          <div style={{ fontSize: 10, color: palette.muted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>Your MediPay File Number</div>
           <div style={s.fileNo}>{fileNo}</div>
-          <div style={{ fontSize:12,color:"#9ca3af",marginBottom:20 }}>{hospital?.full}</div>
+          <div style={{ fontSize: 12, color: palette.textSoft, marginBottom: 20 }}>{hospital?.full}</div>
           <div style={s.walletReveal}>
-            <div style={{ fontSize:10,color:"#6b7280",textTransform:"uppercase",letterSpacing:".06em",marginBottom:6 }}>Circle Programmable Wallet · ARC Testnet</div>
-            <div style={{ fontSize:11,fontFamily:"monospace",color:"#1a9e5f",wordBreak:"break-all",marginBottom:8 }}>{walletAddr}</div>
+            <div style={{ fontSize: 10, color: palette.muted, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 6 }}>Circle Programmable Wallet · ARC Testnet</div>
+            <div style={{ fontSize: 11, fontFamily: "monospace", color: palette.brandDeep, wordBreak: "break-all", marginBottom: 8 }}>{walletAddr}</div>
             {faucetSent && (
               <div style={s.faucetBadge}>
-                🎉 10 USDC auto-sent from Circle faucet!
-                <a href="https://faucet.circle.com" target="_blank" rel="noreferrer" style={{ display:"block",fontSize:11,color:"#1a9e5f",marginTop:4,textDecoration:"underline" }}>Balance not showing? Claim manually here →</a>
+                <Ico.CheckIcon size={14} color={palette.brandDeep} /> 10 USDC auto-sent from Circle faucet!
+                <a href={"https://faucet.circle.com"} target="_blank" rel="noreferrer"
+                  style={{ display: "block", fontSize: 11, color: palette.brandDeep, marginTop: 4, textDecoration: "underline" }}>
+                  Balance not showing? Claim manually here →
+                </a>
               </div>
             )}
           </div>
-          <p style={{ fontSize:12,color:"#9ca3af",lineHeight:1.7,marginBottom:20 }}>
-            <strong style={{ color:"#e5e7eb" }}>Your account is linked to your Google/email login.</strong> Sign in from any device to access your records and wallet.
+          <p style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.7, marginBottom: 20 }}>
+            <strong style={{ color: palette.text }}>Save this number.</strong> Quote it at any MediPay hospital — your records and wallet follow you across Nigeria.
           </p>
           <GBtn onClick={() => { setTab("home"); setScreen("dashboard"); }}>Go to Dashboard →</GBtn>
         </div>
@@ -557,126 +802,167 @@ export default function MediPay() {
     </Shell>
   );
 
-  // ── Receipt ─────────────────────────────────────────────────────────────────
   if (screen === "receipt") return (
     <Shell {...shellProps}>
-      <PBar title="Payment Receipt" onBack={() => { setPaycat("");setPayitem("");setPaynote("");setPayprice(0);setTab("pay");setScreen("dashboard"); }} />
+      <PBar title="Payment Receipt" onBack={() => { setPaycat(""); setPayitem(""); setPaynote(""); setPayprice(0); setTab("pay"); setScreen("dashboard"); }} />
       <div style={s.pg}>
         <div style={s.rcpCard}>
           <div style={s.rcpHeader}>
-            <div style={s.logoMk}><span style={{ fontSize:18,fontWeight:800,color:"#fff" }}>M</span></div>
-            <div style={{ fontSize:18,fontWeight:800,color:"#fff" }}>MediPay</div>
-            <div style={{ fontSize:13,color:"#1a9e5f",marginTop:2 }}>✓ Payment Confirmed · ARC Testnet</div>
+            <div style={s.logoMk}><span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>M</span></div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: palette.text }}>MediPay</div>
+            <div style={{ fontSize: 13, color: palette.brandDeep, marginTop: 2 }}><Ico.CheckIcon size={14} color={palette.brandDeep} /> Payment Confirmed · ARC Testnet</div>
           </div>
           <div style={s.rcpDash} />
-          {[["Patient",receipt?.patient],["File Number",receipt?.fileNo],["Hospital",receipt?.hospital],["Category",receipt?.category],["Service",receipt?.item],["Note",receipt?.note||"--"],["Amount (NGN)",fmt(receipt?.amount)],["Amount (USDC)",receipt?.usdc+" USDC"],["Network","ARC-TESTNET"],["Settlement","< 1 second (Circle MPC)"],["Date",receipt?.date]].map(([k,v])=>v&&(
-            <div key={k} style={s.rcpRow}><span style={{ fontSize:12,color:"#9ca3af" }}>{k}</span><span style={{ fontSize:12,color:"#e5e7eb",fontWeight:500,textAlign:"right",wordBreak:"break-word",maxWidth:"55%" }}>{v}</span></div>
+          {[["Patient", receipt?.patient], ["File Number", receipt?.fileNo], ["Hospital", receipt?.hospital], ["Category", receipt?.category], ["Service", receipt?.item], ["Note", receipt?.note || "--"], ["Amount (NGN)", fmt(receipt?.amount)], ["Amount (USDC)", receipt?.usdc + " USDC"], ["Network", "ARC-TESTNET"], ["Settlement", "< 1 second (Circle MPC)"], ["Date", receipt?.date]].map(([k, v]) => v && (
+            <div key={k} style={s.rcpRow}><span style={{ fontSize: 12, color: palette.textSoft }}>{k}</span><span style={{ fontSize: 12, color: palette.text, fontWeight: 500, textAlign: "right", wordBreak: "break-word", maxWidth: "55%" }}>{v}</span></div>
           ))}
           <div style={s.rcpDash} />
           <div style={s.rcpTotal}>{fmt(receipt?.amount)}</div>
-          <div style={{ fontSize:12,color:"#6b7280",textAlign:"center",marginTop:4 }}>{receipt?.usdc} USDC · Circle ARC Testnet</div>
-          <p style={{ fontSize:10,color:"#6b7280",textAlign:"center",wordBreak:"break-all",marginTop:8 }}>Tx: {receipt?.id}</p>
+          <div style={{ fontSize: 12, color: palette.muted, textAlign: "center", marginTop: 4 }}>{receipt?.usdc} USDC · Circle ARC Testnet</div>
+          <div style={{ fontSize: 9, color: "#d9e5ed", textAlign: "center", margin: "12px 0 4px", letterSpacing: 1 }}>|||||||||||||||||||||||||||||||||||||||||||||||||||||</div>
+          <p style={{ fontSize: 10, color: palette.muted, textAlign: "center", wordBreak: "break-all" }}>Tx: {receipt?.id}</p>
         </div>
-        <div style={{ display:"flex",gap:10,flexWrap:"wrap" }}>
-          <button style={s.outlineBtn} onClick={() => openShareReceipt(receipt)}>⬆ Share</button>
-          <button style={s.outlineBtn} onClick={() => downloadReceiptImage(receipt)}>⬇ Save Image</button>
-          <GBtn xstyle={{ flex:2 }} onClick={() => { setPaycat("");setPayitem("");setPaynote("");setPayprice(0);setTab("pay");setScreen("dashboard"); }}>New Payment →</GBtn>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button style={s.outlineBtn} onClick={() => openShareReceipt(receipt)}><Ico.ShareIcon size={14} /> Share</button>
+          <button style={s.outlineBtn} onClick={() => downloadReceiptImage(receipt)}><Ico.DownloadIcon size={14} /> Save as Image</button>
+          <GBtn xstyle={{ flex: 2 }} onClick={() => { setPaycat(""); setPayitem(""); setPaynote(""); setPayprice(0); setTab("pay"); setScreen("dashboard"); }}>New Payment →</GBtn>
         </div>
       </div>
       {showShareModal && shareReceipt && <ShareModal rec={shareReceipt} copied={rcpCopied} onCopy={copyReceiptText} onNative={nativeShare} onDownload={downloadReceiptImage} onClose={() => setShowShareModal(false)} />}
     </Shell>
   );
 
-  // ── Dashboard ───────────────────────────────────────────────────────────────
   if (screen === "dashboard") return (
     <Shell showNav {...shellProps}>
-      {/* HOME */}
       {tab === "home" && (
         <div style={s.pg}>
           <div style={s.welcomeBanner}>
             <div style={s.welcomeGlow} />
-            <div style={{ position:"relative",zIndex:1 }}>
-              <div style={{ fontSize:13,color:"#9ca3af",marginBottom:4 }}>Welcome back</div>
-              <div style={{ fontSize:22,fontWeight:800,color:"#fff" }}>{user?.name || "Patient"}</div>
-              <div style={{ fontSize:12,color:"#1a9e5f",marginTop:4,fontFamily:"monospace" }}>{fileNo}</div>
-              <div style={{ fontSize:11,color:"#6b7280",marginTop:2 }}>{fbUser?.email}</div>
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{ fontSize: 13, color: palette.textSoft, marginBottom: 4 }}>Welcome back</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: palette.text }}>{user?.name || "Patient"}</div>
+              <div style={{ fontSize: 12, color: palette.brandDeep, marginTop: 4, fontFamily: "monospace" }}>{fileNo}</div>
             </div>
             <div style={s.welcomeBalance}>
-              <div style={{ fontSize:10,color:"#6b7280",fontWeight:600,textTransform:"uppercase",letterSpacing:".05em" }}>USDC Balance</div>
-              <div style={{ fontSize:26,fontWeight:900,color:"#1a9e5f" }}>{usdcBal !== null ? usdcBal : "--"}</div>
-              <div style={{ fontSize:11,color:"#6b7280" }}>ARC Testnet</div>
+              <div style={{ fontSize: 10, color: palette.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>USDC Balance</div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: palette.brandDeep }}>{usdcBal !== null ? usdcBal : "--"}</div>
+              <div style={{ fontSize: 11, color: palette.muted }}>ARC Testnet</div>
             </div>
           </div>
           <div style={s.statsRow}>
-            {[["12","Hospitals"],["< 1s","Settlement"],["N0","Transfer Fees"],["36","States"]].map(([v,l])=>(
+            {[["12","Hospitals"],["< 1s","Settlement"],["N0","Transfer Fees"],["36","States"]].map(([v,l]) => (
               <div key={l} style={s.statBox}><div style={s.statV}>{v}</div><div style={s.statL}>{l}</div></div>
             ))}
           </div>
-          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:24 }}>
-            <button style={s.qaCard} onClick={()=>switchTab("pay")}>
-              <div style={{ ...s.qaIcon,background:"linear-gradient(135deg,#1a9e5f22,#0d7a4722)",border:"1px solid #1a9e5f44" }}>💳</div>
-              <div style={{ fontSize:14,fontWeight:700,color:"#e5e7eb" }}>Make Payment</div>
-              <div style={{ fontSize:12,color:"#9ca3af" }}>Tests, drugs, surgery</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
+            <button style={s.qaCard} onClick={() => switchTab("pay")}>
+              <div style={{ ...s.qaIcon, background: "linear-gradient(135deg,#dff7ef,#ecfbf6)", border: "1px solid rgba(63,183,163,0.22)" }}><Ico.CardIcon size={20} /></div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: palette.text }}>Make Payment</div>
+              <div style={{ fontSize: 12, color: palette.textSoft }}>Tests, drugs, surgery</div>
             </button>
-            <button style={s.qaCard} onClick={()=>switchTab("history")}>
-              <div style={{ ...s.qaIcon,background:"linear-gradient(135deg,#3b82f622,#1d4ed822)",border:"1px solid #3b82f644" }}>📋</div>
-              <div style={{ fontSize:14,fontWeight:700,color:"#e5e7eb" }}>History</div>
-              <div style={{ fontSize:12,color:"#9ca3af" }}>{history.length} transaction{history.length!==1?"s":""}</div>
+            <button style={s.qaCard} onClick={() => switchTab("history")}>
+              <div style={{ ...s.qaIcon, background: "linear-gradient(135deg,#e8f5ff,#f0f1ff)", border: "1px solid #cde9ff" }}><Ico.ClockIcon size={20} /></div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: palette.text }}>History</div>
+              <div style={{ fontSize: 12, color: palette.textSoft }}>{history.length} transaction{history.length !== 1 ? "s" : ""}</div>
             </button>
           </div>
           <SL t="Your Linked Hospitals" />
-          <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:24 }}>
-            {linked.map(h=>(
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+            {linked.map(h => (
               <div key={h.id} style={s.linkedCard}>
-                <div style={s.linkedIcon}>{h.id.slice(0,4)}</div>
-                <div style={{ flex:1,minWidth:0 }}>
-                  <div style={{ fontSize:13,fontWeight:700,color:"#e5e7eb" }}>{h.id}</div>
-                  <div style={{ fontSize:11,color:"#9ca3af",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{h.full}</div>
-                  <div style={{ fontSize:10,color:"#6b7280" }}>📍 {h.state} State</div>
+                <div style={s.linkedIcon}>{h.id.slice(0, 4)}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: palette.text }}>{h.id}</div>
+                  <div style={{ fontSize: 11, color: palette.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.full}</div>
+                  <div style={{ fontSize: 10, color: palette.muted, display: "flex", alignItems: "center", gap: 4 }}><Ico.MapPin size={10} color={palette.muted} />{h.state} State</div>
                 </div>
-                <div style={{ display:"flex",alignItems:"center",gap:5,flexShrink:0 }}>
-                  <div style={{ width:7,height:7,borderRadius:"50%",background:"#1a9e5f" }} />
-                  <span style={{ fontSize:11,color:"#1a9e5f",fontWeight:600 }}>Active</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: palette.brand }} />
+                  <span style={{ fontSize: 11, color: palette.brandDeep, fontWeight: 600 }}>Active</span>
                 </div>
+              </div>
+            ))}
+          </div>
+          <div style={s.globalCard}>
+            <div style={s.globalGlow} />
+            <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <Ico.Globe size={22} color={palette.text} /><span style={{ fontSize: 16, fontWeight: 800, color: palette.text }}>Global MediPay</span>
+                  <span style={s.comingSoonBadge}>Coming Soon</span>
+                </div>
+                <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, maxWidth: 400 }}>Once registered in Nigeria, use MediPay in Ghana, Kenya, South Africa, UK and beyond.</p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {["GH Ghana","KE Kenya","ZA South Africa","GB UK"].map(c => (
+                  <div key={c} style={{ fontSize: 12, color: palette.textSoft, display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: palette.lineStrong }} />{c} <span style={{ fontSize: 10, color: palette.muted }}>Q4 2026</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <SL t="MediPay Updates" />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 12, marginBottom: 24 }}>
+            {NEWS.map((n, i) => (
+              <div key={i} style={s.newsCard}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ ...s.newsTagBadge, background: "rgba(63,183,163,0.10)", color: palette.brandDeep, border: "1px solid rgba(63,183,163,0.18)" }}>{n.tag}</span>
+                  <span style={{ fontSize: 10, color: palette.muted }}>{n.date}</span>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: palette.text, marginBottom: 6, lineHeight: 1.4 }}>{n.title}</div>
+                <div style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.6 }}>{n.body}</div>
               </div>
             ))}
           </div>
           <SL t="Health Tips" />
-          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:12,marginBottom:24 }}>
-            {HEALTH_TIPS.map((t,i)=>(
-              <div key={i} style={{ ...s.tipCard,borderTop:"3px solid "+t.color }}>
-                <div style={{ fontSize:28,marginBottom:8 }}>{t.icon}</div>
-                <div style={{ fontSize:14,fontWeight:700,color:"#e5e7eb",marginBottom:6 }}>{t.title}</div>
-                <div style={{ fontSize:12,color:"#9ca3af",lineHeight:1.6 }}>{t.body}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 12, marginBottom: 24 }}>
+            {HEALTH_TIPS.map((t, i) => (
+              <div key={i} style={{ ...s.tipCard, borderTop: "3px solid " + t.color }}>
+                <div style={{ marginBottom: 8 }}>{t.icon}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: palette.text, marginBottom: 6 }}>{t.title}</div>
+                <div style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.6 }}>{t.body}</div>
               </div>
             ))}
+          </div>
+          <SL t="About MediPay" />
+          <div style={{ ...s.card, marginBottom: 30, padding: "22px", background: "linear-gradient(135deg,#ffffff,#eefbf6)", border: "1px solid rgba(63,183,163,0.18)" }}>
+            <div style={{ fontSize: 17, fontWeight: 800, color: palette.text, marginBottom: 10 }}>What is MediPay?</div>
+            <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.9, marginBottom: 10 }}>Nigeria's first blockchain-powered medical payment platform. Register once, pay anywhere — tests, surgery, medication, therapy — without cash, without queues.</p>
+            <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.9, marginBottom: 16 }}>Powered by <strong style={{ color: palette.brandDeep }}>Circle Programmable Wallets</strong> and <strong style={{ color: palette.brandDeep }}>Circle Nanopayments on ARC Testnet</strong>.</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {["Circle Programmable Wallet","Nanopayments","ARC Testnet","x402 Protocol","USDC","Auto Faucet"].map(t => (
+                <span key={t} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, fontWeight: 600 }}>{t}</span>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* PAY */}
       {tab === "pay" && (
         <div style={s.pg}>
           <div style={s.payHdr}>
-            <div><div style={{ fontSize:18,fontWeight:800,color:"#fff" }}>Make a Payment</div><div style={{ fontSize:12,color:"#9ca3af",marginTop:2 }}>at {hospital?.id}</div></div>
+            <div><div style={{ fontSize: 18, fontWeight: 800, color: palette.text }}>Make a Payment</div><div style={{ fontSize: 12, color: palette.textSoft, marginTop: 2 }}>at {hospital?.id}</div></div>
             {usdcBal !== null && usdcBal !== "--" && (
               <div style={s.payBal}>
-                <span style={{ fontSize:10,color:"#6b7280" }}>Balance</span>
-                <span style={{ fontSize:15,fontWeight:800,color:"#1a9e5f" }}>{usdcBal} USDC</span>
-                <button style={{ background:"none",border:"none",color:"#1a9e5f",cursor:"pointer",fontSize:14 }} onClick={()=>refreshBalance()}>↻</button>
+                <span style={{ fontSize: 10, color: palette.muted }}>Balance</span>
+                <span style={{ fontSize: 15, fontWeight: 800, color: palette.brandDeep }}>{usdcBal} USDC</span>
+                <button style={{ background: "none", border: "none", color: palette.brandDeep, cursor: "pointer", fontSize: 14 }} onClick={() => refreshBalance()}><Ico.RefreshIcon size={14} /></button>
               </div>
             )}
           </div>
           <L t="Payment category" />
-          <div style={{ position:"relative",marginBottom:14 }}>
-            <button style={s.dropBtn} onClick={()=>{setShowCat(!showCat);setShowItem(false);}}>
-              <span style={{ flex:1,textAlign:"left" }}>{paycat?CATS[paycat].icon+"  "+paycat:"Select category..."}</span><span style={{ color:"#6b7280" }}>▾</span>
+          <div style={{ position: "relative", marginBottom: 14 }}>
+            <button style={s.dropBtn} onClick={() => { setShowCat(!showCat); setShowItem(false); }}>
+              <span style={{ flex: 1, textAlign: "left" }}>{paycat ? CATS[paycat].icon + "  " + paycat : "Select category..."}</span>
+              <Ico.ChevronDown size={14} color={palette.muted} />
             </button>
             {showCat && (
               <div style={s.dropMenu}>
-                {Object.keys(CATS).map(cat=>(
-                  <button key={cat} style={s.dropItem} onClick={()=>{setPaycat(cat);setPayitem("");setPayprice(0);setShowCat(false);}}>
-                    <span style={{ fontSize:18 }}>{CATS[cat].icon}</span><span style={{ flex:1,fontWeight:500 }}>{cat}</span><span style={{ fontSize:11,color:"#6b7280" }}>{CATS[cat].items.length} services</span>
+                {Object.keys(CATS).map(cat => (
+                  <button key={cat} style={s.dropItem} onClick={() => { setPaycat(cat); setPayitem(""); setPayprice(0); setShowCat(false); }}>
+                    <span style={{ fontSize: 18 }}>{CATS[cat].icon}</span><span style={{ flex: 1, fontWeight: 500 }}>{cat}</span>
+                    <span style={{ fontSize: 11, color: palette.muted }}>{CATS[cat].items.length} services</span>
                   </button>
                 ))}
               </div>
@@ -684,16 +970,16 @@ export default function MediPay() {
           </div>
           {paycat && (
             <div>
-              <L t={"Select "+paycat+" type"} />
-              <div style={{ position:"relative",marginBottom:14 }}>
-                <button style={s.dropBtn} onClick={()=>{setShowItem(!showItem);setShowCat(false);}}>
-                  <span style={{ flex:1,textAlign:"left" }}>{payitem||"Choose "+paycat+"..."}</span><span style={{ color:"#6b7280" }}>▾</span>
+              <L t={"Select " + paycat + " type"} />
+              <div style={{ position: "relative", marginBottom: 14 }}>
+                <button style={s.dropBtn} onClick={() => { setShowItem(!showItem); setShowCat(false); }}>
+                  <span style={{ flex: 1, textAlign: "left" }}>{payitem || "Choose " + paycat + "..."}</span><Ico.ChevronDown size={14} color={palette.muted} />
                 </button>
                 {showItem && (
                   <div style={s.dropMenu}>
-                    {CATS[paycat].items.map((it,i)=>(
-                      <button key={it} style={s.dropItem} onClick={()=>{setPayitem(it);setPayprice(CATS[paycat].prices[i]);setShowItem(false);}}>
-                        <span style={{ flex:1 }}>{it}</span><span style={{ color:"#1a9e5f",fontWeight:700,fontSize:13 }}>{fmt(CATS[paycat].prices[i])}</span>
+                    {CATS[paycat].items.map((it, i) => (
+                      <button key={it} style={s.dropItem} onClick={() => { setPayitem(it); setPayprice(CATS[paycat].prices[i]); setShowItem(false); }}>
+                        <span style={{ flex: 1 }}>{it}</span><span style={{ color: palette.brandDeep, fontWeight: 700, fontSize: 13 }}>{fmt(CATS[paycat].prices[i])}</span>
                       </button>
                     ))}
                   </div>
@@ -703,46 +989,52 @@ export default function MediPay() {
           )}
           {payitem && (
             <div style={s.priceBox}>
-              <div style={{ fontSize:12,color:"#9ca3af" }}>Total to pay</div>
-              <div style={{ fontSize:36,fontWeight:900,color:"#1a9e5f",letterSpacing:"-1px" }}>{fmt(payprice)}</div>
-              <div style={{ fontSize:12,color:"#6b7280" }}>≈ {(payprice/NGN_USDC).toFixed(4)} USDC · ARC Testnet</div>
+              <div style={{ fontSize: 12, color: palette.textSoft }}>Total to pay</div>
+              <div style={{ fontSize: 36, fontWeight: 900, color: palette.brandDeep, letterSpacing: "-1px" }}>{fmt(payprice)}</div>
+              <div style={{ fontSize: 12, color: palette.muted }}>≈ {(payprice / NGN_USDC).toFixed(4)} USDC · ARC Testnet</div>
             </div>
           )}
           <L t="Note for hospital (optional)" />
-          <input style={s.inp} placeholder="e.g. Prescribed by Dr. Musa Aliyu" value={paynote} onChange={e=>setPaynote(e.target.value)} />
+          <input style={s.inp} placeholder="e.g. Prescribed by Dr. Musa Aliyu" value={paynote} onChange={e => setPaynote(e.target.value)} autoComplete="off" />
           {loading && <Stp s={step} />}
-          <div style={{ display:"grid",gridTemplateColumns:"2fr 1fr",gap:12,marginBottom:8 }}>
-            <GBtn disabled={!payitem||loading} onClick={handlePay}>{loading?"Processing on ARC...":payitem?"Pay "+fmt(payprice):"Pay"}</GBtn>
-            <button style={{ ...s.outlineBtn,flexDirection:"column",gap:2,padding:"14px 10px",opacity:!payitem?0.5:1 }} disabled={!payitem} onClick={generatePayLink}>
-              <span style={{ fontSize:18 }}>🔗</span><span style={{ fontSize:11,fontWeight:600 }}>Share Link</span>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12, marginBottom: 8 }}>
+            <GBtn disabled={!payitem || loading} onClick={handlePay}>{loading ? "Processing on ARC..." : payitem ? "Pay " + fmt(payprice) : "Pay"}</GBtn>
+            <button style={{ ...s.outlineBtn, flexDirection: "column", gap: 2, padding: "14px 10px", opacity: !payitem ? 0.5 : 1 }} disabled={!payitem} onClick={generatePayLink}>
+              <Ico.LinkIcon size={18} /><span style={{ fontSize: 11, fontWeight: 600 }}>Share Link</span>
             </button>
           </div>
+          <p style={{ fontSize: 11, color: palette.muted, textAlign: "center", lineHeight: 1.6 }}>Use Share Link to send a payment request to a family member.</p>
         </div>
       )}
 
-      {/* HISTORY */}
       {tab === "history" && (
         <div style={s.pg}>
-          <div style={{ fontSize:18,fontWeight:800,color:"#fff",marginBottom:4 }}>Transaction History</div>
-          <div style={{ fontSize:12,color:"#9ca3af",marginBottom:20 }}>{history.length} total</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 4 }}>Transaction History</div>
+          <div style={{ fontSize: 12, color: palette.textSoft, marginBottom: 20 }}>{history.length} total · {history.filter(h => h.status === "pending").length} pending</div>
           {history.length === 0 ? (
-            <div style={s.empty}><div style={{ fontSize:40,marginBottom:12 }}>📋</div><div style={{ fontSize:15,fontWeight:600,color:"#9ca3af",marginBottom:6 }}>No transactions yet</div><div style={{ fontSize:13,color:"#6b7280" }}>Make your first payment from the Pay tab</div></div>
-          ) : history.map(r=>(
-            <div key={r.id} style={{ ...s.histCard,borderLeft:"3px solid "+(r.status==="pending"?"#f59e0b":"#1a9e5f") }}>
-              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10 }}>
-                <div style={{ flex:1,minWidth:0 }}>
-                  <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:4 }}>
-                    <span style={{ fontSize:16 }}>{CATS[r.category]?.icon}</span>
-                    <span style={{ fontSize:13,fontWeight:700,color:"#e5e7eb" }}>{r.category}</span>
-                    <span style={{ ...s.statusBadge,...(r.status==="pending"?s.statusPending:s.statusDone) }}>{r.status==="pending"?"⏳ Pending":"✓ Confirmed"}</span>
+            <div style={s.empty}><Ico.ClockIcon size={36} color={palette.muted} /><div style={{ marginBottom: 6 }}></div><div style={{ fontSize: 15, fontWeight: 600, color: palette.textSoft, marginBottom: 6 }}>No transactions yet</div><div style={{ fontSize: 13, color: palette.muted }}>Make your first payment from the Pay tab</div></div>
+          ) : history.map(r => (
+            <div key={r.id} style={{ ...s.histCard, ...(r.status === "pending" ? { borderLeft: "4px solid #f5c85b" } : { borderLeft: "4px solid #3fb7a3" }) }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 16 }}>{CATS[r.category]?.icon}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: palette.text }}>{r.category}</span>
+                    <span style={{ ...s.statusBadge, ...(r.status === "pending" ? s.statusPending : s.statusDone) }}>{r.status === "pending" ? "Pending" : <span><Ico.CheckIcon size={11} /> Confirmed</span>}</span>
+                    {r.type === "payment_link" && <span style={s.linkBadge}><Ico.LinkIcon size={11} /> Link</span>}
                   </div>
-                  <div style={{ fontSize:12,color:"#9ca3af" }}>{r.item}</div>
-                  <div style={{ fontSize:11,color:"#6b7280",marginTop:4 }}>{r.date}</div>
+                  <div style={{ fontSize: 12, color: palette.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.item}</div>
+                  <div style={{ fontSize: 11, color: palette.muted, marginTop: 4 }}>{r.date}</div>
+                  {r.status === "pending" && r.link && (
+                    <button style={{ fontSize: 11, color: "#2872b2", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 4, textDecoration: "underline" }} onClick={() => { setPayLink(r.link); setShowPayLink(true); }}>View payment link</button>
+                  )}
                 </div>
-                <div style={{ textAlign:"right",flexShrink:0 }}>
-                  <div style={{ fontSize:15,fontWeight:800,color:r.status==="pending"?"#f59e0b":"#1a9e5f" }}>{fmt(r.amount)}</div>
-                  <div style={{ fontSize:11,color:"#6b7280" }}>{r.usdc} USDC</div>
-                  {r.status==="confirmed" && <button style={{ fontSize:11,color:"#9ca3af",background:"none",border:"none",cursor:"pointer",padding:0,marginTop:6,textDecoration:"underline" }} onClick={()=>openShareReceipt(r)}>Share ⬆</button>}
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: r.status === "pending" ? "#b17700" : palette.brandDeep }}>{fmt(r.amount)}</div>
+                  <div style={{ fontSize: 11, color: palette.muted }}>{r.usdc} USDC</div>
+                  {r.status === "confirmed" && (
+                    <button style={{ fontSize: 11, color: palette.textSoft, background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 6, textDecoration: "underline" }} onClick={() => openShareReceipt(r)}><Ico.ShareIcon size={14} /> Share</button>
+                  )}
                 </div>
               </div>
             </div>
@@ -750,297 +1042,488 @@ export default function MediPay() {
         </div>
       )}
 
-      {/* PROFILE */}
       {tab === "profile" && (
         <div style={s.pg}>
           <div style={s.profileHero}>
             <div style={s.profileGlow} />
-            <div style={{ position:"relative",zIndex:1,display:"flex",alignItems:"center",gap:16,flexWrap:"wrap" }}>
-              <div style={s.avatar}>{(user?.name||"P")[0]}</div>
+            <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+              <div style={s.avatar}>{(user?.name || "P")[0]}</div>
               <div>
-                <div style={{ fontSize:20,fontWeight:800,color:"#fff" }}>{user?.name}</div>
-                <div style={{ fontSize:12,color:"#1a9e5f",fontFamily:"monospace",marginTop:4 }}>{fileNo}</div>
-                <div style={{ fontSize:12,color:"#9ca3af",marginTop:2 }}>{fbUser?.email}</div>
-                <div style={{ fontSize:11,color:"#6b7280",marginTop:2 }}>{hospital?.id} · {hospital?.state}</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: palette.text }}>{user?.name}</div>
+                <div style={{ fontSize: 12, color: palette.brandDeep, fontFamily: "monospace", marginTop: 4 }}>{fileNo}</div>
+                <div style={{ fontSize: 12, color: palette.textSoft, marginTop: 2 }}>{hospital?.id} · {hospital?.state}</div>
               </div>
             </div>
           </div>
           <div style={s.walletCard}>
-            <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12 }}>
-              <div><div style={{ fontSize:11,color:"#6b7280",textTransform:"uppercase",letterSpacing:".06em",marginBottom:3 }}>Circle Programmable Wallet</div><div style={{ fontSize:11,color:"#9ca3af" }}>ARC Testnet · SCA Account</div></div>
-              <div style={{ width:34,height:34,borderRadius:10,background:"linear-gradient(135deg,#1a9e5f,#0d7a47)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,color:"#fff",fontSize:15 }}>C</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+              <div><div style={{ fontSize: 11, color: palette.muted, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 3 }}>Circle Programmable Wallet</div><div style={{ fontSize: 11, color: palette.textSoft }}>ARC Testnet · SCA Account</div></div>
+              <div style={{ width: 34, height: 34, borderRadius: 12, background: "linear-gradient(135deg,#55c9b6,#2eaa99)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff", fontSize: 15, boxShadow: "0 10px 22px rgba(63,183,163,0.20)" }}>C</div>
             </div>
-            <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:14 }}>
-              <div style={{ fontSize:11,fontFamily:"monospace",color:"#1a9e5f",wordBreak:"break-all",flex:1,padding:"8px 10px",background:"#0d1117",borderRadius:8 }}>{walletAddr||"--"}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontFamily: "monospace", color: palette.brandDeep, wordBreak: "break-all", flex: 1, padding: "8px 10px", background: "#f5fbfd", borderRadius: 8 }}>{walletAddr || "--"}</div>
               <CopyBtn text={walletAddr} />
             </div>
-            <div style={{ display:"flex",alignItems:"flex-end",justifyContent:"space-between" }}>
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize:11,color:"#6b7280",marginBottom:3 }}>USDC Balance</div>
-                <div style={{ display:"flex",alignItems:"baseline",gap:6 }}>
-                  <span style={{ fontSize:28,fontWeight:900,color:"#1a9e5f" }}>{balLoading?"...":usdcBal!==null?usdcBal:"--"}</span>
-                  <span style={{ fontSize:13,color:"#6b7280" }}>USDC</span>
+                <div style={{ fontSize: 11, color: palette.muted, marginBottom: 3 }}>USDC Balance</div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                  <span style={{ fontSize: 28, fontWeight: 900, color: palette.brandDeep }}>{balLoading ? "..." : usdcBal !== null ? usdcBal : "--"}</span>
+                  <span style={{ fontSize: 13, color: palette.muted }}>USDC</span>
                 </div>
               </div>
-              <button style={s.refBtn} onClick={()=>refreshBalance()}>↻ Refresh</button>
+              <button style={s.refBtn} onClick={() => refreshBalance()}><Ico.RefreshIcon size={14} /> Refresh</button>
             </div>
             {faucetSent && (
               <div style={s.faucetBadge}>
-                🎉 10 USDC auto-sent from Circle faucet on registration
-                <a href="https://faucet.circle.com" target="_blank" rel="noreferrer" style={{ display:"block",fontSize:11,color:"#1a9e5f",marginTop:4,textDecoration:"underline" }}>Balance still 0? Claim manually here →</a>
+                <Ico.CheckIcon size={14} color={palette.brandDeep} /> 10 USDC auto-sent from Circle faucet on registration
+                <a href={"https://faucet.circle.com"} target="_blank" rel="noreferrer"
+                  style={{ display: "block", fontSize: 11, color: palette.brandDeep, marginTop: 4, textDecoration: "underline" }}>
+                  Balance still 0? Claim manually here →
+                </a>
               </div>
             )}
-            <div style={{ marginTop:12,display:"flex",gap:8,alignItems:"center",flexWrap:"wrap" }}>
-              <a href="https://faucet.circle.com" target="_blank" rel="noreferrer" style={{ display:"inline-flex",alignItems:"center",gap:6,fontSize:12,fontWeight:700,color:"#1a9e5f",background:"#1a9e5f18",border:"0.5px solid #1a9e5f44",borderRadius:8,padding:"7px 14px",textDecoration:"none" }}>💧 Get Free Test USDC</a>
-              <span style={{ fontSize:11,color:"#6b7280" }}>Paste your wallet address at the faucet</span>
+            <div style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <a href="https://faucet.circle.com" target="_blank" rel="noreferrer"
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700,
+                  color: palette.brandDeep, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)",
+                  borderRadius: 8, padding: "7px 14px", textDecoration: "none" }}>
+                <Ico.DropIcon size={14} /> Get Free Test USDC (Public Faucet)
+              </a>
+              <span style={{ fontSize: 11, color: palette.muted }}>Paste your wallet address above at the faucet</span>
             </div>
-            <div style={{ marginTop:8,fontSize:10,color:"#6b7280" }}>Wallet ID: {walletId||"--"}</div>
+            <div style={{ marginTop: 8, fontSize: 10, color: palette.muted }}>Wallet ID: {walletId || "--"}</div>
           </div>
           <SL t="Profile Details" />
           <div style={s.card}>
-            {[["Home Hospital",hospital?.id+" · "+hospital?.state],["Email",fbUser?.email||"--"],["Phone",user?.phone||form.phone||"--"],["Date of Birth",user?.dob||form.dob||"--"],["Blood Group",user?.bloodGroup||form.bloodGroup||"--"],["Genotype",user?.genotype||form.genotype||"--"],["State",user?.state||form.state||"--"],["Network","ARC-TESTNET (Circle)"]].map(([k,v])=>v&&(
-              <div key={k} style={s.profRow}><span style={{ fontSize:13,color:"#9ca3af" }}>{k}</span><span style={{ fontSize:13,color:"#e5e7eb",fontWeight:500,textAlign:"right",wordBreak:"break-word" }}>{v}</span></div>
+            {[["Home Hospital", hospital?.id + " · " + hospital?.state], ["Email", user?.email || form.email || "--"], ["Phone", user?.phone || form.phone || "--"], ["Date of Birth", user?.dob || form.dob || "--"], ["Blood Group", user?.bloodGroup || form.bloodGroup || "--"], ["Genotype", user?.genotype || form.genotype || "--"], ["State", user?.state || form.state || "--"], ["Network", "ARC-TESTNET (Circle)"]].map(([k, v]) => v && (
+              <div key={k} style={s.profRow}><span style={{ fontSize: 13, color: palette.textSoft }}>{k}</span><span style={{ fontSize: 13, color: palette.text, fontWeight: 500, textAlign: "right", wordBreak: "break-word" }}>{v}</span></div>
             ))}
           </div>
-          <div style={{ marginTop:22 }}>
+          <div style={{ marginTop: 22 }}>
             <SL t="Hospital Access" />
-            <button style={s.transferBtn} onClick={()=>{setShowTrf(true);setTrfDone(false);setTrfTarget("");}}>
-              <div style={{ display:"flex",alignItems:"center",gap:12 }}>
-                <div style={{ width:40,height:40,borderRadius:10,background:"#1a9e5f22",border:"1px solid #1a9e5f44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18 }}>🔗</div>
-                <div><div style={{ fontSize:15,fontWeight:700,color:"#e5e7eb" }}>Link to Another Hospital</div><div style={{ fontSize:12,color:"#9ca3af",marginTop:2 }}>Currently linked to {linked.length} hospital{linked.length!==1?"s":""}</div></div>
+            <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 14 }}>Moved to a new state? Link your records to another hospital. Your file number and Circle wallet remain unchanged.</p>
+            <button style={s.transferBtn} onClick={() => { setShowTrf(true); setTrfDone(false); setTrfTarget(""); }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", display: "flex", alignItems: "center", justifyContent: "center" }}><Ico.LinkIcon size={18} /></div>
+                <div><div style={{ fontSize: 15, fontWeight: 700, color: palette.text }}>Link to Another Hospital</div><div style={{ fontSize: 12, color: palette.textSoft, marginTop: 2 }}>Currently linked to {linked.length} hospital{linked.length !== 1 ? "s" : ""}</div></div>
               </div>
-              <span style={{ color:"#1a9e5f",fontSize:22 }}>›</span>
+              <span style={{ color: palette.brandDeep, fontSize: 22 }}>›</span>
             </button>
           </div>
-          <button style={s.signOutBtn} onClick={handleSignOut}>Sign Out</button>
+          <div style={{ ...s.globalCard, marginTop: 20 }}>
+            <div style={s.globalGlow} />
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <Ico.Globe size={22} color={palette.text} /><span style={{ fontSize: 15, fontWeight: 700, color: palette.text }}>International Use</span><span style={s.comingSoonBadge}>Coming Soon</span>
+              </div>
+              <p style={{ fontSize: 12, color: palette.textSoft, lineHeight: 1.6 }}>Your MediPay wallet will work in Ghana, Kenya, South Africa and beyond.</p>
+            </div>
+          </div>
+          <button style={s.signOutBtn} onClick={() => { logOut().catch(() => {}); setUser(null); resetForm(); setFileNo(""); setWalletId(""); setWalletAddr(""); setUsdcBal(null); setFaucetSent(false); setHistory([]); setLinked([]); setScreen("landing"); }}>Sign Out</button>
         </div>
       )}
 
-      {/* Transfer Modal */}
       {showTrf && (
-        <Mdl onClose={()=>setShowTrf(false)}>
+        <Mdl onClose={() => setShowTrf(false)}>
           {!trfDone ? (
             <div>
-              <div style={{ fontSize:18,fontWeight:800,color:"#fff",marginBottom:6 }}>Link Records to New Hospital</div>
-              <p style={{ fontSize:13,color:"#9ca3af",lineHeight:1.6,marginBottom:14 }}>Your file <strong style={{ color:"#1a9e5f" }}>{fileNo}</strong> and history will be accessible at the new hospital.</p>
-              <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:16 }}>
-                {linked.map(h=><span key={h.id} style={{ fontSize:11,padding:"3px 10px",borderRadius:100,background:"#1a9e5f22",border:"0.5px solid #1a9e5f44",color:"#1a9e5f",fontWeight:600 }}>✓ {h.id}</span>)}
+              <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 6 }}>Link Records to New Hospital</div>
+              <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 14 }}>Your file <strong style={{ color: palette.brandDeep }}>{fileNo}</strong> and payment history will be accessible at the new hospital.</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
+                {linked.map(h => <span key={h.id} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, fontWeight: 600 }}><Ico.CheckIcon size={10} color={palette.brandDeep} /> {h.id}</span>)}
               </div>
               <L t="Select hospital to link" />
-              <div style={{ position:"relative",marginBottom:16 }}>
-                <button style={s.dropBtn} onClick={()=>setTrfDrop(!trfDrop)}>
-                  <span style={{ flex:1,textAlign:"left" }}>{trfTarget?HOSPITALS.find(h=>h.id===trfTarget)?.full:"Choose hospital..."}</span><span>▾</span>
+              <div style={{ position: "relative", marginBottom: 16 }}>
+                <button style={s.dropBtn} onClick={() => setTrfDrop(!trfDrop)}>
+                  <span style={{ flex: 1, textAlign: "left" }}>{trfTarget ? HOSPITALS.find(h => h.id === trfTarget)?.full : "Choose hospital..."}</span><Ico.ChevronDown size={14} />
                 </button>
                 {trfDrop && (
                   <div style={s.dropMenu}>
-                    {availTrf.length===0?<div style={{ padding:14,color:"#6b7280",textAlign:"center",fontSize:13 }}>All hospitals already linked</div>:availTrf.map(h=>(
-                      <button key={h.id} style={s.dropItem} onClick={()=>{setTrfTarget(h.id);setTrfDrop(false);}}>
-                        <strong style={{ color:"#1a9e5f",minWidth:56 }}>{h.id}</strong><span style={{ flex:1,fontSize:12 }}>{h.full}</span><span style={{ fontSize:11,color:"#6b7280" }}>{h.state}</span>
+                    {availTrf.length === 0 ? <div style={{ padding: 14, color: palette.muted, textAlign: "center", fontSize: 13 }}>All hospitals already linked</div> : availTrf.map(h => (
+                      <button key={h.id} style={s.dropItem} onClick={() => { setTrfTarget(h.id); setTrfDrop(false); }}>
+                        <strong style={{ color: palette.brandDeep, minWidth: 56 }}>{h.id}</strong><span style={{ flex: 1, fontSize: 12 }}>{h.full}</span><span style={{ fontSize: 11, color: palette.muted }}>{h.state}</span>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
               {loading && <Stp s="Linking records on ARC Testnet..." />}
-              <div style={{ display:"flex",gap:10 }}>
-                <button style={s.outlineBtn} onClick={()=>setShowTrf(false)}>Cancel</button>
-                <GBtn disabled={!trfTarget||loading} xstyle={{ flex:1 }} onClick={handleTransfer}>{loading?"Linking...":"Link Records"}</GBtn>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button style={s.outlineBtn} onClick={() => setShowTrf(false)}>Cancel</button>
+                <GBtn disabled={!trfTarget || loading} xstyle={{ flex: 1 }} onClick={handleTransfer}>{loading ? "Linking..." : "Link Records"}</GBtn>
               </div>
             </div>
           ) : (
-            <div style={{ textAlign:"center",padding:"12px 0" }}>
-              <div style={{ fontSize:48,marginBottom:12 }}>✅</div>
-              <div style={{ fontSize:18,fontWeight:800,color:"#fff",marginBottom:8 }}>Records Linked!</div>
-              <GBtn onClick={()=>setShowTrf(false)}>Done ✓</GBtn>
+            <div style={{ textAlign: "center", padding: "12px 0" }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}><Ico.CheckIcon size={40} color={palette.brandDeep} /></div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 8 }}>Records Linked!</div>
+              <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 20 }}>Records now accessible at <strong style={{ color: palette.brandDeep }}>{HOSPITALS.find(h => h.id === trfTarget)?.id}</strong>. Quote file <strong style={{ color: palette.brandDeep }}>{fileNo}</strong>.</p>
+              <GBtn onClick={() => setShowTrf(false)}><Ico.CheckIcon size={14} /> Done</GBtn>
             </div>
           )}
         </Mdl>
       )}
 
-      {/* Pay Link Modal */}
       {showPayLink && (
-        <Mdl onClose={()=>setShowPayLink(false)}>
-          <div style={{ fontSize:18,fontWeight:800,color:"#fff",marginBottom:6 }}>🔗 Payment Link Created</div>
-          <p style={{ fontSize:13,color:"#9ca3af",lineHeight:1.6,marginBottom:16 }}>Share this with a family member paying on your behalf.</p>
-          <div style={{ background:"#0d1117",border:"0.5px solid #374151",borderRadius:10,padding:"10px 14px",marginBottom:16,display:"flex",alignItems:"center",gap:10 }}>
-            <span style={{ fontSize:11,fontFamily:"monospace",color:"#9ca3af",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{payLink}</span>
-            <button style={s.refBtn} onClick={copyPayLink}>{payLinkCopied?"✓ Copied":"Copy"}</button>
+        <Mdl onClose={() => setShowPayLink(false)}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}><Ico.LinkIcon size={20} /> Payment Link Created</div>
+          <p style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.6, marginBottom: 16 }}>Share this with a family member. It appears in your History as Pending until payment is completed.</p>
+          <div style={{ background: "#f5fbfd", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
+            <div style={{ fontSize: 12, color: palette.muted, marginBottom: 6 }}>Payment details</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: palette.text, marginBottom: 4 }}>{payitem}</div>
+            <div style={{ fontSize: 12, color: palette.textSoft, marginBottom: 2 }}>Hospital: {hospital?.id}</div>
+            <div style={{ fontSize: 12, color: palette.textSoft, marginBottom: 8 }}>File No: {fileNo}</div>
+            <div style={{ fontSize: 24, fontWeight: 900, color: palette.brandDeep }}>{fmt(payprice)}</div>
           </div>
-          <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
-            <button style={s.greenBtn} onClick={sharePayLink}>💬 Share via WhatsApp / SMS</button>
-            <button style={s.outlineBtn} onClick={()=>setShowPayLink(false)}>Close</button>
+          <div style={{ background: "#f5fbfd", border: "1px solid " + palette.lineStrong, borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 11, fontFamily: "monospace", color: palette.textSoft, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{payLink}</span>
+            <button style={s.refBtn} onClick={copyPayLink}>{payLinkCopied ? "Copied" : "Copy"}</button>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <button style={{ ...s.greenBtn }} onClick={sharePayLink}><Ico.ChatBubble size={16} /> Share via WhatsApp / SMS</button>
+            <button style={s.outlineBtn} onClick={() => setShowPayLink(false)}>Close</button>
           </div>
         </Mdl>
       )}
 
-      {showShareModal && shareReceipt && <ShareModal rec={shareReceipt} copied={rcpCopied} onCopy={copyReceiptText} onNative={nativeShare} onDownload={downloadReceiptImage} onClose={()=>setShowShareModal(false)} />}
+      {showShareModal && shareReceipt && <ShareModal rec={shareReceipt} copied={rcpCopied} onCopy={copyReceiptText} onNative={nativeShare} onDownload={downloadReceiptImage} onClose={() => setShowShareModal(false)} />}
     </Shell>
   );
+
   return null;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast }) {
+function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, isLanding, onRequireAuth }) {
   return (
     <div style={s.shell}>
+      <HealthObjects dense={showNav} />
       <div style={s.topbar}>
         <div style={s.tbL}>
-          {showNav && isMobile && <button style={s.burger} onClick={()=>setMenuOpen(!menuOpen)}>{menuOpen?"✕":"☰"}</button>}
-          <div style={s.logoMk}><span style={{ fontSize:18,fontWeight:800,color:"#fff" }}>M</span></div>
-          <span style={{ fontSize:20,fontWeight:800,letterSpacing:"-0.5px",color:"#fff" }}>MediPay</span>
+          {showNav && isMobile && <button style={s.burger} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <Ico.CloseIcon size={16} /> : <Ico.MenuIcon size={16} />}</button>}
+          <div style={s.logoMk}><span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>M</span></div>
+          <div><span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.5px", color: palette.text }}>MediPay</span>{DEMO_MODE && <span style={s.demoBadge}>Demo</span>}</div>
         </div>
-        {showNav && (
+        {isLanding && !isMobile && (
+          <div style={s.tbC}>
+            {["Features", "Hospitals", "About"].map((lb) => (
+              <button key={lb} style={s.topBtn} onClick={() => lb === "Hospitals" && onRequireAuth()}>{lb}</button>
+            ))}
+          </div>
+        )}
+        {isLanding ? (
           <div style={s.tbR}>
-            {!isMobile && NAV.map(([k,ic,lb])=>(
-              <button key={k} style={{ ...s.topBtn,...(tab===k?s.topBtnOn:{}) }} onClick={()=>switchTab(k)}><span>{ic}</span><span>{lb}</span></button>
+            {!isMobile && <button style={s.landNavCta} onClick={onRequireAuth}>Get Started <Ico.ArrowRight size={14} /></button>}
+          </div>
+        ) : showNav && (
+          <div style={s.tbR}>
+            {!isMobile && NAV.map(([k, ic, lb]) => (
+              <button key={k} style={{ ...s.topBtn, ...(tab === k ? s.topBtnOn : {}) }} onClick={() => switchTab(k)}><span>{ic}</span><span>{lb}</span></button>
             ))}
             <div style={s.balChip}>
-              <span style={{ fontSize:10,color:"#6b7280",fontWeight:600,textTransform:"uppercase",letterSpacing:".05em" }}>Balance</span>
-              <span style={{ fontSize:14,fontWeight:800,color:"#1a9e5f" }}>{balLoading?"...":usdcBal!==null?usdcBal+" USDC":"--"}</span>
+              <span style={{ fontSize: 10, color: palette.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Balance</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: palette.brandDeep }}>{balLoading ? "..." : usdcBal !== null ? usdcBal + " USDC" : "--"}</span>
             </div>
           </div>
         )}
       </div>
       {showNav && isMobile && menuOpen && (
         <div style={s.drawer}>
-          {NAV.map(([k,ic,lb])=>(
-            <button key={k} style={{ ...s.dItem,...(tab===k?s.dItemOn:{}) }} onClick={()=>switchTab(k)}>
-              <span style={{ fontSize:22 }}>{ic}</span><span style={{ fontSize:15,fontWeight:tab===k?700:400 }}>{lb}</span>
-              {tab===k && <div style={s.dItemDot} />}
+          {NAV.map(([k, ic, lb]) => (
+            <button key={k} style={{ ...s.dItem, ...(tab === k ? s.dItemOn : {}) }} onClick={() => switchTab(k)}>
+              <span style={{ fontSize: 22 }}>{ic}</span><span style={{ fontSize: 15, fontWeight: tab === k ? 700 : 400 }}>{lb}</span>
+              {tab === k && <div style={s.dItemDot} />}
             </button>
           ))}
-          <div style={{ padding:"14px 20px",borderTop:"0.5px solid #1f2937",marginTop:4 }}>
-            <div style={{ fontSize:11,color:"#6b7280",marginBottom:3 }}>File Number</div>
-            <div style={{ fontSize:13,fontFamily:"monospace",color:"#1a9e5f",fontWeight:600 }}>{fileNo||"--"}</div>
+          <div style={{ padding: "14px 20px", borderTop: "1px solid " + palette.line, marginTop: 4 }}>
+            <div style={{ fontSize: 11, color: palette.muted, marginBottom: 3 }}>File Number</div>
+            <div style={{ fontSize: 13, fontFamily: "monospace", color: palette.brandDeep, fontWeight: 600 }}>{fileNo || "--"}</div>
           </div>
         </div>
       )}
-      <div style={{ display:"flex",minHeight:"calc(100vh - 64px)" }}>
+      <div style={{ display: "flex", minHeight: "calc(100vh - 66px)", position: "relative", zIndex: 1 }}>
         {showNav && !isMobile && (
           <div style={s.sidebar}>
-            <div style={{ padding:"20px 12px 12px" }}>
-              <div style={{ fontSize:10,color:"#6b7280",textTransform:"uppercase",letterSpacing:".08em",marginBottom:12,paddingLeft:6 }}>Navigation</div>
-              {NAV.map(([k,ic,lb])=>(
-                <button key={k} style={{ ...s.sideBtn,...(tab===k?s.sideBtnOn:{}) }} onClick={()=>switchTab(k)}>
-                  <span style={{ fontSize:18 }}>{ic}</span><span style={{ fontSize:14,fontWeight:tab===k?700:400 }}>{lb}</span>
-                  {tab===k && <div style={{ marginLeft:"auto",width:4,height:20,borderRadius:2,background:"#1a9e5f" }} />}
+            <div style={{ padding: "20px 12px 12px" }}>
+              <div style={{ fontSize: 10, color: palette.muted, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 12, paddingLeft: 6 }}>Navigation</div>
+              {NAV.map(([k, ic, lb]) => (
+                <button key={k} style={{ ...s.sideBtn, ...(tab === k ? s.sideBtnOn : {}) }} onClick={() => switchTab(k)}>
+                  <span style={{ fontSize: 18 }}>{ic}</span><span style={{ fontSize: 14, fontWeight: tab === k ? 700 : 400 }}>{lb}</span>
+                  {tab === k && <div style={{ marginLeft: "auto", width: 4, height: 20, borderRadius: 2, background: palette.brand }} />}
                 </button>
               ))}
             </div>
             <div style={s.sidefoot}>
-              <div style={{ fontSize:10,color:"#6b7280",marginBottom:4,fontWeight:600 }}>Circle Wallet</div>
-              <div style={{ fontSize:10,fontFamily:"monospace",color:"#1a9e5f",wordBreak:"break-all",marginBottom:4 }}>{walletAddr?walletAddr.slice(0,22)+"...":"--"}</div>
-              <div style={{ display:"flex",alignItems:"center",gap:6 }}><div style={{ width:6,height:6,borderRadius:"50%",background:"#1a9e5f" }} /><span style={{ fontSize:10,color:"#6b7280" }}>ARC-TESTNET</span></div>
+              <div style={{ fontSize: 10, color: palette.muted, marginBottom: 4, fontWeight: 600 }}>Circle Wallet</div>
+              <div style={{ fontSize: 10, fontFamily: "monospace", color: palette.brandDeep, wordBreak: "break-all", marginBottom: 4 }}>{walletAddr ? walletAddr.slice(0, 22) + "..." : "--"}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: palette.brand }} /><span style={{ fontSize: 10, color: palette.muted }}>ARC-TESTNET</span></div>
             </div>
           </div>
         )}
-        <div style={{ flex:1,minWidth:0,marginLeft:showNav&&!isMobile?220:0 }}>{children}</div>
+        <div style={{ flex: 1, minWidth: 0, marginLeft: showNav && !isMobile ? 220 : 0 }}>{children}</div>
       </div>
-      {toast.msg && <div style={{ ...s.toast,...(toast.type==="err"?{ background:"#dc2626" }:{}) }}>{toast.msg}</div>}
+      {toast.msg && <div style={{ ...s.toast, ...(toast.type === "err" ? { background: palette.danger } : {}) }}>{toast.msg}</div>}
     </div>
   );
 }
-const CopyBtn = ({ text }) => { const [c,setC] = React.useState(false); return <button onClick={()=>{if(!text)return;navigator.clipboard.writeText(text).then(()=>{setC(true);setTimeout(()=>setC(false),2000)}).catch(()=>{})}} style={{ flexShrink:0,background:c?"#1a9e5f22":"#111827",border:"0.5px solid "+(c?"#1a9e5f":"#374151"),borderRadius:8,padding:"8px 12px",fontSize:12,color:c?"#1a9e5f":"#9ca3af",cursor:"pointer",fontFamily:"inherit",fontWeight:600,whiteSpace:"nowrap" }}>{c?"✓ Copied":"Copy"}</button>; };
-const PBar = ({ title, onBack }) => (
-  <div style={{ display:"flex",alignItems:"center",gap:12,padding:"14px 20px",borderBottom:"0.5px solid #1f2937",position:"sticky",top:0,background:"#0d1117",zIndex:20 }}>
-    {onBack && <button style={{ background:"none",border:"0.5px solid #374151",color:"#9ca3af",fontSize:13,cursor:"pointer",padding:"6px 12px",borderRadius:8 }} onClick={onBack}>← Back</button>}
-    <span style={{ flex:1,fontSize:15,fontWeight:700,color:"#e5e7eb" }}>{title}</span>
+
+const HealthObjects = ({ dense }) => (
+  <div style={s.bioLayer} aria-hidden="true">
+    <div style={{ ...s.bioBlob, ...s.bioBlobMint, top: dense ? 96 : 122, left: dense ? 250 : "8%", transform: "rotate(-18deg)", filter: dense ? "blur(1.5px)" : "blur(.4px)", opacity: dense ? 0.28 : 0.58 }}><Ico.PlusIcon size={24} /></div>
+    <div style={{ ...s.bioBlob, ...s.bioBlobBlue, top: dense ? 168 : "18%", right: dense ? "7%" : "10%", transform: "rotate(22deg)", filter: dense ? "blur(6px)" : "blur(1px)", opacity: dense ? 0.22 : 0.46 }}><Ico.Bubbles size={22} /></div>
+    <div style={{ ...s.bioBlob, ...s.bioBlobPeach, bottom: dense ? "18%" : "13%", left: dense ? "7%" : "16%", transform: "rotate(14deg)", filter: dense ? "blur(7px)" : "blur(2px)", opacity: dense ? 0.20 : 0.42 }}><Ico.PillIcon size={24} /></div>
+    <div style={{ ...s.bioBlob, ...s.bioBlobLav, bottom: dense ? "10%" : "18%", right: dense ? "14%" : "18%", transform: "rotate(-28deg)", filter: dense ? "blur(9px)" : "blur(3px)", opacity: dense ? 0.18 : 0.34 }}><Ico.BrainIcon size={24} /></div>
+    <div style={{ ...s.bioOrb, top: dense ? "44%" : "36%", left: dense ? "78%" : "72%", background: "linear-gradient(145deg,#ffffff,#dff7ef 52%,#93e0d0)" }} />
+    <div style={{ ...s.bioOrb, width: 42, height: 42, bottom: dense ? "30%" : "26%", left: dense ? "28%" : "10%", background: "linear-gradient(145deg,#ffffff,#e8f5ff 55%,#9acdf3)", filter: "blur(1.5px)", opacity: dense ? .22 : .36 }} />
   </div>
 );
-const GBtn = ({ children, onClick, disabled, xstyle }) => <button style={{ background:disabled?"#374151":"linear-gradient(135deg,#1a9e5f,#0d7a47)",color:"#fff",border:"none",borderRadius:12,padding:"14px 20px",fontSize:14,fontWeight:700,cursor:disabled?"not-allowed":"pointer",width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,...(xstyle||{}) }} disabled={disabled} onClick={onClick}>{children}</button>;
+
+const CopyBtn = ({ text }) => {
+  const [copied, setCopied] = React.useState(false);
+  const copy = () => { if (!text) return; navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); };
+  return (
+    <button onClick={copy} style={{ flexShrink: 0, background: copied ? palette.mint : "#fff", border: "1px solid " + (copied ? "rgba(63,183,163,0.30)" : palette.lineStrong), borderRadius: 12, padding: "8px 12px", fontSize: 12, color: copied ? palette.brandDeep : palette.textSoft, cursor: "pointer", fontFamily: "inherit", fontWeight: 600, whiteSpace: "nowrap", transition: "all .2s" }}>
+      {copied ? "Copied" : "Copy"}
+    </button>
+  );
+};
+const PBar = ({ title, onBack }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: "1px solid " + palette.line, position: "sticky", top: 0, background: "#f5fbfd", zIndex: 20 }}>
+    <button style={{ background: "none", color: palette.textSoft, fontSize: 13, cursor: "pointer", padding: "6px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6, border: "1px solid " + palette.lineStrong }} onClick={onBack}><Ico.ChevronRight size={14} style={{ transform: "rotate(180deg)" }} /> Back</button>
+    <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: palette.text }}>{title}</span>
+  </div>
+);
+const GBtn = ({ children, onClick, disabled, xstyle }) => (
+  <button style={{ background: disabled ? palette.lineStrong : "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff", border: "none", borderRadius: 18, padding: "14px 20px", fontSize: 14, fontWeight: 900, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginBottom: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: disabled ? "none" : btnShadow, ...(xstyle || {}) }} disabled={disabled} onClick={onClick}>{children}</button>
+);
 const ShareModal = ({ rec, copied, onCopy, onNative, onDownload, onClose }) => (
   <Mdl onClose={onClose}>
-    <div style={{ fontSize:18,fontWeight:800,color:"#fff",marginBottom:10 }}>Share Receipt</div>
-    <div style={{ background:"#0d1117",border:"0.5px solid #374151",borderRadius:10,padding:14,fontFamily:"monospace",fontSize:11,lineHeight:1.9,color:"#9ca3af",marginBottom:16,maxHeight:200,overflowY:"auto",whiteSpace:"pre-wrap" }}>
-      {["== MEDIPAY RECEIPT ==","Patient:  "+rec.patient,"File No:  "+rec.fileNo,"Hospital: "+(rec.hospital||""),"Service:  "+rec.item,"Amount:   "+("N"+Number(rec.amount).toLocaleString()),"USDC:     "+rec.usdc+" USDC","Date:     "+rec.date,"Tx ID:    "+rec.id,"========================","Powered by Circle on ARC Testnet"].join("\n")}
+    <div style={{ fontSize: 18, fontWeight: 800, color: palette.text, marginBottom: 10 }}>Share Receipt</div>
+    <div style={{ background: "#f5fbfd", border: "1px solid " + palette.lineStrong, borderRadius: 10, padding: 14, fontFamily: "monospace", fontSize: 11, lineHeight: 1.9, color: palette.textSoft, marginBottom: 16, maxHeight: 200, overflowY: "auto", whiteSpace: "pre-wrap" }}>
+      {/* eslint-disable-next-line no-useless-concat */}
+      {["== MEDIPAY RECEIPT ==","Patient:  "+rec.patient,"File No:  "+rec.fileNo,"Hospital: "+(rec.hospital||""),"Category: "+rec.category,"Service:  "+rec.item,rec.note?"Note:     "+rec.note:null,"Amount:   "+("N"+Number(rec.amount).toLocaleString()),"USDC:     "+rec.usdc+" USDC","Network:  ARC-TESTNET","Date:     "+rec.date,"Tx ID:    "+rec.id,"========================","Powered by Circle on ARC Testnet"].filter(Boolean).join("\n")}
     </div>
-    <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
-      <button style={{ background:"linear-gradient(135deg,#1a9e5f,#0d7a47)",color:"#fff",border:"none",borderRadius:12,padding:"13px",fontSize:14,fontWeight:700,cursor:"pointer" }} onClick={()=>onCopy(rec)}>{copied?"✓ Copied!":"📋 Copy Receipt"}</button>
-      <button style={{ background:"linear-gradient(135deg,#25D366,#128C7E)",color:"#fff",border:"none",borderRadius:12,padding:"13px",fontSize:14,fontWeight:700,cursor:"pointer" }} onClick={()=>onNative(rec)}>📲 Share Image on WhatsApp</button>
-      <button style={{ background:"linear-gradient(135deg,#7c3aed,#5b21b6)",color:"#fff",border:"none",borderRadius:12,padding:"13px",fontSize:14,fontWeight:700,cursor:"pointer" }} onClick={()=>onDownload(rec)}>⬇ Save as Image</button>
-      <button style={{ background:"none",border:"1.5px solid #374151",color:"#9ca3af",borderRadius:12,padding:"13px",fontSize:14,fontWeight:600,cursor:"pointer" }} onClick={onClose}>Close</button>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <button style={{ background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onCopy(rec)}>{copied ? <span><Ico.CheckIcon size={14} /> Copied to clipboard!</span> : <span><Ico.FolderIcon size={16} /> Copy Receipt Text</span>}</button>
+      <button style={{ background: "linear-gradient(135deg,#78bff0,#5aa9e6)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onNative(rec)}><Ico.ExternalLink size={16} /> Share via WhatsApp / SMS</button>
+      <button style={{ background: "linear-gradient(135deg,#aaaef4,#8f93ea)", color: "#fff", border: "none", borderRadius: 18, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer" }} onClick={() => onDownload(rec)}><Ico.DownloadIcon size={14} /> Save as Image (PNG)</button>
+      <button style={{ background: "none", border: "1px solid " + palette.lineStrong, color: palette.textSoft, borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 600, cursor: "pointer" }} onClick={onClose}>Close</button>
     </div>
   </Mdl>
 );
-const L   = ({ t }) => <div style={{ fontSize:12,color:"#9ca3af",fontWeight:600,marginBottom:6,marginTop:6 }}>{t}</div>;
-const SL  = ({ t }) => <div style={{ fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em",color:"#6b7280",marginBottom:12 }}>{t}</div>;
-const Stp = ({ s:st }) => st?<div style={{ display:"flex",alignItems:"center",gap:8,fontSize:12,color:"#1a9e5f",padding:"10px 0",lineHeight:1.5 }}><span style={{ animation:"spin .8s linear infinite",display:"inline-block" }}>◌</span>{st}</div>:null;
+const L = ({ t }) => <div style={{ fontSize: 12, color: palette.textSoft, fontWeight: 600, marginBottom: 6, marginTop: 6 }}>{t}</div>;
+const SL = ({ t }) => <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: palette.muted, marginBottom: 12 }}>{t}</div>;
+const Stp = ({ s: st }) => st ? <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: palette.brandDeep, padding: "10px 0", lineHeight: 1.5 }}><span style={{ animation: "spin .8s linear infinite", display: "inline-block" }}>◌</span>{st}</div> : null;
 const Mdl = ({ children, onClose }) => (
-  <div style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(4px)",padding:"20px" }} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-    <div style={{ background:"#111827",borderRadius:"20px",padding:"28px 24px 36px",width:"100%",maxWidth:540,maxHeight:"85vh",overflowY:"auto",border:"0.5px solid #374151",boxShadow:"0 24px 64px rgba(0,0,0,0.8)" }}>{children}</div>
+  <div style={{ position: "fixed", inset: 0, background: "rgba(37,54,75,0.28)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)", padding: "20px" }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+    <div style={{ background: palette.surfaceSoft, borderRadius: "20px", padding: "28px 24px 36px", width: "100%", maxWidth: 540, maxHeight: "85vh", overflowY: "auto", border: "1px solid " + palette.lineStrong, boxShadow: "0 24px 64px rgba(80,110,140,0.22)" }}>{children}</div>
   </div>
 );
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
+const palette = {
+  bg: "#f7fbff",
+  bg2: "#eef8f5",
+  surface: "rgba(255,255,255,0.92)",
+  surfaceSoft: "#ffffff",
+  card: "rgba(255,255,255,0.86)",
+  line: "#e4edf3",
+  lineStrong: "#d8e5ee",
+  text: "#25364b",
+  textSoft: "#5f7188",
+  muted: "#8da0b5",
+  brand: "#3fb7a3",
+  brandDeep: "#198f82",
+  mint: "#dff7ef",
+  blue: "#5aa9e6",
+  blueSoft: "#e8f5ff",
+  lavender: "#8f93ea",
+  lavenderSoft: "#f0f1ff",
+  peach: "#ffb59d",
+  peachSoft: "#fff0e9",
+  yellow: "#f5c85b",
+  yellowSoft: "#fff8df",
+  danger: "#ef6b73",
+};
+
+const btnShadow = "inset 0 1px rgba(255,255,255,.7), 0 0 0 1px rgba(63,183,163,.18), 0 12px 34px rgba(63,183,163,0.22)";
+const cardShadow = "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)";
+const softShadow = "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 28px rgba(80,110,140,.08)";
+const fontStack = "'Borgen', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
 const s = {
-  shell:        { minHeight:"100vh",background:"#0d1117",color:"#e5e7eb",fontFamily:"system-ui,-apple-system,sans-serif" },
-  topbar:       { display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 20px",height:64,borderBottom:"0.5px solid #1f2937",position:"sticky",top:0,background:"rgba(13,17,23,0.95)",backdropFilter:"blur(12px)",zIndex:30,gap:12 },
-  tbL:          { display:"flex",alignItems:"center",gap:10 },
-  tbR:          { display:"flex",alignItems:"center",gap:8 },
-  burger:       { background:"none",border:"none",color:"#e5e7eb",fontSize:22,cursor:"pointer",padding:"4px 8px",lineHeight:1 },
-  logoMk:       { width:38,height:38,borderRadius:10,background:"linear-gradient(135deg,#1a9e5f,#0d7a47)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 0 20px #1a9e5f44" },
-  topBtn:       { background:"none",border:"none",color:"#9ca3af",fontSize:13,fontWeight:500,cursor:"pointer",padding:"7px 12px",borderRadius:8,display:"flex",alignItems:"center",gap:6 },
-  topBtnOn:     { background:"#1a9e5f18",color:"#1a9e5f",fontWeight:700,border:"0.5px solid #1a9e5f33" },
-  balChip:      { display:"flex",flexDirection:"column",alignItems:"flex-end",gap:1,background:"#111827",padding:"7px 14px",borderRadius:10,border:"0.5px solid #1f2937",flexShrink:0 },
-  drawer:       { position:"fixed",top:64,left:0,right:0,background:"#111827",zIndex:25,borderBottom:"0.5px solid #1f2937",boxShadow:"0 8px 32px rgba(0,0,0,0.8)" },
-  dItem:        { width:"100%",display:"flex",alignItems:"center",gap:14,padding:"14px 20px",background:"none",border:"none",borderBottom:"0.5px solid #1f2937",color:"#9ca3af",cursor:"pointer",textAlign:"left",fontFamily:"inherit" },
-  dItemOn:      { color:"#1a9e5f",background:"rgba(26,158,95,0.06)" },
-  dItemDot:     { marginLeft:"auto",width:8,height:8,borderRadius:"50%",background:"#1a9e5f" },
-  sidebar:      { width:220,background:"#111827",borderRight:"0.5px solid #1f2937",position:"fixed",top:64,bottom:0,left:0,display:"flex",flexDirection:"column",justifyContent:"space-between",overflowY:"auto",zIndex:20 },
-  sideBtn:      { width:"100%",display:"flex",alignItems:"center",gap:12,padding:"11px 14px",background:"none",border:"none",color:"#9ca3af",cursor:"pointer",borderRadius:8,textAlign:"left",fontFamily:"inherit",fontSize:13,margin:"1px 0" },
-  sideBtnOn:    { background:"rgba(26,158,95,0.1)",color:"#1a9e5f" },
-  sidefoot:     { padding:"16px 14px",borderTop:"0.5px solid #1f2937" },
-  pg:           { padding:"20px 24px 80px",maxWidth:860,margin:"0 auto" },
-  sub:          { fontSize:13,color:"#9ca3af",lineHeight:1.6,margin:"8px 0 16px" },
-  searchWrap:   { display:"flex",alignItems:"center",gap:10,background:"#111827",border:"0.5px solid #374151",borderRadius:12,padding:"0 14px",marginBottom:16 },
-  searchInp:    { flex:1,background:"none",border:"none",outline:"none",padding:"12px 0",fontSize:14,color:"#e5e7eb",fontFamily:"inherit" },
-  hGrid:        { display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:12,paddingBottom:20 },
-  hCard:        { background:"#111827",border:"0.5px solid #1f2937",borderRadius:14,padding:"16px 14px",cursor:"pointer",textAlign:"left" },
-  hIdBadge:     { display:"inline-block",fontSize:14,fontWeight:800,color:"#1a9e5f",background:"#1a9e5f18",border:"0.5px solid #1a9e5f44",padding:"3px 10px",borderRadius:6 },
-  inp:          { width:"100%",background:"#111827",border:"0.5px solid #374151",borderRadius:10,padding:"13px 14px",fontSize:14,color:"#e5e7eb",marginBottom:14,outline:"none",fontFamily:"inherit",boxSizing:"border-box",caretColor:"#1a9e5f" },
-  fileCard:     { background:"#111827",border:"1px solid #1a9e5f33",borderRadius:20,padding:"32px 24px",maxWidth:480,margin:"24px auto",textAlign:"center" },
-  fileCheck:    { width:60,height:60,borderRadius:"50%",background:"linear-gradient(135deg,#1a9e5f,#0d7a47)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,color:"#fff",margin:"0 auto 16px",boxShadow:"0 0 30px rgba(26,158,95,0.4)" },
-  fileNo:       { fontSize:28,fontWeight:900,color:"#1a9e5f",letterSpacing:2,marginBottom:6,fontFamily:"monospace" },
-  walletReveal: { background:"#0d1117",border:"0.5px solid #1a9e5f44",borderRadius:12,padding:"14px",marginBottom:16,textAlign:"left" },
-  faucetBadge:  { fontSize:12,color:"#1a9e5f",background:"#1a9e5f15",borderRadius:8,padding:"7px 10px",marginTop:8 },
-  rcpCard:      { background:"#111827",border:"0.5px solid #1f2937",borderRadius:16,padding:"24px 20px",maxWidth:520,margin:"0 auto 16px" },
-  rcpHeader:    { textAlign:"center",marginBottom:16,display:"flex",flexDirection:"column",alignItems:"center",gap:4 },
-  rcpDash:      { borderTop:"1.5px dashed #1f2937",margin:"14px 0" },
-  rcpRow:       { display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"6px 0",borderBottom:"0.5px solid #1f293720",gap:10 },
-  rcpTotal:     { fontSize:30,fontWeight:900,color:"#1a9e5f",textAlign:"center",marginTop:14,letterSpacing:"-1px" },
-  welcomeBanner:{ background:"linear-gradient(135deg,#0d1f14,#0d1117,#111827)",border:"1px solid #1a9e5f33",borderRadius:16,padding:"22px 24px",marginBottom:20,display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",position:"relative",overflow:"hidden" },
-  welcomeGlow:  { position:"absolute",top:"-50%",right:"-10%",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(26,158,95,0.15),transparent 70%)",pointerEvents:"none" },
-  welcomeBalance:{ textAlign:"right" },
-  statsRow:     { display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20 },
-  statBox:      { background:"#111827",border:"0.5px solid #1f2937",borderRadius:12,padding:"14px 8px",textAlign:"center" },
-  statV:        { fontSize:20,fontWeight:800,color:"#1a9e5f" },
-  statL:        { fontSize:10,color:"#9ca3af",marginTop:3 },
-  qaCard:       { background:"#111827",border:"0.5px solid #1f2937",borderRadius:14,padding:"20px 16px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"flex-start",gap:6,textAlign:"left" },
-  qaIcon:       { width:44,height:44,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,marginBottom:4 },
-  linkedCard:   { background:"#111827",border:"0.5px solid #1f2937",borderRadius:12,padding:"14px 16px",display:"flex",alignItems:"center",gap:14 },
-  linkedIcon:   { width:42,height:42,borderRadius:10,background:"#1a9e5f18",border:"0.5px solid #1a9e5f44",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,color:"#1a9e5f",fontSize:11,flexShrink:0 },
-  tipCard:      { background:"#111827",border:"0.5px solid #1f2937",borderRadius:14,padding:"16px" },
-  card:         { background:"#111827",border:"0.5px solid #1f2937",borderRadius:14,padding:"16px" },
-  payHdr:       { display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:10 },
-  payBal:       { display:"flex",alignItems:"center",gap:10,background:"#0d1f14",border:"0.5px solid #1a9e5f33",borderRadius:10,padding:"8px 14px" },
-  dropBtn:      { width:"100%",background:"#111827",border:"0.5px solid #374151",borderRadius:12,padding:"13px 16px",fontSize:14,color:"#e5e7eb",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:10,fontFamily:"inherit" },
-  dropMenu:     { position:"absolute",top:"calc(100% + 4px)",left:0,right:0,background:"#111827",border:"0.5px solid #374151",borderRadius:12,zIndex:200,maxHeight:280,overflowY:"auto",boxShadow:"0 16px 48px rgba(0,0,0,0.8)" },
-  dropItem:     { width:"100%",padding:"12px 16px",background:"none",border:"none",borderBottom:"0.5px solid #1f2937",color:"#e5e7eb",cursor:"pointer",textAlign:"left",fontSize:13,fontFamily:"inherit",display:"flex",alignItems:"center",gap:10 },
-  priceBox:     { background:"linear-gradient(135deg,#0d1f14,#0d1117)",border:"1px solid #1a9e5f44",borderRadius:14,padding:"20px",marginBottom:16,textAlign:"center" },
-  histCard:     { background:"#111827",border:"0.5px solid #1f2937",borderRadius:14,padding:"16px",marginBottom:10 },
-  statusBadge:  { fontSize:10,padding:"2px 8px",borderRadius:100,fontWeight:700 },
-  statusDone:   { background:"#1a9e5f22",color:"#1a9e5f",border:"0.5px solid #1a9e5f44" },
-  statusPending:{ background:"#f59e0b22",color:"#f59e0b",border:"0.5px solid #f59e0b44" },
-  profileHero:  { background:"linear-gradient(135deg,#0d1f14,#0d1117,#111827)",border:"1px solid #1a9e5f33",borderRadius:16,padding:"24px",marginBottom:18,position:"relative",overflow:"hidden" },
-  profileGlow:  { position:"absolute",top:"-50%",right:"-10%",width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(26,158,95,0.15),transparent 70%)",pointerEvents:"none" },
-  avatar:       { width:64,height:64,borderRadius:"50%",background:"linear-gradient(135deg,#1a9e5f,#0d7a47)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,fontWeight:800,color:"#fff",flexShrink:0,boxShadow:"0 0 24px rgba(26,158,95,0.4)" },
-  walletCard:   { background:"linear-gradient(135deg,#0d1a14,#0d1117)",border:"1px solid #1a9e5f44",borderRadius:16,padding:"20px",marginBottom:20 },
-  profRow:      { display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"12px 0",borderBottom:"0.5px solid #1f2937",gap:10 },
-  transferBtn:  { width:"100%",background:"#111827",border:"1px solid #1a9e5f33",borderRadius:14,padding:"16px 18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",textAlign:"left",fontFamily:"inherit" },
-  refBtn:       { background:"#1a9e5f18",border:"0.5px solid #1a9e5f44",borderRadius:8,padding:"8px 14px",fontSize:12,color:"#1a9e5f",cursor:"pointer",fontFamily:"inherit",fontWeight:600,flexShrink:0 },
-  greenBtn:     { background:"linear-gradient(135deg,#1a9e5f,#0d7a47)",color:"#fff",border:"none",borderRadius:12,padding:"14px",fontSize:14,fontWeight:700,cursor:"pointer",width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8 },
-  outlineBtn:   { background:"transparent",color:"#9ca3af",border:"1.5px solid #374151",borderRadius:12,padding:"13px 16px",fontSize:13,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6 },
-  signOutBtn:   { width:"100%",marginTop:22,padding:"14px",background:"transparent",border:"1.5px solid #dc2626",color:"#dc2626",borderRadius:12,fontSize:14,fontWeight:600,cursor:"pointer" },
-  empty:        { textAlign:"center",color:"#6b7280",padding:"60px 0",lineHeight:1.8 },
-  toast:        { position:"fixed",bottom:28,left:"50%",transform:"translateX(-50%)",background:"#1a9e5f",color:"#fff",padding:"12px 24px",borderRadius:100,fontSize:13,fontWeight:600,zIndex:600,whiteSpace:"nowrap",boxShadow:"0 8px 32px rgba(0,0,0,0.4)" },
+  shell: {
+    minHeight: "100vh",
+    background:
+      "radial-gradient(circle at 12% 6%, rgba(117,213,194,0.30), transparent 28%), radial-gradient(circle at 92% 12%, rgba(152,183,255,0.28), transparent 30%), linear-gradient(180deg,#f8fcff 0%,#eef8f5 48%,#f8fbff 100%)",
+    color: palette.text,
+    fontFamily: fontStack,
+    position: "relative",
+    overflowX: "hidden",
+  },
+  bioLayer: { position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 },
+  bioBlob: { position: "absolute", width: 92, height: 92, borderRadius: 30, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, boxShadow: "inset 10px 12px 22px rgba(255,255,255,.72), inset -12px -16px 26px rgba(89,118,148,.12), 0 24px 55px rgba(89,118,148,.12)", border: "1px solid rgba(255,255,255,.72)" },
+  bioBlobMint: { background: "linear-gradient(145deg,#ffffff,#dff7ef 58%,#9ae4d5)", color: "#3fb7a3" },
+  bioBlobBlue: { background: "linear-gradient(145deg,#ffffff,#e8f5ff 58%,#9ccff4)", color: "#5aa9e6" },
+  bioBlobPeach: { background: "linear-gradient(145deg,#ffffff,#fff0e9 58%,#ffc3ad)", color: "#e98f70" },
+  bioBlobLav: { background: "linear-gradient(145deg,#ffffff,#f0f1ff 58%,#b6b9ff)", color: "#8f93ea" },
+  bioOrb: { position: "absolute", width: 58, height: 58, borderRadius: "50%", boxShadow: "inset 8px 10px 18px rgba(255,255,255,.85), inset -10px -12px 18px rgba(89,118,148,.13), 0 20px 42px rgba(89,118,148,.10)", opacity: .32 },
+  topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: 64, borderBottom: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, background: "rgba(255,255,255,0.75)", backdropFilter: "blur(22px) saturate(150%)", WebkitBackdropFilter: "blur(22px) saturate(150%)", zIndex: 30, gap: 12 },
+  tbL: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 }, tbC: { display: "flex", alignItems: "center", gap: 6, position: "absolute", left: "50%", transform: "translateX(-50%)" }, tbR: { display: "flex", alignItems: "center", gap: 8 },
+  burger: { background: palette.surfaceSoft, border: "1px solid " + palette.line, color: palette.textSoft, fontSize: 19, cursor: "pointer", padding: "6px 10px", lineHeight: 1, borderRadius: 12, boxShadow: "0 6px 16px rgba(89,118,148,0.10)" },
+  logoMk: { width: 40, height: 40, borderRadius: 14, background: "linear-gradient(135deg,#79dbc7,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 12px 26px rgba(63,183,163,0.30)", color: palette.text },
+  demoBadge: { fontSize: 10, padding: "3px 9px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, marginLeft: 6, fontWeight: 800 },
+  topBtn: { background: "transparent", border: "none", color: palette.textSoft, fontSize: 14, fontWeight: 500, cursor: "pointer", padding: "8px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6, transition: "all .2s ease" },
+  topBtnOn: { background: palette.mint, color: palette.brandDeep, fontWeight: 800, border: "1px solid rgba(63,183,163,0.22)", boxShadow: "0 8px 18px rgba(63,183,163,0.12)" },
+  balChip: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1, background: "rgba(255,255,255,0.92)", padding: "8px 14px", borderRadius: 16, border: "1px solid " + palette.line, flexShrink: 0, boxShadow: softShadow },
+  drawer: { position: "fixed", top: 66, left: 10, right: 10, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(22px)", zIndex: 25, border: "1px solid rgba(255,255,255,0.65)", borderRadius: "0 0 26px 26px", boxShadow: "0 22px 50px rgba(80,110,140,0.10)", overflow: "hidden" },
+  dItem: { width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "15px 18px", background: "none", border: "none", borderBottom: "1px solid #eef3f7", color: palette.textSoft, cursor: "pointer", textAlign: "left", fontFamily: "inherit" },
+  dItemOn: { color: palette.brandDeep, background: "linear-gradient(90deg,rgba(223,247,239,0.95),rgba(255,255,255,0.5))" }, dItemDot: { marginLeft: "auto", width: 8, height: 8, borderRadius: "50%", background: palette.brand },
+  sidebar: { width: 220, background: "rgba(255,255,255,0.45)", backdropFilter: "blur(22px)", borderRight: "1px solid rgba(255,255,255,0.65)", position: "fixed", top: 66, bottom: 0, left: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", overflowY: "auto", zIndex: 20 },
+  sideBtn: { width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "none", border: "none", color: palette.textSoft, cursor: "pointer", borderRadius: 14, textAlign: "left", fontFamily: "inherit", fontSize: 13, margin: "2px 0", transition: "all .2s ease" },
+  sideBtnOn: { background: palette.mint, color: palette.brandDeep, boxShadow: "0 10px 22px rgba(63,183,163,0.13)" }, sidefoot: { padding: "16px 14px", borderTop: "1px solid " + palette.line },
+  pg: { padding: "22px 24px 80px", maxWidth: 900, margin: "0 auto" },
+  landGridPat: { position: "absolute", inset: 0, pointerEvents: "none", backgroundImage: "radial-gradient(circle, rgba(63,183,163,0.08) 1px, transparent 1px)", backgroundSize: "48px 48px", maskImage: "radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%)", zIndex: 0 },
+  landWrap: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 66px)", padding: "80px 22px 120px", textAlign: "center", position: "relative", overflow: "hidden" },
+  landGlow1: { position: "absolute", top: "4%", left: "2%", width: 560, height: 480, borderRadius: "50%", background: "radial-gradient(circle,rgba(122,219,199,0.25),transparent 68%)", pointerEvents: "none", filter: "blur(40px)" },
+  landGlow2: { position: "absolute", bottom: "6%", right: "2%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(90,169,230,0.20),transparent 70%)", pointerEvents: "none", filter: "blur(40px)" },
+  landLogo: { width: 78, height: 78, borderRadius: 24, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, boxShadow: "0 18px 38px rgba(63,183,163,0.28)" },
+  landH1: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(34px,6vw,64px)", fontWeight: 700, lineHeight: 1.04, marginBottom: 18, letterSpacing: "-1.2px", color: palette.text },
+  landSub: { fontSize: 16, color: palette.textSoft, lineHeight: 1.8, marginBottom: 34, maxWidth: 520 },
+  landCTA: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff", border: "none", borderRadius: 999, padding: "14px 32px", fontSize: 15, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 34, boxShadow: btnShadow, transition: "all .2s ease", lineHeight: 1.33 },
+  landFeatures: { display: "flex", gap: 14, marginBottom: 30, flexWrap: "wrap", justifyContent: "center" },
+  landFeat: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(14px) saturate(150%)", border: "1px solid rgba(63,183,163,0.12)", borderRadius: 18, padding: "14px 16px", minWidth: 96, boxShadow: "inset 0 1px rgba(255,255,255,.8), 0 0 0 1px rgba(63,183,163,.06), 0 8px 24px rgba(80,110,140,.06)" },
+  landStats: { display: "flex", gap: 24, padding: "18px 26px", background: "rgba(255,255,255,0.5)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 28, flexWrap: "wrap", justifyContent: "center", boxShadow: "0 18px 40px rgba(80,110,140,0.08)" },
+  
+
+  phoneMockupWrap: {
+    position: "relative", zIndex: 2,
+    width: "100%", maxWidth: 340,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    filter: "drop-shadow(0 32px 72px rgba(80,110,140,0.20))",
+  },
+  phoneMockupImg: {
+    width: "100%", height: "auto",
+  },
+
+  landingFooterDeco: { position: "absolute", top: -1, left: "10%", right: "10%", height: 1, background: "linear-gradient(90deg,transparent,rgba(63,183,163,0.30),transparent)", pointerEvents: "none" },
+  landingFooter: {
+    width: "100%", maxWidth: 1120, margin: "0 auto", padding: "64px 0 24px",
+    borderTop: "1px solid " + palette.line,
+    position: "relative",
+  },
+  footerGrid: {
+    display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr",
+    gap: 32, marginBottom: 40,
+  },
+  footerTitle: {
+    fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em",
+    color: palette.text, marginBottom: 14,
+  },
+  footerLink: {
+    fontSize: 13, color: palette.textSoft, lineHeight: 2.2, cursor: "pointer",
+    background: "none", border: "none", padding: 0, fontFamily: "inherit",
+    textAlign: "left", display: "block",
+  },
+  footerBottom: {
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    paddingTop: 20, borderTop: "1px solid " + palette.line,
+    flexWrap: "wrap", gap: 10,
+  },
+  landNavCta: {
+    background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: "#fff",
+    border: "none", borderRadius: 999, padding: "8px 18px",
+    fontSize: 13, fontWeight: 700, cursor: "pointer",
+    display: "flex", alignItems: "center", gap: 6,
+    fontFamily: "inherit", whiteSpace: "nowrap",
+    boxShadow: "0 8px 20px rgba(63,183,163,0.22)",
+  },
+  landSection: { width: "100%", maxWidth: 1120, margin: "0 auto", padding: "0 0 96px" },
+  landSectionNarrow: { width: "100%", maxWidth: 760, margin: "0 auto", padding: "0 0 22px" },
+  sectionTitle: { fontSize: 12, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: palette.brandDeep, marginBottom: 14 },
+  sectionH2: { fontFamily: "'Borgen', system-ui, -apple-system, sans-serif", fontSize: "clamp(26px, 4vw, 40px)", lineHeight: 1.1, color: palette.text, marginBottom: 12, fontWeight: 700, letterSpacing: "-0.6px" },
+  sectionLead: { fontSize: 15, color: palette.textSoft, lineHeight: 1.8, maxWidth: 720, margin: "0 auto" },
+  landingGrid: { width: "100%", maxWidth: 1120, margin: "0 auto 80px", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 72, alignItems: "center", position: "relative", zIndex: 1 },
+  heroCopy: { textAlign: "left", alignItems: "flex-start" },
+  heroPills: { display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-start", margin: "0 0 18px" },
+  heroPill: { fontSize: 12, fontWeight: 600, color: palette.brandDeep, background: "rgba(63,183,163,0.08)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 999, padding: "8px 14px", boxShadow: "none" },
+  heroVisual: { width: "100%", display: "flex", justifyContent: "center" },
+  previewShell: { width: "100%", maxWidth: 420, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(18px)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 36, padding: 16, boxShadow: "0 28px 60px rgba(80,110,140,0.12), inset 0 1px 2px rgba(255,255,255,.72)" },
+  previewTop: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 },
+  previewChip: { fontSize: 11, padding: "6px 10px", borderRadius: 999, background: palette.mint, color: palette.brandDeep, fontWeight: 700 },
+  previewCard: { background: "rgba(255,255,255,0.5)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 28, padding: 18, textAlign: "left", boxShadow: "0 14px 30px rgba(80,110,140,0.08)" },
+  previewRow: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12 },
+  previewAvatar: { width: 58, height: 58, borderRadius: 20, background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900, color: palette.text, boxShadow: "0 14px 28px rgba(63,183,163,0.24)" },
+  miniStatGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10, marginTop: 14 },
+  miniStat: { background: "rgba(255,255,255,0.88)", border: "1px solid " + palette.line, borderRadius: 18, padding: "12px 10px", textAlign: "center" },
+  sectionGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 32, marginTop: 40 },
+  stepCard: { background: "linear-gradient(145deg,#ffffff 0%,#eefbf6 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 28, padding: 32, boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
+  stepNo: { width: 36, height: 36, borderRadius: 14, background: palette.mint, color: palette.brandDeep, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: 12, border: "1px solid rgba(63,183,163,0.18)" },
+  trustGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 28, marginTop: 40 },
+  trustCard: { background: "linear-gradient(145deg,#ffffff 0%,#edf9f5 100%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 24, padding: 28, textAlign: "center", boxShadow: "inset 0 1px rgba(255,255,255,.85), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
+  newsGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 28, marginTop: 40 },
+  ctaPanel: { background: "linear-gradient(135deg,rgba(255,255,255,0.55),rgba(223,247,239,0.35))", backdropFilter: "blur(18px) saturate(150%)", border: "1px solid rgba(63,183,163,0.14)", borderRadius: 32, padding: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap", boxShadow: "inset 0 1px rgba(255,255,255,.8), 0 0 0 1px rgba(63,183,163,.06), 0 8px 32px rgba(80,110,140,.08), 0 24px 60px rgba(80,110,140,.06)" },
+  sub: { fontSize: 14, color: palette.textSoft, lineHeight: 1.7, margin: "8px 0 18px" }, hint: { fontSize: 13, color: palette.muted, lineHeight: 1.7, marginBottom: 16 },
+  searchWrap: { display: "flex", alignItems: "center", gap: 10, background: palette.surface, border: "1px solid " + palette.line, borderRadius: 18, padding: "0 16px", marginBottom: 18, boxShadow: softShadow },
+  searchInp: { flex: 1, background: "none", border: "none", outline: "none", padding: "14px 0", fontSize: 16, color: palette.text, fontFamily: "inherit", minWidth: 0 },
+  hGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))", gap: 14, paddingBottom: 20 },
+  hCard: { background: "rgba(255,255,255,0.55)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 24, padding: "18px 16px", cursor: "pointer", textAlign: "left", boxShadow: "0 14px 30px rgba(80,110,140,0.08)", transition: "all .2s ease" },
+  hIdBadge: { display: "inline-block", fontSize: 14, fontWeight: 900, color: palette.brandDeep, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", padding: "5px 11px", borderRadius: 12 },
+  hospBanner: { background: "linear-gradient(135deg,#ffffff,#e9fbf5)", border: "1px solid rgba(63,183,163,0.20)", borderRadius: 24, padding: "20px 22px", margin: "10px 0 18px", boxShadow: cardShadow },
+  authTabs: { display: "flex", gap: 6, marginBottom: 20, background: "#eef6f8", borderRadius: 18, padding: 5, border: "1px solid " + palette.line },
+  authTab: { flex: 1, padding: "11px 8px", fontSize: 13, fontWeight: 800, border: "none", borderRadius: 14, background: "none", color: palette.textSoft, cursor: "pointer" },
+  authTabOn: { background: "#fff", color: palette.brandDeep, boxShadow: "0 8px 18px rgba(89,118,148,0.10)" },
+  inp: { width: "100%", background: "rgba(255,255,255,0.96)", border: "1px solid " + palette.lineStrong, borderRadius: 16, padding: "14px 15px", fontSize: 16, color: palette.text, marginBottom: 14, outline: "none", fontFamily: "inherit", boxSizing: "border-box", caretColor: palette.brand },
+  socialBtn: { width: "100%", background: "#fff", border: "1px solid " + palette.line, borderRadius: 18, padding: "15px", fontSize: 14, color: palette.text, cursor: "pointer", fontFamily: "inherit", textAlign: "center", fontWeight: 800, boxShadow: softShadow },
+  fileCard: { background: "rgba(255,255,255,0.92)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 30, padding: "34px 24px", maxWidth: 500, margin: "24px auto", textAlign: "center", boxShadow: cardShadow },
+  fileCheck: { width: 64, height: 64, borderRadius: "50%", background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, color: palette.text, margin: "0 auto 16px", boxShadow: "0 16px 32px rgba(63,183,163,0.26)" },
+  fileNo: { fontSize: 27, fontWeight: 900, color: palette.brandDeep, letterSpacing: 1, marginBottom: 8, fontFamily: "ui-monospace,SFMono-Regular,Menlo,monospace", wordBreak: "break-word" },
+  walletReveal: { background: "#f5fbfd", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 18, padding: "15px", marginBottom: 16, textAlign: "left" },
+  faucetBadge: { fontSize: 12, color: palette.brandDeep, background: palette.mint, borderRadius: 14, padding: "9px 11px", marginTop: 8, border: "1px solid rgba(63,183,163,0.16)" },
+  rcpCard: { background: "#fff", border: "1px solid " + palette.line, borderRadius: 26, padding: "25px 20px", maxWidth: 530, margin: "0 auto 16px", boxShadow: cardShadow },
+  rcpHeader: { textAlign: "center", marginBottom: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 },
+  rcpDash: { borderTop: "1.5px dashed #dce8ef", margin: "14px 0" },
+  rcpRow: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "8px 0", borderBottom: "1px solid #f0f5f8", gap: 10 },
+  rcpTotal: { fontSize: 31, fontWeight: 900, color: palette.brandDeep, textAlign: "center", marginTop: 14, letterSpacing: "0" },
+  welcomeBanner: { background: "linear-gradient(135deg,#ffffff 0%,#e6fbf4 62%,#edf4ff 100%)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 28, padding: "24px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", position: "relative", overflow: "hidden", boxShadow: cardShadow },
+  welcomeGlow: { position: "absolute", top: "-50%", right: "-10%", width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle,rgba(90,169,230,0.20),transparent 70%)", pointerEvents: "none" },
+  welcomeBalance: { textAlign: "right", background: "rgba(255,255,255,0.72)", border: "1px solid rgba(255,255,255,0.8)", padding: "12px 16px", borderRadius: 22 },
+  statsRow: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 },
+  statBox: { background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 22, padding: "15px 8px", textAlign: "center", boxShadow: "0 10px 24px rgba(80,110,140,0.08)" },
+  statV: { fontSize: 21, fontWeight: 900, color: palette.brandDeep }, statL: { fontSize: 11, color: palette.textSoft, marginTop: 4, fontWeight: 700 },
+  qaCard: { background: "rgba(255,255,255,0.55)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 26, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 7, textAlign: "left", boxShadow: "0 14px 30px rgba(80,110,140,0.08)" },
+  qaIcon: { width: 48, height: 48, borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 4 },
+  linkedCard: { background: "rgba(255,255,255,0.55)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 24, padding: "15px 16px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 14px 30px rgba(80,110,140,0.08)" },
+  linkedIcon: { width: 44, height: 44, borderRadius: 16, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: palette.brandDeep, fontSize: 11, flexShrink: 0 },
+  globalCard: { background: "linear-gradient(135deg,#ffffff,#e8f5ff)", border: "1px solid rgba(90,169,230,0.20)", borderRadius: 28, padding: "22px 24px", marginBottom: 28, position: "relative", overflow: "hidden", boxShadow: cardShadow },
+  globalGlow: { position: "absolute", top: "-30%", right: "-10%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle,rgba(90,169,230,0.20),transparent 70%)", pointerEvents: "none" },
+  comingSoonBadge: { fontSize: 10, padding: "4px 10px", borderRadius: 100, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", color: palette.brandDeep, fontWeight: 800 },
+  newsCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
+  newsTagBadge: { fontSize: 10, padding: "4px 10px", borderRadius: 100, fontWeight: 700 },
+  tipCard: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
+  card: { background: "rgba(255,255,255,0.9)", border: "1px solid " + palette.line, borderRadius: 22, padding: "16px", boxShadow: softShadow },
+  payHdr: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 10 },
+  payBal: { display: "flex", alignItems: "center", gap: 10, background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", borderRadius: 18, padding: "9px 14px" },
+  dropBtn: { width: "100%", background: "#fff", border: "1px solid " + palette.lineStrong, borderRadius: 18, padding: "14px 16px", fontSize: 16, color: palette.text, cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit", boxShadow: "0 8px 18px rgba(89,118,148,0.06)" },
+  dropMenu: { position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, background: "#fff", border: "1px solid " + palette.lineStrong, borderRadius: 20, zIndex: 200, maxHeight: 290, overflowY: "auto", boxShadow: "0 22px 50px rgba(80,110,140,0.18)" },
+  dropItem: { width: "100%", padding: "13px 16px", background: "none", border: "none", borderBottom: "1px solid #eef3f7", color: palette.text, cursor: "pointer", textAlign: "left", fontSize: 14, fontFamily: "inherit", display: "flex", alignItems: "center", gap: 10 },
+  priceBox: { background: "linear-gradient(135deg,#ffffff,#e9fbf5)", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 24, padding: "22px", marginBottom: 16, textAlign: "center", boxShadow: cardShadow },
+  histCard: { background: "rgba(255,255,255,0.55)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 26, padding: "16px", marginBottom: 10, boxShadow: "0 14px 30px rgba(80,110,140,0.08)" },
+  statusBadge: { fontSize: 10, padding: "3px 8px", borderRadius: 100, fontWeight: 800, whiteSpace: "nowrap" },
+  statusDone: { background: palette.mint, color: palette.brandDeep, border: "1px solid rgba(63,183,163,0.22)" },
+  statusPending: { background: palette.yellowSoft, color: "#b17700", border: "1px solid #f4dda0" },
+  linkBadge: { fontSize: 10, padding: "3px 8px", borderRadius: 100, background: palette.blueSoft, color: "#2872b2", border: "1px solid #cde9ff", fontWeight: 800 },
+  profileHero: { background: "linear-gradient(135deg,#ffffff,#e6fbf4,#edf4ff)", border: "1px solid rgba(63,183,163,0.18)", borderRadius: 28, padding: "24px", marginBottom: 18, position: "relative", overflow: "hidden", boxShadow: cardShadow },
+  profileGlow: { position: "absolute", top: "-50%", right: "-10%", width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle,rgba(63,183,163,0.20),transparent 70%)", pointerEvents: "none" },
+  avatar: { width: 66, height: 66, borderRadius: "50%", background: "linear-gradient(135deg,#8ce4d2,#3fb7a3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 29, fontWeight: 900, color: palette.text, flexShrink: 0, boxShadow: "0 15px 30px rgba(63,183,163,0.26)" },
+  walletCard: { background: "linear-gradient(135deg,#ffffff,#edf9f5)", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 26, padding: "20px", marginBottom: 20, boxShadow: cardShadow },
+  profRow: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "12px 0", borderBottom: "1px solid #eef3f7", gap: 10 },
+  transferBtn: { width: "100%", background: "rgba(255,255,255,0.92)", border: "1px solid rgba(63,183,163,0.22)", borderRadius: 22, padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left", fontFamily: "inherit", boxShadow: softShadow },
+  refBtn: { background: palette.mint, border: "1px solid rgba(63,183,163,0.22)", borderRadius: 12, padding: "8px 14px", fontSize: 12, color: palette.brandDeep, cursor: "pointer", fontFamily: "inherit", fontWeight: 800, flexShrink: 0 },
+  greenBtn: { background: "linear-gradient(135deg,#55c9b6,#2eaa99)", color: palette.text, border: "none", borderRadius: 18, padding: "15px", fontSize: 14, fontWeight: 900, cursor: "pointer", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: btnShadow },
+  outlineBtn: { background: "#fff", color: palette.textSoft, border: "1px solid " + palette.lineStrong, borderRadius: 18, padding: "13px 16px", fontSize: 13, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "0 8px 18px rgba(89,118,148,0.07)" },
+  signOutBtn: { width: "100%", marginTop: 22, padding: "14px", background: "#fff", border: "1px solid #ffd4d8", color: palette.danger, borderRadius: 18, fontSize: 14, fontWeight: 800, cursor: "pointer", boxShadow: softShadow },
+  empty: { textAlign: "center", color: palette.muted, padding: "60px 0", lineHeight: 1.8 },
+  toast: { position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: palette.brand, color: palette.text, padding: "12px 24px", borderRadius: 100, fontSize: 13, fontWeight: 800, zIndex: 600, whiteSpace: "nowrap", boxShadow: "0 12px 32px rgba(63,183,163,0.28)" },
 };
