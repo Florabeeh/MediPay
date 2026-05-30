@@ -36,6 +36,34 @@ Payments settle in under one second. No bank involved. No transfer delays. No fe
 
 ---
 
+## How Payments Work
+
+**In the current demo (ARC Testnet)**
+
+When a patient pays for a service, the USDC transfers from their Circle Programmable Wallet to a shared demo wallet address. This proves the full payment flow works end-to-end — registration, wallet creation, USDC transfer, receipt generation — without requiring real hospital onboarding.
+
+**In production**
+
+Each partnered hospital would receive their own Circle Programmable Wallet. When a patient pays, USDC settles directly into that hospital's wallet in under one second. The hospital then converts USDC to local currency (NGN, GHS, KES etc.) through Circle's partner network and receives funds in their bank account.
+
+Neither the patient nor the hospital needs to understand cryptocurrency. The patient sees NGN amounts and clicks Pay. The hospital sees funds arrive. Circle and USDC are the invisible infrastructure underneath — the same way Visa is invisible when you tap a card.
+
+**Patient flow**
+- Register at any partnered hospital → Circle wallet created automatically
+- Receive 10 USDC testnet on signup → wallet is ready to use
+- Select service → confirm payment → receipt generated in under 1 second
+- Share receipt via WhatsApp or download as image
+- Records and wallet persist across every device via Firebase
+
+**Hospital flow (production)**
+- Sign partnership agreement with MediPay
+- Receive a Circle Programmable Wallet linked to their hospital account
+- Patient payments arrive instantly in USDC
+- Convert to local currency via Circle partner exchange
+- No crypto knowledge required — just a receiving wallet and a bank account
+
+---
+
 ## Features
 
 **Authentication and Identity**
@@ -66,8 +94,8 @@ Payments settle in under one second. No bank involved. No transfer delays. No fe
 - Shareable payment links — patients generate a link and send it to family members who can pay on their behalf
 
 **Landing Page**
-- Full marketing landing page with hero, How it Works, Features, Hospital Network sections
-- About page with global vision, hospital network, and built-by information
+- Full marketing landing page with hero, How it Works, Features, and Hospital Network sections
+- Dedicated About page with global vision, hospital network, and built-by information
 - Phone mockup showing the app in action
 
 ---
@@ -191,6 +219,7 @@ All sensitive Circle API operations run server-to-server via `setupProxy.js`:
 - 12 hospitals onboarded as pilot network
 - 8 payment categories with real NGN and USDC pricing
 - Cross-hospital record linking and shareable payment links
+- Downloadable and shareable payment receipts
 
 ### Phase 2 — Authentication and Persistence (Completed)
 - Firebase Auth — Google and email/password login
@@ -198,45 +227,50 @@ All sensitive Circle API operations run server-to-server via `setupProxy.js`:
 - Returning patients auto-loaded to dashboard on login
 - Balance auto-loads on authentication
 - WhatsApp receipt image sharing via Web Share API
-- Full marketing landing page with About page
+- Full marketing landing page with About page and How it Works section
 
 ### Phase 3 — Production Deployment (In Progress)
-- Migrate server-side endpoints to Vercel serverless functions
+- Migrate server-side endpoints from setupProxy.js to Vercel serverless functions
 - Deploy frontend on Vercel
+- Configure production Firebase Authorized Domains
 - End-to-end testing on production URL
 
 ### Phase 4 — Hospital Network Expansion
 - Expand beyond the current 12 hospitals
-- Hospital admin dashboard for payment reconciliation
+- Each hospital receives their own Circle Programmable Wallet
+- Hospital admin dashboard for payment reconciliation and patient lookup
 - Formal hospital partnership agreements
 
 ### Phase 5 — Mainnet and Real Payments
 - Migrate from ARC Testnet to mainnet
 - Real USDC payments with NGN on-ramp integration
+- Circle Paymaster integration for gasless transactions
 - Multi-currency support — GHS, KES, ZAR alongside NGN
+- Compliance and KYC layer for regulated markets
 
 ### Phase 6 — Patient Experience
 - Mobile application for Android and iOS
-- Push notifications for payment confirmations
+- Push notifications for payment confirmations and appointment reminders
 - NFC tap-to-pay at hospital cashier points
+- Offline payment receipt storage
 
 ### Phase 7 — International Scale
 - Ghana, Kenya, South Africa hospital networks
 - UK and Europe diaspora payment support
 - Insurance integration — direct billing to health insurance providers
-- Government and NGO partnership program
+- Government and NGO partnership program for subsidised healthcare access
 
 ---
 
 ## Current Status
 
-Active development and demo stage. Core functionality — patient registration, wallet creation, USDC payments, Firebase authentication, and Firestore persistence — is fully working on ARC Testnet.
+Active development and demo stage. Core functionality — patient registration, wallet creation, USDC payments, Firebase authentication, and Firestore persistence — is fully working on ARC Testnet. Production deployment and hospital network expansion are the immediate next milestones.
 
 ---
 
 ## Contributing
 
-Contributions, feedback, and ideas are welcome. Open an issue or submit a pull request.
+Contributions, feedback, and ideas are welcome. Open an issue or submit a pull request. If you work in healthcare, fintech, or have direct experience with medical payment challenges anywhere in the world, your perspective is especially valuable.
 
 ---
 
