@@ -179,7 +179,7 @@ const HEALTH_TIPS = [
 ];
 
 const NEWS = [
-  { tag: "Launch", tagColor: "#3fb7a3", title: "MediPay live across 12 Nigerian hospitals", body: "Register once at UDUTH, LUTH, UCH, ABUTH and 8 others with a single Circle Programmable Wallet.", date: "May 2026" },
+  { tag: "Launch", tagColor: "#3fb7a3", title: "MediPay live across 12 hospitals", body: "Register once at any partnered hospital with a single Circle Programmable Wallet.", date: "May 2026" },
   { tag: "Feature", tagColor: "#5aa9e6", title: "Transfer records across states instantly", body: "Moving from Sokoto to Lagos? Your history travels with you. Just enter your file number at any MediPay hospital.", date: "May 2026" },
   { tag: "Technology", tagColor: "#8f93ea", title: "Powered by Circle on ARC Testnet", body: "Every payment settles in under 1 second using Circle Nanopayments. No bank delays, no transfer fees.", date: "May 2026" },
   { tag: "Vision", tagColor: "#f5c85b", title: "Expanding to Ghana and Kenya by Q4 2026", body: "After Nigeria pilot, MediPay partners with Korle-Bu Teaching Hospital Ghana and Kenyatta National Hospital Kenya.", date: "April 2026" },
@@ -308,6 +308,8 @@ export default function MediPay() {
           setFileNo(rec.fileNo || ""); setWalletId(rec.walletId || ""); setWalletAddr(rec.walletAddress || "");
           setLinked(rec.linkedHospitals?.map(id => ({ id, ...(HOSPITALS.find(h => h.id === id) || {}) })) || []);
           setFaucetSent(rec.faucetSent || false); setHistory(rec.history || []);
+          const hosp = HOSPITALS.find(h => h.id === rec.hospitalId);
+          if (hosp) setHospital(hosp);
           setTab("home"); setScreen("dashboard");
           if (rec.walletId) refreshBalance(rec.walletId);
         } else {
@@ -335,6 +337,7 @@ export default function MediPay() {
   };
 
   // Save the complete patient record to Firestore after wallet/profile changes.
+  const cleanObj = (obj) => Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined && v !== null));
   const persistRecord = async (overrides = {}) => {
     if (!fbUser) return;
     const rec = {
@@ -358,7 +361,7 @@ export default function MediPay() {
       updatedAt: new Date().toISOString(),
       ...overrides,
     };
-    await savePatientRecord(fbUser.uid, rec);
+    await savePatientRecord(fbUser.uid, cleanObj(rec));
   };
 
   const setupWallet = async (refId) => {
@@ -451,7 +454,7 @@ export default function MediPay() {
       const newHistory = [rec, ...history];
       setReceipt(rec); setHistory(newHistory);
       setPendingLinks(pl => pl.map(p => p.item === payitem && p.hospitalId === hospital?.id ? { ...p, status: "confirmed" } : p));
-      await savePatientRecord(fbUser.uid, { history: newHistory });
+      await savePatientRecord(fbUser.uid, { history: newHistory.map(r => cleanObj(r)) });
       setLoading(false); setStep(""); setScreen("receipt");
     } catch (e) { toast_("Payment failed: " + e.message, "err"); setLoading(false); setStep(""); }
   };
@@ -485,7 +488,7 @@ export default function MediPay() {
     const newHistory = [pendingEntry, ...history];
     setHistory(newHistory);
     setPendingLinks(p => [pendingEntry, ...p]);
-    savePatientRecord(fbUser?.uid, { history: newHistory });
+    savePatientRecord(fbUser?.uid, { history: newHistory.map(r => cleanObj(r)) });
     setPayLinkCopied(false); setShowPayLink(true);
   };
 
@@ -629,7 +632,7 @@ export default function MediPay() {
             </div>
             <p style={{ fontSize: 13, color: palette.muted, marginBottom: 18 }}>Powered by Circle USDC on ARC Testnet</p>
             <h1 style={s.landH1}>Healthcare payments,<br /><span style={{ color: palette.brandDeep }}>finally simple.</span></h1>
-            <p style={s.landSub}>Register once. Pay anywhere in Nigeria and beyond.<br />Your Circle Programmable Wallet goes with you.</p>
+            <p style={s.landSub}>Register once. Pay anywhere in the world.<br />Your Circle Programmable Wallet goes with you.</p>
             <button style={s.landCTA} onClick={requireAuth}><span>Get Started</span><Ico.ArrowRight size={18} /></button>
             <div style={s.landFeatures}>
               {[[<Ico.Shield size={20} />, "MPC Secured"], [<Ico.Bolt size={20} />, "< 1s Settlement"], [<Ico.NGFlag size={20} />, "12 Hospitals"], [<Ico.ActivityIcon size={20} />, "USDC Native"]].map(([ic, lb]) => (
@@ -654,16 +657,36 @@ export default function MediPay() {
           </div>
         </div>
 
+        <div style={{ ...s.landSection, textAlign:"center", padding:"60px 24px" }}>
+          <div style={{ fontSize:11,fontWeight:700,letterSpacing:".18em",textTransform:"uppercase",color:"#20b2aa",marginBottom:14 }}>How it works</div>
+          <div style={{ fontSize:"clamp(24px,4vw,36px)",fontWeight:800,color:"#1a2e35",marginBottom:12,letterSpacing:"-0.5px" }}>Three steps to your first payment</div>
+          <div style={{ fontSize:14,color:"#5a7a8a",marginBottom:40,maxWidth:560,margin:"0 auto 40px" }}>No bank account needed. No crypto knowledge required. Just sign up and pay.</div>
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:24,maxWidth:800,margin:"0 auto",textAlign:"left" }}>
+            {[
+              { step:"01", title:"Register at any hospital", body:"Sign up with your Google account or email. Choose your hospital. Done in under 2 minutes.", icon:"🏥" },
+              { step:"02", title:"Get your Circle Wallet", body:"A Circle Programmable Wallet is created instantly — MPC-secured, no seed phrase. You get 10 USDC testnet to start.", icon:"💳" },
+              { step:"03", title:"Pay from anywhere", body:"Use your wallet to pay for any medical service. Share a payment link so family can pay on your behalf from anywhere.", icon:"⚡" },
+            ].map(({ step, title, body, icon }) => (
+              <div key={step} style={{ background:"#fff",border:"1px solid rgba(63,183,163,0.18)",borderRadius:16,padding:"24px",position:"relative" }}>
+                <div style={{ fontSize:11,fontWeight:800,color:"#20b2aa",letterSpacing:".12em",marginBottom:12 }}>{step}</div>
+                <div style={{ fontSize:28,marginBottom:12 }}>{icon}</div>
+                <div style={{ fontSize:15,fontWeight:700,color:"#1a2e35",marginBottom:8 }}>{title}</div>
+                <div style={{ fontSize:13,color:"#5a7a8a",lineHeight:1.7 }}>{body}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div style={s.landSection}>
           <div id="features-section"></div><div style={s.sectionTitle}>What MediPay does</div>
-          <div style={s.sectionH2}>Medical payments across Nigeria, powered by Circle USDC.</div>
+          <div style={s.sectionH2}>Medical payments across the World, powered by Circle USDC.</div>
           <div style={s.sectionLead}>MediPay replaces cash and bank transfers at hospitals with instant USDC settlement through a Circle Programmable Wallet — created automatically for every patient, no crypto knowledge needed.</div>
           <div style={{ height: 8 }} />
           <div style={s.sectionGrid}>
             {[
               [<Ico.LinkIcon size={22} />, "Share a payment link", "Generate a one-tap payment link and send via WhatsApp or SMS. The payer clicks and settles in seconds — no app download required."],
               [<Ico.CardIcon size={22} />, "Instant Circle Wallet", "A Circle Programmable Wallet is created on registration. MPC-secured, no seed phrase, and auto-funded with 10 USDC testnet on signup."],
-              [<Ico.FolderIcon size={22} />, "File number travels with you", "Register once at any MediPay hospital. Your file number, records, and wallet follow you across all 12 hospitals in 36 states."]
+              [<Ico.FolderIcon size={22} />, "File number travels with you", "Register once at any MediPay hospital. Your file number, records, and wallet follow you across all partnered hospitals."]
             ].map(([ic, t, d]) => (
               <div key={t} style={s.stepCard}>
                 <div style={{ ...s.stepNo, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.65)", width: 52, height: 52, borderRadius: 18 }}>{ic}</div>
@@ -697,7 +720,7 @@ export default function MediPay() {
             <div style={{ maxWidth: 600 }}>
               <div style={s.sectionTitle}>Ready to get started?</div>
               <div style={s.sectionH2}>Choose your hospital and register in under 2 minutes.</div>
-              <div style={s.sectionLead}>A Circle wallet is created automatically. You get 10 USDC testnet, a portable file number, and access to instant medical payments across Nigeria.</div>
+              <div style={s.sectionLead}>A Circle wallet is created automatically. You get 10 USDC testnet, a portable file number, and access to instant medical payments anywhere in the world.</div>
             </div>
             <button style={{ ...s.landCTA, marginBottom: 0 }} onClick={requireAuth}><span>Find your hospital</span><Ico.ArrowRight size={18} /></button>
           </div>
@@ -877,6 +900,11 @@ export default function MediPay() {
     <Shell {...shellProps}>
       <PBar title="Payment Receipt" onBack={() => { setPaycat(""); setPayitem(""); setPaynote(""); setPayprice(0); setTab("pay"); setScreen("dashboard"); }} />
       <div style={s.pg}>
+        <div style={{ textAlign:"center", padding:"24px 0 16px" }}>
+          <div style={{ width:68,height:68,borderRadius:"50%",background:"linear-gradient(135deg,#20b2aa,#0d8c85)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",boxShadow:"0 0 40px rgba(32,178,170,0.35)",fontSize:30,animation:"popIn 0.5s ease" }}>✓</div>
+          <div style={{ fontSize:20,fontWeight:800,color:"#1a2e35",marginBottom:4 }}>Payment Confirmed!</div>
+          <div style={{ fontSize:13,color:"#5a7a8a" }}>Settled on ARC Testnet in under 1 second</div>
+        </div>
         <div style={s.rcpCard}>
           <div style={s.rcpHeader}>
             <div style={s.logoMk}><span style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>M</span></div>
@@ -1025,7 +1053,7 @@ export default function MediPay() {
           <L t="Payment category" />
           <div style={{ position: "relative", marginBottom: 14 }}>
             <button style={s.dropBtn} onClick={() => { setShowCat(!showCat); setShowItem(false); }}>
-              <span style={{ flex: 1, textAlign: "left" }}>{paycat ? CATS[paycat].icon + "  " + paycat : "Select category..."}</span>
+              <span style={{ flex: 1, textAlign: "left" }}>{paycat ? (typeof CATS[paycat].icon === "string" ? CATS[paycat].icon : "") + "  " + paycat : "Select category..."}</span>
               <Ico.ChevronDown size={14} color={palette.muted} />
             </button>
             {showCat && (
