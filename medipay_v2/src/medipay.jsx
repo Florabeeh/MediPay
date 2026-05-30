@@ -284,6 +284,7 @@ export default function MediPay() {
   const [searchH, setSearchH] = useState(""); const [showCat, setShowCat] = useState(false); const [showItem, setShowItem] = useState(false);
   const [showTrf, setShowTrf] = useState(false); const [trfTarget, setTrfTarget] = useState(""); const [trfDrop, setTrfDrop] = useState(false); const [trfDone, setTrfDone] = useState(false);
   const [existFN, setExistFN] = useState(""); const [menuOpen, setMenuOpen] = useState(false); const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
+  const [showAboutPage, setShowAboutPage] = useState(false);
   const [showPayLink, setShowPayLink] = useState(false); const [payLink, setPayLink] = useState(""); const [payLinkCopied, setPayLinkCopied] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false); const [shareReceipt, setShareReceipt] = useState(null); const [rcpCopied, setRcpCopied] = useState(false);
   // eslint-disable-next-line
@@ -503,14 +504,112 @@ export default function MediPay() {
     navigator.clipboard.writeText(lines).then(() => { setRcpCopied(true); setTimeout(() => setRcpCopied(false), 2000); }).catch(() => toast_("Clipboard not available", "err"));
   };
   const nativeShare = async rec => {
-    const lines = ["== MEDIPAY RECEIPT ==", "Patient:  " + rec.patient, "File No:  " + rec.fileNo, "Hospital: " + (rec.hospital || ""), "Category: " + rec.category, "Service:  " + rec.item, rec.note ? "Note:     " + rec.note : null, "Amount:   " + fmt(rec.amount), "USDC:     " + rec.usdc + " USDC", "Network:  ARC-TESTNET", "Date:     " + rec.date, "Tx ID:    " + rec.id, "========================", "Powered by Circle on ARC Testnet"].filter(Boolean).join("\n");
-    if (navigator.share) navigator.share({ title: "MediPay Receipt", text: lines });
-    else { copyReceiptText(rec); toast_("Receipt copied to clipboard!"); }
+    const canvas = document.createElement("canvas");
+    canvas.width = 600; canvas.height = 820;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#f0faf8"; ctx.fillRect(0, 0, 600, 820);
+    ctx.fillStyle = "#20b2aa"; ctx.fillRect(0, 0, 600, 8);
+    ctx.beginPath(); ctx.arc(300, 70, 36, 0, Math.PI * 2);
+    const g = ctx.createRadialGradient(300,70,0,300,70,36);
+    g.addColorStop(0,"#20b2aa"); g.addColorStop(1,"#0d8c85");
+    ctx.fillStyle = g; ctx.fill();
+    ctx.fillStyle="#fff"; ctx.font="bold 28px system-ui"; ctx.textAlign="center"; ctx.fillText("M",300,80);
+    ctx.fillStyle="#1a1a2e"; ctx.font="bold 26px system-ui"; ctx.fillText("MediPay",300,128);
+    ctx.fillStyle="#20b2aa"; ctx.font="14px system-ui"; ctx.fillText("Payment Confirmed  ARC Testnet",300,152);
+    ctx.setLineDash([6,4]); ctx.strokeStyle="#d1d5db"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(40,172); ctx.lineTo(560,172); ctx.stroke(); ctx.setLineDash([]);
+    const rows=[["Patient",rec.patient],["File Number",rec.fileNo],["Hospital",rec.hospital||""],["Category",rec.category],["Service",rec.item],rec.note?["Note",rec.note]:null,["Amount (NGN)",fmt(rec.amount)],["Amount (USDC)",rec.usdc+" USDC"],["Network","ARC-TESTNET"],["Settlement","< 1 second (Circle)"],["Date",rec.date],["Tx ID",rec.id?rec.id.slice(0,28)+"...":""]].filter(Boolean);
+    let y=200; rows.forEach(([k,v])=>{ ctx.fillStyle="#6b7280"; ctx.font="13px system-ui"; ctx.textAlign="left"; ctx.fillText(k,50,y); ctx.fillStyle="#1a1a2e"; ctx.font="13px system-ui"; ctx.textAlign="right"; ctx.fillText(String(v).length>38?String(v).slice(0,38)+"...":String(v),550,y); ctx.strokeStyle="#e5e7eb"; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(50,y+10); ctx.lineTo(550,y+10); ctx.stroke(); y+=36; });
+    y+=10; ctx.fillStyle="#e6f7f5"; ctx.beginPath(); ctx.roundRect(40,y,520,80,12); ctx.fill();
+    ctx.fillStyle="#20b2aa"; ctx.font="bold 32px system-ui"; ctx.textAlign="center"; ctx.fillText(fmt(rec.amount),300,y+42);
+    ctx.fillStyle="#6b7280"; ctx.font="13px system-ui"; ctx.fillText(rec.usdc+" USDC  Circle ARC Testnet",300,y+64);
+    y+=100; ctx.fillStyle="#d1d5db"; ctx.font="8px monospace"; ctx.fillText("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||",300,y);
+    ctx.fillStyle="#9ca3af"; ctx.font="11px system-ui"; ctx.fillText("Powered by Circle on ARC Testnet",300,y+20);
+    ctx.fillStyle="#20b2aa"; ctx.fillRect(0,812,600,8);
+    try {
+      const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+      const file = new File([blob], "medipay-receipt-"+(rec.fileNo||"receipt")+".png", { type:"image/png" });
+      if (navigator.canShare && navigator.canShare({ files:[file] })) {
+        await navigator.share({ title:"MediPay Receipt", files:[file] });
+        return;
+      }
+    } catch(e) { console.log("File share failed:", e.message); }
+    const link = document.createElement("a");
+    link.download = "medipay-receipt-"+(rec.fileNo||"receipt")+".png";
+    link.href = canvas.toDataURL("image/png"); link.click();
+    setTimeout(() => {
+      const text = encodeURIComponent("MediPay Receipt\nPatient: "+rec.patient+"\nService: "+rec.item+"\nAmount: "+fmt(rec.amount)+"\nDate: "+rec.date+"\n\n(See downloaded image for full receipt)");
+      window.open("https://wa.me/?text="+text, "_blank");
+    }, 800);
   };
 
   const NAV = [["home", <Ico.HomeIcon size={18} />, "Home"], ["pay", <Ico.CardIcon size={18} />, "Pay"], ["history", <Ico.ClockIcon size={18} />, "History"], ["profile", <Ico.UserIcon size={18} />, "Profile"]];
   const switchTab = t => { setTab(t); setMenuOpen(false); };
-  const shellProps = { isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, setScreen, onRequireAuth: requireAuth };
+  const shellProps = { isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, setScreen, onRequireAuth: requireAuth, setShowAboutPage };
+
+
+  if (showAboutPage) return (
+    <div style={{ minHeight:"100vh", background:"#f7fbff", fontFamily:"system-ui,-apple-system,sans-serif" }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 24px", height:64, borderBottom:"1px solid rgba(63,183,163,0.15)", background:"#fff", position:"sticky", top:0, zIndex:30 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#20b2aa,#0d8c85)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,color:"#fff",fontSize:16 }}>M</div>
+          <span style={{ fontSize:18,fontWeight:800,color:"#1a2e35" }}>MediPay</span>
+        </div>
+        <button onClick={() => setShowAboutPage(false)} style={{ background:"none",border:"1px solid rgba(63,183,163,0.4)",borderRadius:8,padding:"8px 16px",fontSize:13,fontWeight:600,color:"#20b2aa",cursor:"pointer" }}>← Back</button>
+      </div>
+      <div style={{ maxWidth:800, margin:"0 auto", padding:"40px 24px 80px" }}>
+        <div style={{ fontSize:11,fontWeight:700,letterSpacing:".18em",textTransform:"uppercase",color:"#20b2aa",marginBottom:12 }}>About MediPay</div>
+        <h1 style={{ fontSize:"clamp(28px,5vw,42px)",fontWeight:800,color:"#1a2e35",lineHeight:1.1,marginBottom:16,letterSpacing:"-1px" }}>Healthcare payments,<br/><span style={{ color:"#20b2aa" }}>built for the world.</span></h1>
+        <p style={{ fontSize:15,color:"#5a7a8a",lineHeight:1.9,marginBottom:32 }}>MediPay is a borderless healthcare payment platform that gives every patient a portable digital wallet and a permanent medical identity — one that works across any partnered hospital, in any city, in any country. We started in Nigeria because the need is most urgent here. But the infrastructure we are building has no borders.</p>
+        <div style={{ background:"#fff",border:"1px solid rgba(63,183,163,0.18)",borderRadius:16,padding:"24px",marginBottom:16 }}>
+          <div style={{ fontSize:15,fontWeight:800,color:"#1a2e35",marginBottom:16 }}>Why MediPay exists</div>
+          {[["The problem","Patients lose records when they move cities. Families cannot send money urgently for medical emergencies. Hospital cashier systems are cash-dependent and disconnected. People miss treatment because of payment friction."],["The solution","One registration. One file number. One Circle Programmable Wallet. Pay for any medical service from anywhere in the world. Your records and wallet travel with you forever."],["The technology","Built on Circle Programmable Wallets and USDC on ARC Testnet. Every payment settles in under one second. No bank delays. No transfer fees. MPC-secured — no seed phrase to lose."]].map(([title,body]) => (
+            <div key={title} style={{ marginBottom:16,paddingBottom:16,borderBottom:"1px solid rgba(63,183,163,0.12)" }}>
+              <div style={{ fontSize:13,fontWeight:700,color:"#20b2aa",marginBottom:6 }}>{title}</div>
+              <p style={{ fontSize:13,color:"#5a7a8a",lineHeight:1.8,margin:0 }}>{body}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ background:"#fff",border:"1px solid rgba(63,183,163,0.18)",borderRadius:16,padding:"24px",marginBottom:16 }}>
+          <div style={{ fontSize:15,fontWeight:800,color:"#1a2e35",marginBottom:16 }}>Global expansion</div>
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10 }}>
+            {[{flag:"🇳🇬",country:"Nigeria",status:"Live — Pilot",note:"12 hospitals"},{flag:"🇬🇭",country:"Ghana",status:"Coming Soon",note:"Korle-Bu Hospital"},{flag:"🇰🇪",country:"Kenya",status:"Coming Soon",note:"Kenyatta Hospital"},{flag:"🇿🇦",country:"South Africa",status:"Coming Soon",note:"Expanding"},{flag:"🇬🇧",country:"UK",status:"Coming Soon",note:"Diaspora payments"},{flag:"🌍",country:"Global",status:"Vision",note:"Any hospital, anywhere"}].map(({flag,country,status,note}) => (
+              <div key={country} style={{ background:"#f7fbff",border:"1px solid rgba(63,183,163,0.15)",borderRadius:10,padding:"12px" }}>
+                <div style={{ fontSize:22,marginBottom:4 }}>{flag}</div>
+                <div style={{ fontSize:12,fontWeight:700,color:"#1a2e35" }}>{country}</div>
+                <div style={{ fontSize:11,color:"#20b2aa",fontWeight:600,marginTop:2 }}>{status}</div>
+                <div style={{ fontSize:11,color:"#9aa5b1",marginTop:2 }}>{note}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ background:"#fff",border:"1px solid rgba(63,183,163,0.18)",borderRadius:16,padding:"24px",marginBottom:16 }}>
+          <div style={{ fontSize:15,fontWeight:800,color:"#1a2e35",marginBottom:16 }}>Hospital network</div>
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8 }}>
+            {HOSPITALS.map(h => (
+              <div key={h.id} style={{ background:"#f7fbff",border:"1px solid rgba(63,183,163,0.15)",borderRadius:8,padding:"10px" }}>
+                <div style={{ fontSize:12,fontWeight:700,color:"#20b2aa" }}>{h.id}</div>
+                <div style={{ fontSize:10,color:"#5a7a8a",marginTop:2,lineHeight:1.4 }}>{h.full}</div>
+                <div style={{ fontSize:10,color:"#9aa5b1",marginTop:2 }}>📍 {h.state}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ background:"linear-gradient(135deg,#f0fdfb,#e6f7f5)",border:"1px solid rgba(63,183,163,0.2)",borderRadius:16,padding:"24px" }}>
+          <div style={{ fontSize:15,fontWeight:800,color:"#1a2e35",marginBottom:12 }}>Built by</div>
+          <div style={{ display:"flex",alignItems:"center",gap:14,marginBottom:20 }}>
+            <div style={{ width:50,height:50,borderRadius:"50%",background:"linear-gradient(135deg,#20b2aa,#0d8c85)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:800,color:"#fff",flexShrink:0 }}>E</div>
+            <div>
+              <div style={{ fontSize:14,fontWeight:700,color:"#1a2e35" }}>Esther Daka</div>
+              <div style={{ fontSize:12,color:"#5a7a8a",marginTop:2 }}>Product vision and domain knowledge — healthcare payment infrastructure for underserved markets.</div>
+              <a href="https://github.com/Florabeeh/MediPay" target="_blank" rel="noreferrer" style={{ fontSize:12,color:"#20b2aa",marginTop:4,display:"inline-block",textDecoration:"none",fontWeight:600 }}>GitHub: Florabeeh/MediPay →</a>
+            </div>
+          </div>
+          <button onClick={() => { setShowAboutPage(false); }} style={{ background:"linear-gradient(135deg,#20b2aa,#0d8c85)",color:"#fff",border:"none",borderRadius:12,padding:"13px 28px",fontSize:14,fontWeight:700,cursor:"pointer" }}>← Back to MediPay</button>
+        </div>
+      </div>
+    </div>
+  );
 
   if (screen === "landing") return (
     <Shell {...shellProps} isLanding={true}>
@@ -556,7 +655,7 @@ export default function MediPay() {
         </div>
 
         <div style={s.landSection}>
-          <div style={s.sectionTitle}>What MediPay does</div>
+          <div id="features-section"></div><div style={s.sectionTitle}>What MediPay does</div>
           <div style={s.sectionH2}>Medical payments across Nigeria, powered by Circle USDC.</div>
           <div style={s.sectionLead}>MediPay replaces cash and bank transfers at hospitals with instant USDC settlement through a Circle Programmable Wallet — created automatically for every patient, no crypto knowledge needed.</div>
           <div style={{ height: 8 }} />
@@ -575,27 +674,7 @@ export default function MediPay() {
           </div>
         </div>
 
-        <div style={s.landSection}>
-          <div style={s.sectionTitle}>Why MediPay</div>
-          <div style={s.sectionH2}>Instant settlement. No bank delays. No app download for the payer.</div>
-          <div style={s.trustGrid}>
-            {[
-              [<Ico.Bolt size={22} />, "< 1 second settlement", "Powered by Circle Nanopayments on ARC Testnet. No bank queues, no transfer delays."],
-              [<Ico.Shield size={22} />, "MPC-secured wallets", "Multi-Party Computation means no seed phrase to lose. Your wallet is safe and recoverable."],
-              [<Ico.NGFlag size={22} />, "12 hospitals + growing", "UDUTH, LUTH, UCH, ABUTH, and 8 more across Nigeria. Expanding to Ghana and Kenya."],
-              [<Ico.LinkIcon size={22} />, "Shareable payment links", "Anyone can pay a link — no app, no crypto wallet, no registration. Just tap and settle."]
-            ].map(([ic, t, d]) => (
-              <div key={t} style={s.trustCard}>
-                <div style={{ width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.65)", borderRadius: 18 }}>{ic}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: palette.text, marginBottom: 6 }}>{t}</div>
-                  <div style={{ fontSize: 13, color: palette.textSoft, lineHeight: 1.7 }}>{d}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
+        
         <div style={s.landSection}>
           <div style={s.sectionTitle}>Hospital network</div>
           <div style={s.sectionH2}>Built for real hospitals, not just a demo screen.</div>
@@ -1187,7 +1266,7 @@ export default function MediPay() {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, isLanding, onRequireAuth }) {
+function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, isLanding, onRequireAuth, setShowAboutPage }) {
   return (
     <div style={s.shell}>
       <HealthObjects dense={showNav} />
@@ -1200,7 +1279,11 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
         {isLanding && !isMobile && (
           <div style={s.tbC}>
             {["Features", "Hospitals", "About"].map((lb) => (
-              <button key={lb} style={s.topBtn} onClick={() => lb === "Hospitals" && onRequireAuth()}>{lb}</button>
+              <button key={lb} style={s.topBtn} onClick={() => {
+                if (lb === "Hospitals") { onRequireAuth(); return; }
+                if (lb === "About") { setShowAboutPage(true); window.scrollTo({top:0}); return; }
+                if (lb === "Features") { const el = document.getElementById("features-section"); if(el) el.scrollIntoView({behavior:"smooth"}); }
+              }}>{lb}</button>
             ))}
           </div>
         )}
