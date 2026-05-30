@@ -53,30 +53,22 @@ Payments settle in under one second. No bank involved. No transfer delays. No fe
 - Manual faucet link provided on profile page as fallback
 
 **Hospital Network**
-- 12 hospitals across Nigeria in the current pilot network
+- 12 hospitals across the pilot network
 - Cross-hospital record linking — patients can link their file number to hospitals in other states
 - Patients can walk into any linked hospital and be identified by their file number alone
 
 **Payment Categories**
-- Surgery
-- Investigations (lab tests)
-- Radiology
-- Medication
-- Therapy
-- Pharmacy
-- Rehabilitation
-- Procedures
+- Surgery, Investigations, Radiology, Medication, Therapy, Pharmacy, Rehabilitation, Procedures
 
 **Receipts and Sharing**
 - Downloadable payment receipts as PNG images
 - WhatsApp image sharing — share receipt photo directly on mobile via Web Share API
 - Shareable payment links — patients generate a link and send it to family members who can pay on their behalf
-- Pending payment links tracked in transaction history and marked confirmed once paid
 
-**Developer and Operations**
-- Server-side Circle API endpoints — wallet creation, payments, faucet, and ciphertext generation all run server-to-server to avoid browser proxy timeouts
-- Diagnostic endpoints for testing Circle API connectivity and faucet access
-- Full API request logging in terminal for debugging
+**Landing Page**
+- Full marketing landing page with hero, How it Works, Features, Hospital Network sections
+- About page with global vision, hospital network, and built-by information
+- Phone mockup showing the app in action
 
 ---
 
@@ -99,13 +91,16 @@ Payments settle in under one second. No bank involved. No transfer delays. No fe
 MediPay/
 ├── medipay_v2/
 │   ├── public/
+│   │   ├── fonts/              Custom fonts
+│   │   ├── hero.png            Hero image
+│   │   ├── phone mockup.png    App screenshot mockup
 │   │   └── index.html
 │   ├── src/
-│   │   ├── firebase.js          Firebase initialisation, auth helpers, Firestore helpers
-│   │   ├── index.js             React entry point
-│   │   ├── medipay.jsx          Main application — all screens, components, and logic
-│   │   └── setupProxy.js        Dev server proxy and server-side Circle API endpoints
-│   ├── .env                     Environment variables (not committed)
+│   │   ├── firebase.js         Firebase init, auth helpers, Firestore helpers
+│   │   ├── index.js            React entry point
+│   │   ├── medipay.jsx         Main application — all screens, components, and logic
+│   │   └── setupProxy.js       Dev server proxy and server-side Circle API endpoints
+│   ├── .env                    Environment variables (not committed)
 │   ├── .gitignore
 │   ├── package.json
 │   └── package-lock.json
@@ -133,7 +128,7 @@ REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 REACT_APP_FIREBASE_APP_ID=your_app_id
 ```
 
-The `.env` file is listed in `.gitignore` and must never be committed to the repository.
+Never commit the `.env` file. It is listed in `.gitignore`.
 
 ---
 
@@ -167,6 +162,7 @@ npm install
 **Start the development server**
 
 ```bash
+cd medipay_v2
 npm start
 ```
 
@@ -176,14 +172,13 @@ The app runs at `http://localhost:3000`.
 
 ## Server-Side API Endpoints
 
-These endpoints are handled by `setupProxy.js` and run server-to-server to avoid browser security restrictions and proxy timeouts:
+All sensitive Circle API operations run server-to-server via `setupProxy.js`:
 
 - `POST /create-wallet` — creates a new Circle Programmable Wallet for a patient
 - `POST /fund-wallet` — calls the Circle testnet faucet to send USDC to a new wallet
 - `POST /send-payment` — executes a USDC transfer from a patient wallet to the hospital address
 - `GET /get-ciphertext` — generates a fresh RSA-OAEP entity secret ciphertext using Node.js crypto
 - `GET /test-circle` — diagnostic endpoint to verify Circle API key and connectivity
-- `GET /test-faucet` — diagnostic endpoint to test faucet access for a specific address
 
 ---
 
@@ -193,11 +188,9 @@ These endpoints are handled by `setupProxy.js` and run server-to-server to avoid
 - React frontend with full patient registration and payment flow
 - Circle Developer-Controlled Wallets with SCA account type
 - Server-side wallet creation, payment execution, and ciphertext generation
-- 12 Nigerian hospitals onboarded as pilot network
+- 12 hospitals onboarded as pilot network
 - 8 payment categories with real NGN and USDC pricing
-- Cross-hospital record linking
-- Shareable payment links for family-assisted payments
-- Downloadable and shareable payment receipts
+- Cross-hospital record linking and shareable payment links
 
 ### Phase 2 — Authentication and Persistence (Completed)
 - Firebase Auth — Google and email/password login
@@ -205,61 +198,53 @@ These endpoints are handled by `setupProxy.js` and run server-to-server to avoid
 - Returning patients auto-loaded to dashboard on login
 - Balance auto-loads on authentication
 - WhatsApp receipt image sharing via Web Share API
+- Full marketing landing page with About page
 
 ### Phase 3 — Production Deployment (In Progress)
-- Migrate server-side endpoints from setupProxy.js to Vercel serverless functions
+- Migrate server-side endpoints to Vercel serverless functions
 - Deploy frontend on Vercel
-- Configure production Firebase Authorized Domains
-- Set production environment variables in Vercel dashboard
 - End-to-end testing on production URL
 
 ### Phase 4 — Hospital Network Expansion
-- Expand from 12 to 50+ hospitals across all 36 Nigerian states
-- Onboard hospitals in Ghana, Kenya, and South Africa
-- Hospital admin dashboard for payment reconciliation and patient lookup
-- Formal hospital partnership agreements and API integrations
-- Real-time hospital capacity and appointment availability
+- Expand beyond the current 12 hospitals
+- Hospital admin dashboard for payment reconciliation
+- Formal hospital partnership agreements
 
 ### Phase 5 — Mainnet and Real Payments
 - Migrate from ARC Testnet to mainnet
 - Real USDC payments with NGN on-ramp integration
-- Circle Paymaster integration for gasless transactions
 - Multi-currency support — GHS, KES, ZAR alongside NGN
-- Compliance and KYC layer for regulated markets
 
 ### Phase 6 — Patient Experience
-- Mobile application for Android and iOS (React Native)
-- Push notifications for payment confirmations and appointment reminders
-- Offline payment receipt storage
+- Mobile application for Android and iOS
+- Push notifications for payment confirmations
 - NFC tap-to-pay at hospital cashier points
-- Patient health record summary linked to payment history
 
 ### Phase 7 — International Scale
-- UK and Europe hospital network
-- Global patient identity — same file number works in any country
+- Ghana, Kenya, South Africa hospital networks
+- UK and Europe diaspora payment support
 - Insurance integration — direct billing to health insurance providers
-- Diaspora payment support — family members abroad pay directly in their local currency
-- Government and NGO partnership program for subsidised healthcare access
+- Government and NGO partnership program
 
 ---
 
 ## Current Status
 
-The application is in active development and demo stage. Core functionality — patient registration, wallet creation, USDC payments, Firebase authentication, and Firestore persistence — is fully working on ARC Testnet. Production deployment and hospital network expansion are the immediate next milestones.
+Active development and demo stage. Core functionality — patient registration, wallet creation, USDC payments, Firebase authentication, and Firestore persistence — is fully working on ARC Testnet.
 
 ---
 
 ## Contributing
 
-Contributions, feedback, and ideas are welcome. Open an issue or submit a pull request. If you work in healthcare, fintech, or have direct experience with medical payment challenges anywhere in the world, your perspective is especially valuable.
+Contributions, feedback, and ideas are welcome. Open an issue or submit a pull request.
 
 ---
 
 ## Author
 
-Built by Blis Thoms ([@blisthoms](https://github.com/Florabeeh))
+Built by Esther Daka ([@Florabeeh](https://github.com/Florabeeh))
 
-Domain knowledge and product vision — healthcare payment infrastructure for underserved markets. Technical implementation in collaboration with AI tooling.
+Domain knowledge and product vision — healthcare payment infrastructure for underserved markets.
 
 ---
 
