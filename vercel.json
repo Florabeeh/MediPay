@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "buildCommand": "cd medipay_v2 && npm install && npm run build",
+  "outputDirectory": "medipay_v2/build",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/medipay_v2/build/index.html" }
+  ]
+}
