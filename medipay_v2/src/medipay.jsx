@@ -18,7 +18,7 @@ async function circlePost(path, body, apiKey) {
 
 // ── Server-side ciphertext — Node crypto is fully compatible with Circle API ──
 async function getCiphertext() {
-  const res = await fetch("/get-ciphertext");
+  const res = await fetch("/api/get-ciphertext");
   const data = await res.json();
   if (!res.ok) throw new Error(data?.error || "Failed to get ciphertext from server");
   return data.ciphertext;
@@ -28,7 +28,7 @@ async function getCiphertext() {
 async function createCircleWallet(apiKey, _unused, refId) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 1400)); return { id: "wlt_" + Math.random().toString(36).slice(2, 14), address: "0x" + [...Array(20)].map(() => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join(""), blockchain: "ARC-TESTNET", state: "LIVE", accountType: "SCA" }; }
   // Server-side wallet creation — avoids all proxy/timeout/ciphertext issues
-  const res = await fetch("/create-wallet", {
+  const res = await fetch("/api/create-wallet", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refId }),
@@ -40,7 +40,7 @@ async function createCircleWallet(apiKey, _unused, refId) {
 async function faucetDrip(apiKey, address) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 1000)); return { amount: "10.00", status: "pending" }; }
   try {
-    const res = await fetch("/fund-wallet", {
+    const res = await fetch("/api/fund-wallet", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address })
@@ -66,7 +66,7 @@ async function getWalletBalance(apiKey, walletId) {
 async function sendPayment(apiKey, fromWalletId, toAddress, amount) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 2000)); return { id: "txn_" + Math.random().toString(36).slice(2, 14), txHash: "0x" + [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join(""), state: "COMPLETE" }; }
 
-  const res = await fetch("/send-payment", {
+  const res = await fetch("/api/send-payment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ fromWalletId, toAddress, amount, blockchain: "ARC-TESTNET" }),
