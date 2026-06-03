@@ -3,7 +3,11 @@
   "buildCommand": "cd medipay_v2 && npm install && npm run build",
   "outputDirectory": "medipay_v2/build",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/api/get-balance", "destination": "/api/get-balance" },
+    { "source": "/api/create-wallet", "destination": "/api/create-wallet" },
+    { "source": "/api/fund-wallet", "destination": "/api/fund-wallet" },
+    { "source": "/api/send-payment", "destination": "/api/send-payment" },
+    { "source": "/api/get-ciphertext", "destination": "/api/get-ciphertext" },
     { "source": "/(.*)", "destination": "/medipay_v2/build/index.html" }
   ]
 }
