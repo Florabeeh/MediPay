@@ -315,7 +315,7 @@ export default function MediPay() {
             const wid = rec.walletId;
             setBalLoading(true);
             setTimeout(() => {
-              getWalletBalance(wid)
+              getWalletBalance(API_KEY, wid)
                 .then(bal => { setUsdcBal(bal); setBalLoading(false); })
                 .catch(() => { setUsdcBal("0.00"); setBalLoading(false); });
             }, 1500);
@@ -1545,8 +1545,9 @@ const AuthModal = ({ authMode, setAuthMode, authEmail, setAuthEmail, authPw, set
           background: "rgba(255,255,255,0.92)",
           fontFamily: "inherit", caretColor: palette.brand,
           boxSizing: "border-box",
-        }} placeholder="Password" type="password" value={authPw}
+        }} placeholder="Password" type={showPw ? "text" : "password"} value={authPw}
           onChange={e => setAuthPw(e.target.value)} autoComplete={authMode === "login" ? "current-password" : "new-password"} />
+        <button onClick={() => setShowPw(!showPw)} type="button" style={{ position:"absolute", right:14, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", fontSize:18, color:"#9ca3af", lineHeight:1 }}>{showPw ? "🙈" : "👁️"}</button>
 
         {/* Error */}
         <div id="auth-reset-msg" style={{ display:"none", fontSize:12, color:"#20b2aa", marginBottom:12, padding:"10px 14px", background:"rgba(32,178,170,0.08)", borderRadius:12, border:"1px solid rgba(32,178,170,0.2)" }}>
