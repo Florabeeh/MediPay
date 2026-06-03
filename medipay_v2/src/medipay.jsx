@@ -56,9 +56,11 @@ async function faucetDrip(apiKey, address) {
 async function getWalletBalance(apiKey, walletId) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 600)); return (Math.random() * 18 + 2).toFixed(2); }
   try {
-    const res = await fetch("/api/get-balance?walletId=" + walletId);
+    const res = await fetch("https://api.circle.com/v1/w3s/wallets/" + walletId + "/balances", {
+      headers: { "Authorization": "Bearer " + apiKey }
+    });
     const data = await res.json();
-    return data?.amount || "0.00";
+    return data?.data?.tokenBalances?.find(t => t.token?.symbol === "USDC")?.amount || "0.00";
   } catch(e) { return "0.00"; }
 }
 async function sendPayment(apiKey, fromWalletId, toAddress, amount) {
