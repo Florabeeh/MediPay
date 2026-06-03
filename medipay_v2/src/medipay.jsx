@@ -1146,6 +1146,16 @@ export default function MediPay() {
               </div>
             </div>
           ))}
+          {history.length > historyLimit && (
+            <button onClick={() => setHistoryLimit(historyLimit + 5)} style={{ width:"100%", padding:"13px", background:"none", border:"1px solid rgba(63,183,163,0.3)", borderRadius:14, fontSize:13, fontWeight:700, color:"#20b2aa", cursor:"pointer", marginTop:8 }}>
+              Show {Math.min(5, history.length - historyLimit)} more ↓
+            </button>
+          )}
+          {historyLimit > 5 && (
+            <button onClick={() => setHistoryLimit(5)} style={{ width:"100%", padding:"13px", background:"none", border:"none", fontSize:12, color:"#9ca3af", cursor:"pointer", marginTop:4 }}>
+              Show less ↑
+            </button>
+          )}
         </div>
       )}
 
