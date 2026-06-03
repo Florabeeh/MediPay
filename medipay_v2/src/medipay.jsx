@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { auth, signInWithGoogle, signInEmail, signUpEmail, getPatientRecord, savePatientRecord, logOut } from "./firebase";
+import { auth, signInWithGoogle, signInEmail, signUpEmail, getPatientRecord, savePatientRecord, logOut, resetPassword } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 // ─── Circle API ───────────────────────────────────────────────────────────────
@@ -394,7 +394,7 @@ export default function MediPay() {
       if (mode === "login") await signInEmail(authEmail, authPw);
       else await signUpEmail(authEmail, authPw);
       setShowAuth(false);
-    } catch(e) { setAuthErr(e.message?.replace('Firebase: ','')?.replace(/\(auth\/.*\)/,'')?.trim() || 'Login failed. Check your email and password.'); }
+    } catch(e) { console.error('Auth error:', e); setAuthErr(e?.message?.replace('Firebase: ','')?.replace(/\(auth\/.*\)/,'')?.trim() || 'Login failed. Check your email and password.'); }
     setLoading(false);
   };
 
@@ -1541,6 +1541,17 @@ const AuthModal = ({ authMode, setAuthMode, authEmail, setAuthEmail, authPw, set
           onChange={e => setAuthPw(e.target.value)} autoComplete={authMode === "login" ? "current-password" : "new-password"} />
 
         {/* Error */}
+        {authMode === "login" && (
+          <div style={{ textAlign:"right", marginBottom:8, marginTop:-8 }}>
+            <button onClick={async () => {
+              if (!authEmail) { alert("Enter your email first"); return; }
+              try { await resetPassword(authEmail); alert("Password reset email sent! Check your inbox."); }
+              catch(e) { alert("Error: " + e.message); }
+            }} style={{ background:"none", border:"none", color:"#20b2aa", fontSize:12, cursor:"pointer", textDecoration:"underline" }}>
+              Forgot password?
+            </button>
+          </div>
+        )}
         {authErr && (
           <div style={{
             fontSize: 12, color: "#ef6b73", marginBottom: 12,

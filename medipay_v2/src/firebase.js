@@ -20,6 +20,7 @@ export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 export const signInEmail = (email, pw) => signInWithEmailAndPassword(auth, email, pw);
 export const signUpEmail  = (email, pw) => createUserWithEmailAndPassword(auth, email, pw);
 export const logOut = () => signOut(auth);
+export const resetPassword = (email) => sendPasswordResetEmail(auth, email);
 
 export async function getPatientRecord(uid) {
   const snap = await getDoc(doc(db, "patients", uid));
