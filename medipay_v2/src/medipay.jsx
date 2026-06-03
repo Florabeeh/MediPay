@@ -1336,6 +1336,7 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
         {isLanding ? (
           <div style={s.tbR}>
             {!isMobile && <button style={s.landNavCta} onClick={onRequireAuth}>Get Started <Ico.ArrowRight size={14} /></button>}
+            {isMobile && <button style={s.burger} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <Ico.CloseIcon size={16} /> : <Ico.MenuIcon size={16} />}</button>}
           </div>
         ) : showNav && (
           <div style={s.tbR}>
