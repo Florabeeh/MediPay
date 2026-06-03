@@ -311,7 +311,15 @@ export default function MediPay() {
           const hosp = HOSPITALS.find(h => h.id === rec.hospitalId);
           if (hosp) setHospital(hosp);
           setTab("home"); setScreen("dashboard");
-          if (rec.walletId) refreshBalance(rec.walletId);
+          if (rec.walletId) {
+            const wid = rec.walletId;
+            setBalLoading(true);
+            setTimeout(() => {
+              getWalletBalance(wid)
+                .then(bal => { setUsdcBal(bal); setBalLoading(false); })
+                .catch(() => { setUsdcBal("0.00"); setBalLoading(false); });
+            }, 1500);
+          }
         } else {
           if (fbU.email) setFemail(fbU.email);
           setScreen("hospitals");
@@ -1541,12 +1549,22 @@ const AuthModal = ({ authMode, setAuthMode, authEmail, setAuthEmail, authPw, set
           onChange={e => setAuthPw(e.target.value)} autoComplete={authMode === "login" ? "current-password" : "new-password"} />
 
         {/* Error */}
+        <div id="auth-reset-msg" style={{ display:"none", fontSize:12, color:"#20b2aa", marginBottom:12, padding:"10px 14px", background:"rgba(32,178,170,0.08)", borderRadius:12, border:"1px solid rgba(32,178,170,0.2)" }}>
+          ✓ Password reset email sent! Check your inbox.
+        </div>
         {authMode === "login" && (
           <div style={{ textAlign:"right", marginBottom:8, marginTop:-8 }}>
             <button onClick={async () => {
-              if (!authEmail) { alert("Enter your email first"); return; }
-              try { await resetPassword(authEmail); alert("Password reset email sent! Check your inbox."); }
-              catch(e) { alert("Error: " + e.message); }
+              if (!authEmail) { setAuthErr("Enter your email address first"); return; }
+              try {
+                await resetPassword(authEmail);
+                setAuthErr("");
+                setAuthPw("");
+                // Show success in error box styled green
+                const el = document.getElementById("auth-reset-msg");
+                if (el) { el.style.display="block"; setTimeout(() => { el.style.display="none"; }, 4000); }
+              }
+              catch(e) { setAuthErr(e.message?.replace("Firebase: ","")?.replace(/\(auth\/.*\)/,"")?.trim()); }
             }} style={{ background:"none", border:"none", color:"#20b2aa", fontSize:12, cursor:"pointer", textDecoration:"underline" }}>
               Forgot password?
             </button>
