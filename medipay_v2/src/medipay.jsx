@@ -394,7 +394,7 @@ export default function MediPay() {
       if (mode === "login") await signInEmail(authEmail, authPw);
       else await signUpEmail(authEmail, authPw);
       setShowAuth(false);
-    } catch(e) { setAuthErr(e.message); }
+    } catch(e) { setAuthErr(e.message?.replace('Firebase: ','')?.replace(/\(auth\/.*\)/,'')?.trim() || 'Login failed. Check your email and password.'); }
     setLoading(false);
   };
 
