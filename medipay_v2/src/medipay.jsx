@@ -61,8 +61,11 @@ async function faucetDrip(apiKey, address) {
 }
 async function getWalletBalance(apiKey, walletId) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 600)); return (Math.random() * 18 + 2).toFixed(2); }
-  const data = await circleGet("/v1/w3s/wallets/" + walletId + "/balances", apiKey);
-  return data?.data?.tokenBalances?.find(t => t.token?.symbol === "USDC")?.amount || "0.00";
+  try {
+    const res = await fetch("/api/get-balance?walletId=" + walletId);
+    const data = await res.json();
+    return data?.amount || "0.00";
+  } catch(e) { return "0.00"; }
 }
 async function sendPayment(apiKey, fromWalletId, toAddress, amount) {
   if (DEMO_MODE) { await new Promise(r => setTimeout(r, 2000)); return { id: "txn_" + Math.random().toString(36).slice(2, 14), txHash: "0x" + [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join(""), state: "COMPLETE" }; }
@@ -1537,6 +1540,7 @@ const AuthModal = ({ authMode, setAuthMode, authEmail, setAuthEmail, authPw, set
           onChange={e => setAuthEmail(e.target.value)} autoComplete="email" />
 
         {/* Password input */}
+        <div style={{ position:"relative", marginBottom:14 }}>
         <input style={{
           width: "100%", padding: "14px 16px",
           border: "1.5px solid " + palette.lineStrong,
@@ -1548,6 +1552,7 @@ const AuthModal = ({ authMode, setAuthMode, authEmail, setAuthEmail, authPw, set
         }} placeholder="Password" type={showPw ? "text" : "password"} value={authPw}
           onChange={e => setAuthPw(e.target.value)} autoComplete={authMode === "login" ? "current-password" : "new-password"} />
         <button onClick={() => setShowPw(!showPw)} type="button" style={{ position:"absolute", right:14, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", fontSize:18, color:"#9ca3af", lineHeight:1 }}>{showPw ? "🙈" : "👁️"}</button>
+        </div>
 
         {/* Error */}
         <div id="auth-reset-msg" style={{ display:"none", fontSize:12, color:"#20b2aa", marginBottom:12, padding:"10px 14px", background:"rgba(32,178,170,0.08)", borderRadius:12, border:"1px solid rgba(32,178,170,0.2)" }}>
