@@ -264,7 +264,7 @@ function roundRectStroke(ctx, x, y, w, h, r) {
 export default function MediPay() {
   const [screen, setScreen] = useState("landing");
   const [fbUser, setFbUser] = useState(undefined); // undefined=loading, null=logged out
-  const [authEmail, setAuthEmail] = useState(""); const [authPw, setAuthPw] = useState(""); const [authErr, setAuthErr] = useState("");
+  const [authEmail, setAuthEmail] = useState(""); const [authPw, setAuthPw] = useState(""); const [authErr, setAuthErr] = useState(""); const [showPw, setShowPw] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [hospital, setHospital] = useState(null);
   const [authMode, setAuthMode] = useState("signup");
