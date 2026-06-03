@@ -14,13 +14,7 @@ async function circlePost(path, body, apiKey) {
   if (!res.ok) { console.error("Circle error:", data); throw new Error(data?.message || data?.error || "Circle API " + res.status); }
   return data;
 }
-async function circleGet(path, apiKey) {
-  if (DEMO_MODE) { await new Promise(r => setTimeout(r, 800)); return null; }
-  const res = await fetch(CIRCLE_API + path, { headers: { "Authorization": "Bearer " + apiKey } });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.message || "Circle API " + res.status);
-  return data;
-}
+
 
 // ── Server-side ciphertext — Node crypto is fully compatible with Circle API ──
 async function getCiphertext() {
