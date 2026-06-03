@@ -6,6 +6,8 @@ MediPay is a healthcare payment platform that allows patients to register once a
 
 Built for Nigeria first — designed for the world.
 
+**Live demo:** https://medipay-iota.vercel.app
+
 ---
 
 ## The Problem
@@ -52,7 +54,7 @@ Neither the patient nor the hospital needs to understand cryptocurrency. The pat
 - Register at any partnered hospital → Circle wallet created automatically
 - Receive 10 USDC testnet on signup → wallet is ready to use
 - Select service → confirm payment → receipt generated in under 1 second
-- Share receipt via WhatsApp or download as image
+- Share receipt via WhatsApp as image or download as PNG
 - Records and wallet persist across every device via Firebase
 
 **Hospital flow (production)**
@@ -68,6 +70,8 @@ Neither the patient nor the hospital needs to understand cryptocurrency. The pat
 
 **Authentication and Identity**
 - Google sign-in and email/password authentication via Firebase Auth
+- Forgot password — password reset via email
+- Show/hide password toggle on login form
 - Patient profiles stored in Firestore — fully persistent across devices and sessions
 - Unique file number generated per patient per hospital at registration
 - Returning patients are automatically loaded into their dashboard on login
@@ -76,7 +80,7 @@ Neither the patient nor the hospital needs to understand cryptocurrency. The pat
 - Circle Programmable Wallet (Smart Contract Account) auto-created on every new signup
 - No seed phrase, no private key management — fully MPC-secured by Circle
 - Wallet balance auto-loads on login
-- Payments execute server-side for reliability — no proxy timeouts
+- Payments execute via Vercel serverless functions for reliability
 - USDC auto-sent to new wallets via Circle testnet faucet on registration
 - Manual faucet link provided on profile page as fallback
 
@@ -89,14 +93,18 @@ Neither the patient nor the hospital needs to understand cryptocurrency. The pat
 - Surgery, Investigations, Radiology, Medication, Therapy, Pharmacy, Rehabilitation, Procedures
 
 **Receipts and Sharing**
-- Downloadable payment receipts as PNG images
+- Payment confirmation screen with success animation
+- Downloadable payment receipts as PNG images matching the app design
 - WhatsApp image sharing — share receipt photo directly on mobile via Web Share API
 - Shareable payment links — patients generate a link and send it to family members who can pay on their behalf
+- Transaction history with show more / show less pagination
 
 **Landing Page**
 - Full marketing landing page with hero, How it Works, Features, and Hospital Network sections
 - Dedicated About page with global vision, hospital network, and built-by information
 - Phone mockup showing the app in action
+- Hamburger menu for clean mobile navigation
+- Responsive design — works on all screen sizes
 
 ---
 
@@ -109,7 +117,8 @@ Neither the patient nor the hospital needs to understand cryptocurrency. The pat
 - Blockchain — ARC Testnet
 - Currency — USDC
 - Cryptography — Node.js RSA-OAEP for entity secret ciphertext generation
-- Proxy — http-proxy-middleware (Create React App dev server)
+- Serverless Functions — Vercel API routes (Node.js)
+- Deployment — Vercel
 
 ---
 
@@ -117,6 +126,13 @@ Neither the patient nor the hospital needs to understand cryptocurrency. The pat
 
 ```
 MediPay/
+├── api/                        Vercel serverless functions
+│   ├── _helpers.js             Shared Circle API helpers
+│   ├── create-wallet.js        POST — create Circle wallet
+│   ├── fund-wallet.js          POST — faucet drip
+│   ├── get-balance.js          GET  — fetch USDC balance
+│   ├── get-ciphertext.js       GET  — RSA-OAEP ciphertext
+│   └── send-payment.js         POST — USDC transfer
 ├── medipay_v2/
 │   ├── public/
 │   │   ├── fonts/              Custom fonts
@@ -127,11 +143,12 @@ MediPay/
 │   │   ├── firebase.js         Firebase init, auth helpers, Firestore helpers
 │   │   ├── index.js            React entry point
 │   │   ├── medipay.jsx         Main application — all screens, components, and logic
-│   │   └── setupProxy.js       Dev server proxy and server-side Circle API endpoints
+│   │   └── setupProxy.js       Dev server proxy for local development
 │   ├── .env                    Environment variables (not committed)
 │   ├── .gitignore
 │   ├── package.json
 │   └── package-lock.json
+├── vercel.json                 Vercel deployment configuration
 └── README.md
 ```
 
@@ -155,6 +172,8 @@ REACT_APP_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 REACT_APP_FIREBASE_APP_ID=your_app_id
 ```
+
+For Vercel deployment, add the same variables under Project Settings → Environment Variables.
 
 Never commit the `.env` file. It is listed in `.gitignore`.
 
@@ -198,15 +217,13 @@ The app runs at `http://localhost:3000`.
 
 ---
 
-## Server-Side API Endpoints
+## Deployment
 
-All sensitive Circle API operations run server-to-server via `setupProxy.js`:
+The app is deployed on Vercel at https://medipay-iota.vercel.app
 
-- `POST /create-wallet` — creates a new Circle Programmable Wallet for a patient
-- `POST /fund-wallet` — calls the Circle testnet faucet to send USDC to a new wallet
-- `POST /send-payment` — executes a USDC transfer from a patient wallet to the hospital address
-- `GET /get-ciphertext` — generates a fresh RSA-OAEP entity secret ciphertext using Node.js crypto
-- `GET /test-circle` — diagnostic endpoint to verify Circle API key and connectivity
+The `api/` folder at the repo root contains Vercel serverless functions that handle all Circle API calls server-side. The React frontend is built from `medipay_v2/` and served as a static site.
+
+After deploying to Vercel, add your Vercel domain to Firebase Console → Authentication → Settings → Authorised Domains.
 
 ---
 
@@ -222,18 +239,20 @@ All sensitive Circle API operations run server-to-server via `setupProxy.js`:
 - Downloadable and shareable payment receipts
 
 ### Phase 2 — Authentication and Persistence (Completed)
-- Firebase Auth — Google and email/password login
+- Firebase Auth — Google and email/password login with forgot password
 - Firestore database — patient records persist across all devices
 - Returning patients auto-loaded to dashboard on login
 - Balance auto-loads on authentication
 - WhatsApp receipt image sharing via Web Share API
 - Full marketing landing page with About page and How it Works section
+- Payment confirmation success animation
+- Mobile-responsive design with hamburger navigation
+- Transaction history pagination with show more / show less
 
-### Phase 3 — Production Deployment (In Progress)
-- Migrate server-side endpoints from setupProxy.js to Vercel serverless functions
-- Deploy frontend on Vercel
-- Configure production Firebase Authorized Domains
-- End-to-end testing on production URL
+### Phase 3 — Production Deployment (Completed)
+- Vercel serverless API functions for all Circle operations
+- Deployed at medipay-iota.vercel.app
+- Firebase Authorized Domains configured for production
 
 ### Phase 4 — Hospital Network Expansion
 - Expand beyond the current 12 hospitals
@@ -264,7 +283,9 @@ All sensitive Circle API operations run server-to-server via `setupProxy.js`:
 
 ## Current Status
 
-Active development and demo stage. Core functionality — patient registration, wallet creation, USDC payments, Firebase authentication, and Firestore persistence — is fully working on ARC Testnet. Production deployment and hospital network expansion are the immediate next milestones.
+Fully deployed and working at https://medipay-iota.vercel.app
+
+Core functionality — patient registration, wallet creation, USDC payments, Firebase authentication, Firestore persistence, and Vercel serverless API — is fully working on ARC Testnet.
 
 ---
 
