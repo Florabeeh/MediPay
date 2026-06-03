@@ -1120,7 +1120,7 @@ export default function MediPay() {
           <div style={{ fontSize: 12, color: palette.textSoft, marginBottom: 20 }}>{history.length} total · {history.filter(h => h.status === "pending").length} pending</div>
           {history.length === 0 ? (
             <div style={s.empty}><Ico.ClockIcon size={36} color={palette.muted} /><div style={{ marginBottom: 6 }}></div><div style={{ fontSize: 15, fontWeight: 600, color: palette.textSoft, marginBottom: 6 }}>No transactions yet</div><div style={{ fontSize: 13, color: palette.muted }}>Make your first payment from the Pay tab</div></div>
-          ) : history.map(r => (
+          ) : (showAllHistory ? history : history.slice(0, 5)).map(r => (
             <div key={r.id} style={{ ...s.histCard, ...(r.status === "pending" ? { borderLeft: "4px solid #f5c85b" } : { borderLeft: "4px solid #3fb7a3" }) }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
