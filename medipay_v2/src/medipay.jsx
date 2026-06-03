@@ -1349,6 +1349,24 @@ function Shell({ children, showNav, isMobile, menuOpen, setMenuOpen, NAV, tab, s
           </div>
         )}
       </div>
+      {isLanding && isMobile && menuOpen && (
+        <div style={{ position:"fixed", top:66, left:10, right:10, background:"rgba(255,255,255,0.97)", backdropFilter:"blur(22px)", zIndex:25, border:"1px solid rgba(63,183,163,0.2)", borderRadius:"0 0 20px 20px", boxShadow:"0 22px 50px rgba(80,110,140,0.15)", overflow:"hidden" }}>
+          {[["Features","🔍"],["Hospitals","🏥"],["About","ℹ️"]].map(([lb, ic]) => (
+            <button key={lb} style={{ width:"100%", display:"flex", alignItems:"center", gap:12, padding:"16px 20px", background:"none", border:"none", borderBottom:"1px solid #f0f4f8", color:"#25364b", cursor:"pointer", textAlign:"left", fontFamily:"inherit", fontSize:15, fontWeight:500 }}
+              onClick={() => {
+                setMenuOpen(false);
+                if (lb === "Hospitals") { onRequireAuth(); return; }
+                if (lb === "About") { setShowAboutPage(true); window.scrollTo({top:0}); return; }
+                if (lb === "Features") { setTimeout(() => { const el = document.getElementById("features-section"); if(el) el.scrollIntoView({behavior:"smooth"}); }, 50); }
+              }}>
+              <span>{ic}</span><span>{lb}</span>
+            </button>
+          ))}
+          <div style={{ padding:"16px 20px" }}>
+            <button onClick={() => { setMenuOpen(false); onRequireAuth(); }} style={{ width:"100%", background:"linear-gradient(135deg,#55c9b6,#2eaa99)", color:"#fff", border:"none", borderRadius:14, padding:"14px", fontSize:15, fontWeight:700, cursor:"pointer" }}>Get Started →</button>
+          </div>
+        </div>
+      )}
       {showNav && isMobile && menuOpen && (
         <div style={s.drawer}>
           {NAV.map(([k, ic, lb]) => (
