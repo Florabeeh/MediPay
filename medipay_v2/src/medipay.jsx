@@ -775,7 +775,7 @@ export default function MediPay() {
           authMode={authMode} setAuthMode={setAuthMode}
           authEmail={authEmail} setAuthEmail={setAuthEmail}
           authPw={authPw} setAuthPw={setAuthPw}
-          authErr={authErr} setAuthErr={setAuthErr} loading={loading}
+          showPw={showPw} setShowPw={setShowPw} authErr={authErr} setAuthErr={setAuthErr} loading={loading}
           onGoogle={() => { setAuthErr(""); signInWithGoogle().then(() => setShowAuth(false)).catch(e => setAuthErr(e.message)); }}
           onSubmit={() => handleFirebaseAuth(authMode)}
           onClose={() => { setShowAuth(false); setAuthErr(""); }}
@@ -1433,7 +1433,7 @@ const Mdl = ({ children, onClose }) => (
 );
 
 // ─── Auth Modal (LATI glassmorphism) ──────────────────────────────────────────
-const AuthModal = ({ authMode, setAuthMode, authEmail, setAuthEmail, authPw, setAuthPw, authErr, setAuthErr, loading, onGoogle, onSubmit, onClose }) => (
+const AuthModal = ({ authMode, setAuthMode, authEmail, setAuthEmail, authPw, setAuthPw, showPw, setShowPw, authErr, setAuthErr, loading, onGoogle, onSubmit, onClose }) => (
   <div style={{
     position: "fixed", inset: 0, zIndex: 9999,
     display: "flex", alignItems: "center", justifyContent: "center",
