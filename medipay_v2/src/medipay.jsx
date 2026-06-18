@@ -399,8 +399,23 @@ export default function MediPay() {
     if (!authEmail || !authPw) { setAuthErr("Enter email and password"); return; }
     setAuthErr(""); setLoading(true);
     try {
-      if (mode === "login") await signInEmail(authEmail, authPw);
-      else await signUpEmail(authEmail, authPw);
+      if (mode === "login") {
+        await signInEmail(authEmail, authPw);
+        if (!auth.currentUser?.emailVerified) {
+          setAuthErr("Please verify your email first. Check your inbox and click the link we sent you.");
+          await auth.signOut();
+          return;
+        }
+      } else {
+        await signUpEmail(authEmail, authPw);
+        setAuthErr("");
+        setLoading(false);
+        await auth.signOut();
+        alert("Account created! We sent a verification link to " + authEmail + ". Please verify your email before signing in.");
+        setAuthMode("login");
+        setAuthPw("");
+        return;
+      }
       setShowAuth(false);
     } catch(e) { console.error('Auth error:', e); setAuthErr(e?.message?.replace('Firebase: ','')?.replace(/\(auth\/.*\)/,'')?.trim() || 'Login failed. Check your email and password.'); }
     setLoading(false);
