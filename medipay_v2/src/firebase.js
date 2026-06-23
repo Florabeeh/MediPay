@@ -18,7 +18,11 @@ export const googleProvider = new GoogleAuthProvider();
 
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 export const signInEmail = (email, pw) => signInWithEmailAndPassword(auth, email, pw);
-export const signUpEmail  = (email, pw) => createUserWithEmailAndPassword(auth, email, pw);
+export const signUpEmail = async (email, pw) => {
+  const result = await createUserWithEmailAndPassword(auth, email, pw);
+  await sendEmailVerification(result.user);
+  return result;
+};
 export const logOut = () => signOut(auth);
 export const resetPassword = (email) => sendPasswordResetEmail(auth, email);
 
