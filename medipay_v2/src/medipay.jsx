@@ -411,9 +411,9 @@ export default function MediPay() {
         setAuthErr("");
         setLoading(false);
         await auth.signOut();
-        alert("Account created! We sent a verification link to " + authEmail + ". Please verify your email before signing in.");
-        setAuthMode("login");
+        setVerifyEmail(authEmail);
         setAuthPw("");
+        setShowAuth(false);
         return;
       }
       setShowAuth(false);
@@ -573,6 +573,43 @@ export default function MediPay() {
   const switchTab = t => { setTab(t); setMenuOpen(false); };
   const shellProps = { isMobile, menuOpen, setMenuOpen, NAV, tab, switchTab, walletAddr, fileNo, balLoading, usdcBal, toast, setScreen, onRequireAuth: requireAuth, setShowAboutPage };
 
+
+  if (verifyEmail) return (
+    <div style={{ minHeight:"100vh", background:"#f7fbff", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"system-ui,-apple-system,sans-serif", padding:"24px" }}>
+      <div style={{ background:"#fff", borderRadius:24, padding:"48px 36px", maxWidth:480, width:"100%", textAlign:"center", boxShadow:"0 20px 60px rgba(0,0,0,0.08)", border:"1px solid rgba(63,183,163,0.15)" }}>
+        <div style={{ width:72, height:72, borderRadius:"50%", background:"linear-gradient(135deg,#20b2aa,#0d8c85)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", fontSize:32 }}>📧</div>
+        <div style={{ fontSize:22, fontWeight:800, color:"#1a2e35", marginBottom:10 }}>Check your inbox</div>
+        <div style={{ fontSize:14, color:"#5a7a8a", lineHeight:1.8, marginBottom:8 }}>
+          We sent a verification link to
+        </div>
+        <div style={{ fontSize:14, fontWeight:700, color:"#20b2aa", marginBottom:24, wordBreak:"break-all" }}>{verifyEmail}</div>
+        <div style={{ background:"#f0fdfb", border:"1px solid rgba(63,183,163,0.2)", borderRadius:14, padding:"16px 20px", marginBottom:28, textAlign:"left" }}>
+          <div style={{ fontSize:13, color:"#1a2e35", lineHeight:1.8 }}>
+            <div style={{ marginBottom:6 }}>1. Open the email from MediPay</div>
+            <div style={{ marginBottom:6 }}>2. Click the verification link</div>
+            <div>3. Come back here and sign in</div>
+          </div>
+        </div>
+        <button onClick={() => { setVerifyEmail(""); setShowAuth(true); setAuthMode("login"); }}
+          style={{ width:"100%", background:"linear-gradient(135deg,#20b2aa,#0d8c85)", color:"#fff", border:"none", borderRadius:14, padding:"14px", fontSize:15, fontWeight:700, cursor:"pointer", marginBottom:12 }}>
+          Go to Sign In
+        </button>
+        <div style={{ fontSize:12, color:"#9ca3af" }}>
+          Didn't receive the email? Check your spam folder or{" "}
+          <button onClick={async () => {
+            try {
+              await signUpEmail(verifyEmail, "resend-dummy-will-fail").catch(async () => {
+                const { sendEmailVerification } = await import("firebase/auth");
+                if (auth.currentUser) await sendEmailVerification(auth.currentUser);
+              });
+            } catch(e) {}
+          }} style={{ background:"none", border:"none", color:"#20b2aa", cursor:"pointer", fontSize:12, textDecoration:"underline", padding:0 }}>
+            contact support
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   if (showAboutPage) return (
     <div style={{ minHeight:"100vh", background:"#f7fbff", fontFamily:"system-ui,-apple-system,sans-serif" }}>
