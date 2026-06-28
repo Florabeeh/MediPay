@@ -401,10 +401,16 @@ export default function MediPay() {
     try {
       if (mode === "login") {
         await signInEmail(authEmail, authPw);
-        if (!auth.currentUser?.emailVerified) {
-          setAuthErr("Please verify your email first. Check your inbox and click the link we sent you.");
-          await auth.signOut();
-          return;
+        const currentUser = auth.currentUser;
+        if (currentUser && !currentUser.emailVerified) {
+          // Only block users created after June 2026 (when verification was added)
+          const createdAt = new Date(parseInt(currentUser.metadata.createdAt));
+          const verificationDate = new Date("2026-06-08");
+          if (createdAt > verificationDate) {
+            setAuthErr("Please verify your email first. Check your inbox and click the verification link we sent you.");
+            await auth.signOut();
+            return;
+          }
         }
       } else {
         await signUpEmail(authEmail, authPw);
