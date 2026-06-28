@@ -474,6 +474,22 @@ export default function MediPay() {
         date: new Date().toLocaleString("en-NG", { dateStyle: "full", timeStyle: "short" }),
         status: "confirmed",
       };
+      // Record payment on MediPayRegistry smart contract
+      try {
+        await fetch("/api/record-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            hospitalId: hospital?.id,
+            fileNumber: fileNo,
+            category: paycat,
+            serviceItem: payitem,
+            amountUSDC: usdc,
+            patientWallet: walletAddr,
+            circleRef: tx?.txHash || rec.id,
+          }),
+        });
+      } catch(e) { console.log("Contract record failed (non-critical):", e.message); }
       const newHistory = [rec, ...history];
       setReceipt(rec); setHistory(newHistory);
       setPendingLinks(pl => pl.map(p => p.item === payitem && p.hospitalId === hospital?.id ? { ...p, status: "confirmed" } : p));
