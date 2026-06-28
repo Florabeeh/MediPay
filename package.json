@@ -3,5 +3,8 @@
     "@nomicfoundation/hardhat-toolbox": "^7.0.0",
     "dotenv": "^17.4.2",
     "hardhat": "^3.9.0"
+  },
+  "dependencies": {
+    "ethers": "^6.17.0"
   }
 }

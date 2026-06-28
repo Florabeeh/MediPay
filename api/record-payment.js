@@ -2,7 +2,7 @@ const { ethers } = require("ethers");
 
 const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS;
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
-const ARC_RPC = "https://rpc.arcscan.app";
+const ARC_RPC = "https://rpc.testnet.arc.network";
 
 const ABI = [
   "function processPayment(string hospitalId, string fileNumber, string category, string serviceItem, uint256 amountUSDC) external"
