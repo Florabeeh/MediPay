@@ -1207,6 +1207,7 @@ export default function MediPay() {
                   <div style={{ fontSize: 12, color: palette.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.item}</div>
                   <div style={{ fontSize: 11, color: palette.muted, marginTop: 4 }}>{r.date}</div>
                   {r.id && r.id.startsWith("0x") && <a href={"https://testnet.arcscan.app/tx/" + r.id} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: palette.brandDeep, textDecoration: "none", marginTop: 2, display: "block" }}>View on ARC Explorer →</a>}
+                  {r.id && r.id.startsWith("0x") && <a href={"https://testnet.arcscan.app/tx/" + r.id} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: palette.brandDeep, textDecoration: "none", marginTop: 2, display: "block" }}>View on ARC Explorer →</a>}
                   {r.status === "pending" && r.link && (
                     <button style={{ fontSize: 11, color: "#2872b2", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 4, textDecoration: "underline" }} onClick={() => { setPayLink(r.link); setShowPayLink(true); }}>View payment link</button>
                   )}
