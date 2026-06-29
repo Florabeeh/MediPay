@@ -1,13 +1,3 @@
-import { ethers } from "ethers";
-
-const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS;
-const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
-const ARC_RPC = "https://rpc.testnet.arc.network";
-
-const ABI = [
-  "function registerPatient(address wallet, string memory fileNumber, string memory hospitalId) external"
-];
-
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -16,12 +6,23 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { hospitalId, fileNumber, patientWallet } = req.body;
-  console.log("[Contract] Recording:", fileNumber, hospitalId);
+  console.log("[Contract] Recording:", fileNumber, hospitalId, patientWallet);
+
+  const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS;
+  const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
+  const ARC_RPC = "https://rpc.testnet.arc.network";
 
   if (!DEPLOYER_PRIVATE_KEY) return res.status(500).json({ error: "DEPLOYER_PRIVATE_KEY not set" });
   if (!CONTRACT_ADDRESS) return res.status(500).json({ error: "CONTRACT_ADDRESS not set" });
 
   try {
+    // Dynamically import ethers inside the handler
+    const { ethers } = await import("ethers");
+
+    const ABI = [
+      "function registerPatient(address wallet, string memory fileNumber, string memory hospitalId) external"
+    ];
+
     const provider = new ethers.JsonRpcProvider(ARC_RPC);
     const signer = new ethers.Wallet(DEPLOYER_PRIVATE_KEY, provider);
     const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
