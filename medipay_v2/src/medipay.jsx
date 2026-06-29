@@ -188,7 +188,7 @@ const NGN_USDC = 1650;
 const HOSP_ADDR = "0x742d35Cc6634C0532925a3b8D4C9b4AA12b5e6f4";
 const fmt = n => "N" + Number(n).toLocaleString();
 const genFN = id => id + "-" + Date.now().toString().slice(-6) + "-" + Math.floor(Math.random() * 9000 + 1000);
-const genTx = () => "0x" + [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
+const genTx = () => "0x" + [...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
 
 
 // ─── Receipt Image Generator (LATI light theme) ──────────────────────────────
@@ -1206,8 +1206,8 @@ export default function MediPay() {
                   </div>
                   <div style={{ fontSize: 12, color: palette.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.item}</div>
                   <div style={{ fontSize: 11, color: palette.muted, marginTop: 4 }}>{r.date}</div>
-                  {r.id && r.id.startsWith("0x") && <a href={"https://testnet.arcscan.app/tx/" + r.id} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: palette.brandDeep, textDecoration: "none", marginTop: 2, display: "block" }}>View on ARC Explorer →</a>}
-                  {r.id && r.id.startsWith("0x") && <a href={"https://testnet.arcscan.app/tx/" + r.id} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: palette.brandDeep, textDecoration: "none", marginTop: 2, display: "block" }}>View on ARC Explorer →</a>}
+                  {r.id && r.id.startsWith("0x") && r.id.length === 66 && <a href={"https://testnet.arcscan.app/tx/" + r.id} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: palette.brandDeep, textDecoration: "none", marginTop: 2, display: "block" }}>View on ARC Explorer →</a>}
+                  {r.id && r.id.startsWith("0x") && r.id.length === 66 && <a href={"https://testnet.arcscan.app/tx/" + r.id} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: palette.brandDeep, textDecoration: "none", marginTop: 2, display: "block" }}>View on ARC Explorer →</a>}
                   {r.status === "pending" && r.link && (
                     <button style={{ fontSize: 11, color: "#2872b2", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 4, textDecoration: "underline" }} onClick={() => { setPayLink(r.link); setShowPayLink(true); }}>View payment link</button>
                   )}
