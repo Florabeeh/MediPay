@@ -1003,7 +1003,8 @@ export default function MediPay() {
           <div style={s.rcpTotal}>{fmt(receipt?.amount)}</div>
           <div style={{ fontSize: 12, color: palette.muted, textAlign: "center", marginTop: 4 }}>{receipt?.usdc} USDC · Circle ARC Testnet</div>
           <div style={{ fontSize: 9, color: "#d9e5ed", textAlign: "center", margin: "12px 0 4px", letterSpacing: 1 }}>|||||||||||||||||||||||||||||||||||||||||||||||||||||</div>
-          <p style={{ fontSize: 10, color: palette.muted, textAlign: "center", wordBreak: "break-all" }}>Tx: {receipt?.id && <a href={"https://testnet.arcscan.app/tx/" + receipt.id} target="_blank" rel="noreferrer" style={{ color: palette.brandDeep, textDecoration: "none" }}>{receipt.id}</a>}</p>
+          <p style={{ fontSize: 10, color: palette.muted, textAlign: "center", wordBreak: "break-all" }}>Tx: {receipt?.id}</p>
+          {receipt?.arcTxHash && <p style={{ textAlign:"center", marginTop:4 }}><a href={"https://testnet.arcscan.app/tx/" + receipt.arcTxHash} target="_blank" rel="noreferrer" style={{ fontSize:10, color:"#20b2aa", textDecoration:"none", fontWeight:600 }}>View on ARC Explorer →</a></p>}
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button style={s.outlineBtn} onClick={() => openShareReceipt(receipt)}><Ico.ShareIcon size={14} /> Share</button>
