@@ -1001,7 +1001,7 @@ export default function MediPay() {
           <div style={s.rcpTotal}>{fmt(receipt?.amount)}</div>
           <div style={{ fontSize: 12, color: palette.muted, textAlign: "center", marginTop: 4 }}>{receipt?.usdc} USDC · Circle ARC Testnet</div>
           <div style={{ fontSize: 9, color: "#d9e5ed", textAlign: "center", margin: "12px 0 4px", letterSpacing: 1 }}>|||||||||||||||||||||||||||||||||||||||||||||||||||||</div>
-          <p style={{ fontSize: 10, color: palette.muted, textAlign: "center", wordBreak: "break-all" }}>Tx: {receipt?.id}</p>
+          <p style={{ fontSize: 10, color: palette.muted, textAlign: "center", wordBreak: "break-all" }}>Tx: {receipt?.id && <a href={"https://testnet.arcscan.app/tx/" + receipt.id} target="_blank" rel="noreferrer" style={{ color: palette.brandDeep, textDecoration: "none" }}>{receipt.id}</a>}</p>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button style={s.outlineBtn} onClick={() => openShareReceipt(receipt)}><Ico.ShareIcon size={14} /> Share</button>
@@ -1206,6 +1206,7 @@ export default function MediPay() {
                   </div>
                   <div style={{ fontSize: 12, color: palette.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.item}</div>
                   <div style={{ fontSize: 11, color: palette.muted, marginTop: 4 }}>{r.date}</div>
+                  {r.id && r.id.startsWith("0x") && <a href={"https://testnet.arcscan.app/tx/" + r.id} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: palette.brandDeep, textDecoration: "none", marginTop: 2, display: "block" }}>View on ARC Explorer →</a>}
                   {r.status === "pending" && r.link && (
                     <button style={{ fontSize: 11, color: "#2872b2", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 4, textDecoration: "underline" }} onClick={() => { setPayLink(r.link); setShowPayLink(true); }}>View payment link</button>
                   )}
