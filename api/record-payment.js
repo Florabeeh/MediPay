@@ -1,12 +1,11 @@
-const { ethers } = require("ethers");
+import { ethers } from "ethers";
 
 const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS;
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 const ARC_RPC = "https://rpc.testnet.arc.network";
 
 const ABI = [
-  "function registerPatient(address wallet, string memory fileNumber, string memory hospitalId) external",
-  "event PatientRegistered(address wallet, string fileNumber, string hospitalId, uint256 timestamp)"
+  "function registerPatient(address wallet, string memory fileNumber, string memory hospitalId) external"
 ];
 
 export default async function handler(req, res) {
@@ -17,8 +16,10 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { hospitalId, fileNumber, patientWallet } = req.body;
+  console.log("[Contract] Recording:", fileNumber, hospitalId);
 
-  console.log("[Contract] Recording payment for:", fileNumber, hospitalId, patientWallet);
+  if (!DEPLOYER_PRIVATE_KEY) return res.status(500).json({ error: "DEPLOYER_PRIVATE_KEY not set" });
+  if (!CONTRACT_ADDRESS) return res.status(500).json({ error: "CONTRACT_ADDRESS not set" });
 
   try {
     const provider = new ethers.JsonRpcProvider(ARC_RPC);
