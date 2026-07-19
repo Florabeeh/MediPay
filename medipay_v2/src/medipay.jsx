@@ -480,6 +480,20 @@ export default function MediPay() {
         date: new Date().toLocaleString("en-NG", { dateStyle: "full", timeStyle: "short" }),
         status: "confirmed",
       };
+      // Fetch real ARC tx hash from explorer
+      try {
+        await new Promise(r => setTimeout(r, 3000)); // wait for indexing
+        const explorerRes = await fetch(
+          "https://testnet.arcscan.app/api/v2/addresses/" + walletAddr + "/token-transfers?limit=1"
+        );
+        const explorerData = await explorerRes.json();
+        const latestTx = explorerData?.items?.[0];
+        if (latestTx?.transaction_hash) {
+          rec.arcTxHash = latestTx.transaction_hash;
+          console.log("[ARC] Real tx hash:", rec.arcTxHash);
+        }
+      } catch(e) { console.log("[ARC] Explorer fetch failed:", e.message); }
+
       // Record payment on MediPayRegistry smart contract
       try {
         const contractRes = await fetch("/api/record-payment", {
