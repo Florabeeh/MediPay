@@ -9,40 +9,40 @@ export default async function handler(req, res) {
   const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS;
   const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
   const ARC_RPC = "https://rpc.testnet.arc.network";
-
-  if (!DEPLOYER_PRIVATE_KEY) return res.status(500).json({ error: "DEPLOYER_PRIVATE_KEY not set" });
-  if (!CONTRACT_ADDRESS) return res.status(500).json({ error: "CONTRACT_ADDRESS not set" });
-
   const ABI = ["function registerPatient(address wallet, string memory fileNumber, string memory hospitalId) external"];
-
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-  // Retry up to 3 times with increasing delays
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= 5; attempt++) {
     try {
       const { ethers } = await import("ethers");
       const provider = new ethers.JsonRpcProvider(ARC_RPC);
       const signer = new ethers.Wallet(DEPLOYER_PRIVATE_KEY, provider);
       const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
-      console.log(`[Contract] Attempt ${attempt} for:`, fileNumber);
+      // Get current nonce fresh each attempt
+      const nonce = await provider.getTransactionCount(signer.address, "latest");
+      console.log(`[Contract] Attempt ${attempt}, nonce: ${nonce}`);
+
       const tx = await contract.registerPatient(
         patientWallet || signer.address,
         fileNumber || "UNKNOWN",
-        hospitalId || "UNKNOWN"
+        hospitalId || "UNKNOWN",
+        { nonce, gasLimit: 200000 }
       );
 
       console.log("[Contract] Tx sent:", tx.hash);
-      await tx.wait();
-      console.log("[Contract] Confirmed:", tx.hash);
+      const receipt = await tx.wait();
+      console.log("[Contract] Confirmed:", tx.hash, "block:", receipt.blockNumber);
       return res.json({ success: true, txHash: tx.hash });
 
     } catch (e) {
       console.error(`[Contract] Attempt ${attempt} failed:`, e.message);
-      if (attempt < 3) {
-        const delay = attempt * 3000; // 3s, 6s
-        console.log(`[Contract] Retrying in ${delay}ms...`);
+      if (e.message.includes("request limit reached") || e.message.includes("rate")) {
+        const delay = attempt * 4000;
+        console.log(`[Contract] Rate limited. Waiting ${delay}ms...`);
         await sleep(delay);
+      } else if (attempt < 5) {
+        await sleep(2000);
       } else {
         return res.status(500).json({ error: e.message });
       }
