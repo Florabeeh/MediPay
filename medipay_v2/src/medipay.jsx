@@ -484,7 +484,7 @@ export default function MediPay() {
       try {
         await new Promise(r => setTimeout(r, 3000)); // wait for indexing
         const explorerRes = await fetch(
-          "https://testnet.arcscan.app/api/v2/addresses/" + walletAddr + "/token-transfers?limit=1"
+          "https://testnet.arcscan.app/api/v2/addresses/" + walletAddr + "/token-transfers"
         );
         const explorerData = await explorerRes.json();
         const latestTx = explorerData?.items?.[0];
