@@ -494,29 +494,35 @@ export default function MediPay() {
         }
       } catch(e) { console.log("[ARC] Explorer fetch failed:", e.message); }
 
-      // Record payment on MediPayRegistry smart contract
-      try {
-        const contractRes = await fetch("/api/record-payment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            hospitalId: hospital?.id,
-            fileNumber: fileNo,
-            category: paycat,
-            serviceItem: payitem,
-            amountUSDC: usdc,
-            patientWallet: walletAddr,
-            circleRef: tx?.txHash || rec.id,
-          }),
-        });
-        const contractData = await contractRes.json();
-        if (contractData?.txHash) rec.arcTxHash = contractData.txHash;
-      } catch(e) { console.log("Contract record failed (non-critical):", e.message); }
       const newHistory = [rec, ...history];
       setReceipt(rec); setHistory(newHistory);
       setPendingLinks(pl => pl.map(p => p.item === payitem && p.hospitalId === hospital?.id ? { ...p, status: "confirmed" } : p));
       await savePatientRecord(fbUser.uid, { history: newHistory.map(r => cleanObj(r)) });
       setLoading(false); setStep(""); setScreen("receipt");
+
+      // Record on smart contract in background (non-blocking)
+      fetch("/api/record-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hospitalId: hospital?.id,
+          fileNumber: fileNo,
+          category: paycat,
+          serviceItem: payitem,
+          amountUSDC: usdc,
+          patientWallet: walletAddr,
+          circleRef: tx?.txHash || rec.id,
+        }),
+      }).then(r => r.json()).then(contractData => {
+        if (contractData?.txHash) {
+          rec.arcTxHash = contractData.txHash;
+          setReceipt({...rec, arcTxHash: contractData.txHash});
+          const updatedHistory = newHistory.map(h => h.id === rec.id ? {...h, arcTxHash: contractData.txHash} : h);
+          setHistory(updatedHistory);
+          savePatientRecord(fbUser.uid, { history: updatedHistory.map(r => cleanObj(r)) });
+          console.log("[Contract] ARC tx hash saved:", contractData.txHash);
+        }
+      }).catch(e => console.log("Contract record failed:", e.message));
     } catch (e) { toast_("Payment failed: " + e.message, "err"); setLoading(false); setStep(""); }
   };
 
