@@ -5,7 +5,6 @@ import { onAuthStateChanged } from "firebase/auth";
 // ─── Circle API ───────────────────────────────────────────────────────────────
 const DEMO_MODE = process.env.REACT_APP_DEMO_MODE !== "false";
 const API_KEY = process.env.REACT_APP_CIRCLE_API_KEY || "";
-const CIRCLE_API = "/circle-api";
 
 
 
