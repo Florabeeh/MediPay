@@ -63,23 +63,7 @@ async function getWalletBalance(apiKey, walletId) {
     return data?.data?.tokenBalances?.find(t => t.token?.symbol === "USDC")?.amount || "0.00";
   } catch(e) { return "0.00"; }
 }
-async function sendPayment(apiKey, fromWalletId, toAddress, amount) {
-  if (DEMO_MODE) { await new Promise(r => setTimeout(r, 2000)); return { id: "txn_" + Math.random().toString(36).slice(2, 14), txHash: "0x" + [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join(""), state: "COMPLETE" }; }
 
-  const res = await fetch("/api/send-payment", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fromWalletId, toAddress, amount, blockchain: "ARC-TESTNET" }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (res.ok) return data?.data?.transaction;
-  if (res.status !== 404 && res.status !== 405) throw new Error(data?.message || data?.error || "Payment failed " + res.status);
-
-  // Fallback for environments that only expose the generic Circle proxy.
-  const entitySecretCiphertext = await getCiphertext();
-  const fallback = await circlePost("/v1/w3s/developer/transactions/transfer", { idempotencyKey: crypto.randomUUID(), walletId: fromWalletId, blockchain: "ARC-TESTNET", tokenAddress: "0x3600000000000000000000000000000000000000", destinationAddress: toAddress, amounts: [String(amount)], feeLevel: "MEDIUM", entitySecretCiphertext }, apiKey);
-  return fallback?.data?.transaction;
-}
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 // ─── Inline SVG Icons (no emoji) ───────────────────────────────────────────────
@@ -185,7 +169,7 @@ const NEWS = [
 ];
 
 const NGN_USDC = 1650;
-const HOSP_ADDR = "0x742d35Cc6634C0532925a3b8D4C9b4AA12b5e6f4";
+
 const fmt = n => "N" + Number(n).toLocaleString();
 const genFN = id => id + "-" + Date.now().toString().slice(-6) + "-" + Math.floor(Math.random() * 9000 + 1000);
 const genTx = () => "0x" + [...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
