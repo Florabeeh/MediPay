@@ -7,22 +7,11 @@ const DEMO_MODE = process.env.REACT_APP_DEMO_MODE !== "false";
 const API_KEY = process.env.REACT_APP_CIRCLE_API_KEY || "";
 const CIRCLE_API = "/circle-api";
 
-async function circlePost(path, body, apiKey) {
-  if (DEMO_MODE) { await new Promise(r => setTimeout(r, 1200)); return null; }
-  const res = await fetch(CIRCLE_API + path, { method: "POST", headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  const data = await res.json();
-  if (!res.ok) { console.error("Circle error:", data); throw new Error(data?.message || data?.error || "Circle API " + res.status); }
-  return data;
-}
+
 
 
 // ── Server-side ciphertext — Node crypto is fully compatible with Circle API ──
-async function getCiphertext() {
-  const res = await fetch("/api/get-ciphertext");
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "Failed to get ciphertext from server");
-  return data.ciphertext;
-}
+
 
 
 async function createCircleWallet(apiKey, _unused, refId) {
