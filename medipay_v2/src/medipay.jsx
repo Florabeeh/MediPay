@@ -470,7 +470,19 @@ export default function MediPay() {
       const idx = CATS[paycat].items.indexOf(payitem);
       const amount = CATS[paycat].prices[idx];
       const usdc = (amount / NGN_USDC).toFixed(4);
-      const tx = await sendPayment(API_KEY, walletId, HOSP_ADDR, usdc);
+      const tx = await fetch("/api/contract-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          walletId,
+          hospitalId: hospital?.id,
+          fileNumber: fileNo,
+          category: paycat,
+          serviceItem: payitem,
+          amountUSDC: usdc,
+        }),
+      }).then(r => r.json());
+      if (!tx.success) throw new Error(tx.error || "Contract payment failed");
       if (usdcBal && usdcBal !== "--") setUsdcBal(Math.max(0, parseFloat(usdcBal) - parseFloat(usdc)).toFixed(2));
       const rec = {
         id: tx?.txHash || tx?.id || genTx(), type: "payment",
