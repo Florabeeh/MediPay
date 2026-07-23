@@ -4,6 +4,19 @@ import { onAuthStateChanged } from "firebase/auth";
 
 // ─── Circle API ───────────────────────────────────────────────────────────────
 const DEMO_MODE = process.env.REACT_APP_DEMO_MODE !== "false";
+const HOSP_ADDR = "0xe79eBDf24D2cc1B97d72E973C4D4fb85C8C5961f";
+
+async function sendPayment(apiKey, fromWalletId, amount) {
+  if (DEMO_MODE) { await new Promise(r => setTimeout(r, 2000)); return { id: "txn_" + Math.random().toString(36).slice(2, 14), txHash: "0x" + [...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join(""), state: "COMPLETE" }; }
+  const res = await fetch("/api/send-payment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fromWalletId, toAddress: HOSP_ADDR, amount, blockchain: "ARC-TESTNET" }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.ok) return data?.data?.transaction || data;
+  throw new Error(data?.message || data?.error || "Payment failed " + res.status);
+}
 const API_KEY = process.env.REACT_APP_CIRCLE_API_KEY || "";
 
 
